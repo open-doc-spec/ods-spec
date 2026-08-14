@@ -537,7 +537,7 @@ Eval = ["Benchmark Suite", "Model Evals"]
 
 ## 7. Custom Profiles & Profile Definition Files
 
-Workspaces can define domain-specific custom profiles by creating profile definition Markdown files and registering them in `ods.toml`.
+Workspaces can define domain-specific custom profiles by creating profile definition Markdown files and registering their exact paths in `ods.toml`.
 
 ### 7.1 Custom Profile Definition File (`docs/profiles/rfc.md`)
 
@@ -567,6 +567,8 @@ ods:
 
 - Pipe characters (`|`) in section headings define acceptable heading alternatives.
 - The profile identifier is derived from `ods.custom_profile.name` or the file stem (`rfc`).
+- Every path listed in `custom_profiles` MUST exist at the configured location and MUST resolve to a Markdown file or a profile directory. Tools MUST NOT silently skip a missing path or search another location.
+- A file containing `ods.custom_profile` MUST be one of the registered profile-definition files (or a file inside a registered profile directory). Ordinary documents MUST use `ods.profile` to select the registered profile.
 
 ### 7.1.1 Profile-definition metadata
 
@@ -584,6 +586,10 @@ These keys describe the profile definition; they are not copied into documents u
 `required_keys` is a presence-only contract: a conformant tool MUST NOT infer a value type, enum, or business meaning from it. A key satisfies the requirement when it is present with a non-null YAML value, including an empty list or structured value. An absent or explicit null key does not satisfy it. Key matching is case-insensitive after normalization; authors SHOULD write keys in lowercase.
 
 `optional_keys` and `forbidden_keys` do not define value types. A tool SHOULD report a `PROF-004` warning when a target document contains a `forbidden_keys` entry.
+
+If a document declares an `ods.profile` name that is not a standard profile or a profile loaded from a registered definition path, the tool MUST report a `PROF-001` error. The diagnostic MUST identify the configured `custom_profiles` paths so the author can correct the exact file location or profile name.
+
+If a path declared by `custom_profiles` does not exist, is not a Markdown file or profile directory, or contains invalid profile-definition frontmatter, the tool MUST fail with a `PROF-005` error and identify the configured path. If `ods.custom_profile` appears in a file that is not selected by `custom_profiles` or a registered pack, the tool MUST fail with a `PROF-006` error.
 
 Missing profile-required keys MUST be reported as a profile validation warning (`PROF-003`). Under the binary compliance contract, warnings do not cause a non-zero exit code unless another error is present. Tools MAY offer a stricter policy, but it is outside the ODS 0.1 core contract.
 
@@ -634,7 +640,7 @@ When resolving a document's `ods.profile`, tools MUST search in this priority or
 2. **Explicit workspace `custom_profiles`** paths declared in `ods.toml`
 3. **Imported `packs`** in the order declared in `ods.toml`
 
-If a profile name is declared in multiple places, the first resolved definition wins, and tools SHOULD emit a diagnostic warning. Unresolved profile names fallback to `note` behavior and emit a validation warning.
+If a profile name is declared in multiple places, the first resolved definition wins, and tools SHOULD emit a diagnostic warning. Unresolved profile names MUST NOT fall back to `note` behavior; they produce a `PROF-001` error.
 
 ---
 

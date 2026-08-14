@@ -85,7 +85,7 @@ ods:
   status: draft
 ```
 
-These keys are profile-scoped metadata, not new `ods:` engine keys. Missing keys produce a `PROF-003` warning; forbidden keys produce a `PROF-004` warning. They do not change the standard engine-key placement rules.
+These keys are profile-scoped metadata, not new `ods:` engine keys. Missing keys produce a `PROF-003` warning; forbidden keys produce a `PROF-004` warning. They do not change the standard engine-key placement rules. If the configured profile path is missing, the definition is invalid, or `ods.profile` cannot be resolved, ODS returns an error and does not fall back to another path or to the `note` profile.
 
 Do not build inheritance (`rfc` extends `feature` extends `base`). Flat shapes stay debuggable. Full rules: [`specs/profiles.md`](../specs/profiles.md).
 
@@ -138,7 +138,8 @@ Bare `ods lint` is ODS. You do not need those flags to use this specification.
 
 ## Troubleshooting
 
-- **"Custom profile is ignored."** Path in `custom_profiles` is wrong, or `ods.custom_profile.name` / filename stem does not match `ods.profile`.
+- **"Profile not found."** ODS checks the exact paths in `custom_profiles`. Create the definition at the configured path, correct the path in `ods.toml`, or make `ods.profile` match the loaded definition name.
+- **"Invalid custom profile placement."** `ods.custom_profile` is only valid in a file selected by `custom_profiles` or a registered pack. Move it to that file and use `ods.profile` in the ordinary document.
 - **"Two packs define `rfc`."** First match wins; you should get a warning. Rename one.
 - **"I want `implements` / `replaces` edges."** Out of scope on purpose. Use `depends` or `related`, and explain the nuance in prose. See [`specs/scope.md`](../specs/scope.md).
 - **"I want to put `role:` in frontmatter for agents."** Do not. Use `##` headings. Re-read [Pick a shape](02-pick-a-shape.md) §5.
