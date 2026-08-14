@@ -20,7 +20,7 @@ This document specifies **Document Profiles** in Open Document Spec (ODS): their
 
 ## At a glance
 
-- **What this chapter defines:** The 13 standard profiles, expected `##` headings, aliases, profile-definition metadata, custom profiles, and packs.
+- **What this chapter defines:** The 13 standard profiles, expected H2/H3 headings, aliases, profile-definition metadata, custom profiles, and packs.
 - **Why it exists:** A `decision` should contain the same sections in every repo so humans and agents know where to look.
 - **When you need it:** You are picking a shape, authoring a template, or validating headings.
 - **When you can skip it:** You only write how-tos — `profile: guide` is enough ([Pick a shape](../guides/02-pick-a-shape.md)).
@@ -37,7 +37,9 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 
 ## 2. What is a Profile?
 
-A **Profile** defines the *structural shape* and semantic nature of a document by establishing the list of expected `##` H2 section headings. A custom profile MAY also declare profile-required document metadata keys.
+A **Profile** defines the *structural shape* and semantic nature of a document by establishing the list of expected H2 or H3 section headings (`##` or `###`). A custom profile MAY also declare profile-required document metadata keys.
+
+Profile section matching is heading-level agnostic between H2 and H3: an expected section written as either `## Context` or `### Context` satisfies the same profile requirement. The document title remains the first `#` H1 heading, and H1, H4, or deeper headings MUST NOT satisfy an expected profile section.
 
 - A profile is **not** a file extension or a layout template.
 - A profile is a **structural validation contract** that ensures documents of a specific kind (e.g. PRDs, ADRs, SOPs, Guides, Agent Prompts, Skills) contain all required sections.
@@ -50,7 +52,7 @@ A **Profile** defines the *structural shape* and semantic nature of a document b
 
 ODS provides 13 built-in standard profiles that cover common software engineering, autonomous agent execution, and organizational documentation:
 
-| Profile | Intent & Usage | Expected `##` H2 Sections |
+| Profile | Intent & Usage | Expected H2/H3 Sections (`##` or `###`) |
 | :--- | :--- | :--- |
 | **`note`** | Free-form notes, scratchpads, and unstructured knowledge. (Default profile). | *(None required)* |
 | **`guide`** | Step-by-step tutorials, setup instructions, and how-to procedures. | `Overview`, `Prerequisites`, `Steps`, `Troubleshooting` |
@@ -657,7 +659,7 @@ We choose PostgreSQL 16 managed on AWS RDS.
 ## Consequences
 We gain strong consistency and JSONB support; we must manage RDS connection pooling.
 ```
-*Why it is valid*: All 4 required sections (`Context`, `Decision`, `Alternatives Considered` [alias], `Consequences`) are present as `##` H2 headings.
+*Why it is valid*: All 4 required sections (`Context`, `Decision`, `Alternatives Considered` [alias], `Consequences`) are present as recognized H2/H3 profile headings.
 
 ### Invalid Agent Document (Frontmatter Pollution Anti-Pattern)
 ```markdown
@@ -683,7 +685,7 @@ Implement route handlers.
 
 ## 10. Design Decisions
 
-### Why use `##` Headings instead of rigid JSON/YAML schemas for document bodies?
+### Why use H2/H3 headings instead of rigid JSON/YAML schemas for document bodies?
 Engineers and authors write Markdown naturally using section headings. Forcing authors into structured JSON arrays or proprietary markdown frontmatter fields damages readability in text editors and breaks standard Markdown rendering.
 
 ### Why headings instead of frontmatter keys for agent prompts and skills?

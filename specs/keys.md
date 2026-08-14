@@ -72,7 +72,7 @@ updated: 2026-08-14
 # TIER 2: ODS ENGINE KEYS (Scoped under ods: to prevent collisions)
 # ═════════════════════════════════════════════════════════════════
 ods:
-  profile: guide                              # Document shape / expected H2 sections
+  profile: guide                              # Document shape / expected H2 or H3 sections
   status: stable                              # Lifecycle maturity: draft | stable | deprecated | archived
   share: public                               # Privacy boundary: public | org | private
 
@@ -247,7 +247,7 @@ All engine keys MUST be nested inside the `ods:` mapping.
 
 ### 7.1 `ods.profile`
 - **Type**: `string` (default: `"note"`)
-- **Purpose**: Declares the structural shape and expected `##` H2 sections of the document.
+- **Purpose**: Declares the structural shape and expected H2 or H3 sections (`##` or `###`) of the document.
 - **Values**: Standard profiles (`note`, `guide`, `feature`, `decision`, `sop`, `api`, `architecture`, `policy`, `meeting`, `faq`, `checklist`, `agent`, `skill`) or custom profiles registered in `ods.toml`. See [profiles.md](profiles.md).
 
 ```yaml

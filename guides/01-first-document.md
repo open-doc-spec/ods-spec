@@ -90,7 +90,7 @@ Copy it as-is. You will grow this file in later pages; you will not replace it.
 
 **`tags`** are loose keywords. Keep them at the **top level**, never under `ods:`.
 
-**`ods.profile: guide`** says "this file should look like a how-to." A guide is expected to have `## Overview`, `## Prerequisites`, `## Steps`, and `## Troubleshooting`. Those headings are for humans first; lint only warns if they are missing.
+**`ods.profile: guide`** says "this file should look like a how-to." A guide is expected to have `##` or `###` headings for Overview, Prerequisites, Steps, and Troubleshooting. Those headings are for humans first; lint only warns if they are missing.
 
 **`ods.status: draft`** means work in progress. Change it to `stable` when the steps are true.
 

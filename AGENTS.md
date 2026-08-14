@@ -77,7 +77,7 @@ When answering questions, planning code modifications, or debugging issues, agen
 
 ## 3. Standard Document Profile Shapes
 
-When authoring new documents, pick the profile matching the document's intent and scaffold the expected `##` H2 sections:
+When authoring new documents, pick the profile matching the document's intent and scaffold the expected H2 or H3 sections (`##` or `###`):
 
 | Profile | Primary Intent | Expected Sections |
 | :--- | :--- | :--- |
