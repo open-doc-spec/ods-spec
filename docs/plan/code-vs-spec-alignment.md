@@ -104,7 +104,7 @@ graph TD
 | **LSP Server (`ods lsp`)** | Full Language Server Protocol over stdio for IDE completions, hover diagnostics, and jump-to-definition. | Not mentioned in `specs/`. | Document under Implementer Conformance in `specs/validation.md`. |
 | **`[specs.okf]` & `[specs.skills]` Config Options** | `check_keys = bool`, `ignore_keys = [...]` in `ods.toml` + CLI flags `--skip-keys`, `--ignore-keys`. | `specs/indexes.md` only shows `enabled = false`. | Document the key-checking sub-options in `specs/indexes.md`. |
 | **Workspace Maintenance Commands** | `ods doctor`, `ods undo`, `ods diff`, `ods schema`, `ods clean`, `ods bench`, `ods setup`, `ods upgrade`. | Specs focus primarily on the core spec operations (`lint`, `context`, `find`, `mv`, `rm`, `adopt`, `fmt`). | Document these operational tools in CLI tooling reference. |
-| **Profile Authoring Frontmatter** | `expected_keys` (or `expected-keys`) and `name` used when authoring custom profile documents. | Now documented in `specs/profiles.md`, `specs/keys.md`, and `specs/validation.md`; implementation enforcement still needs conformance tests and a custom-frontmatter lookup fix. | Update the implementation to validate parsed top-level custom keys and add `PROF-003` coverage. |
+| **Profile Authoring Frontmatter** | `expected_keys` (or `expected-keys`) and `name` used when authoring custom profile documents. | Documented in `specs/profiles.md`, `specs/keys.md`, and `specs/validation.md`; runtime enforcement and conformance coverage are addressed by [open-doc-spec/ods#50](https://github.com/open-doc-spec/ods/pull/50). | Keep the specification and implementation changes synchronized; merge the linked implementation PR with this documentation update. |
 
 ---
 

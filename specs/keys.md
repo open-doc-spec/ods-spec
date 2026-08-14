@@ -408,9 +408,11 @@ The following fields are allowed in the frontmatter of a registered custom profi
 | :--- | :--- | :--- | :--- |
 | `name` | Profile-definition frontmatter, top level | string, optional | Profile identifier. If omitted, the profile file stem is used. |
 | `description` | Profile-definition frontmatter, top level | string, optional | Human-readable description of the profile. |
-| `expected_keys` | Profile-definition frontmatter, top level | list of strings, optional | Names of top-level document metadata keys required when the profile is selected. |
+| `expected_keys` | Profile-definition frontmatter, top level | list of strings, optional | Names of top-level document metadata keys required when the profile is selected. The compatibility alias `expected-keys` is also accepted. |
 
 `expected_keys` MUST NOT be placed under the document's `ods:` block. It does not add a new core ODS key, validate a value type, or make third-party metadata globally required. It only adds a presence requirement to documents using the declaring custom profile. See [profiles.md](profiles.md#711-profile-definition-metadata) for the complete contract.
+
+`expected_keys` is the canonical spelling. Implementations MAY accept `expected-keys` as a compatibility alias; the two spellings have identical semantics.
 
 ```yaml
 # VALID: profile-definition file

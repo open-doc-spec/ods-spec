@@ -575,7 +575,9 @@ The frontmatter of a registered profile-definition file MAY contain these profil
 
 `expected_keys` applies to documents using that custom profile; it is not copied into those documents. Each listed key MUST be present as a top-level frontmatter key in the document. Profile-specific keys MUST NOT be nested under `ods:`. The standard engine keys (`profile`, `status`, `id`, `share`, `depends`, `related`, `resources`, `code`, and `context`) remain the only keys defined under `ods:`.
 
-The requirement is presence-only: a conformant tool MUST NOT infer a value type, enum, or business meaning from `expected_keys`. A key satisfies the requirement when it is present with a non-null YAML value. An absent or explicit null key does not satisfy it. Key matching is case-insensitive after normalization; authors SHOULD write keys in lowercase.
+The requirement is presence-only: a conformant tool MUST NOT infer a value type, enum, or business meaning from `expected_keys`. A key satisfies the requirement when it is present with a non-null YAML value, including an empty list or structured value. An absent or explicit null key does not satisfy it. Key matching is case-insensitive after normalization; authors SHOULD write keys in lowercase.
+
+`expected_keys` is the canonical spelling. Implementations MAY accept `expected-keys` as a compatibility alias with identical semantics.
 
 Missing profile-required keys MUST be reported as a profile validation warning (`PROF-003`). Under the binary compliance contract, warnings do not cause a non-zero exit code unless another error is present. Tools MAY offer a stricter policy, but it is outside the ODS 0.1 core contract.
 
