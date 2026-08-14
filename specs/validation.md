@@ -45,7 +45,7 @@ Conformance for ODS metadata is defined by **validation, not intention**.
 - When `ods lint` is executed:
   - If **zero errors** are reported: the tool MUST exit with status code **`0`** (**Compliant**).
   - If **one or more errors** are reported: the tool MUST exit with status code **`1`** (**Non-Compliant**).
-- Warnings (such as missing optional profile sections or unrecognized profile names) SHOULD be reported to authors but MUST NOT cause a non-zero exit code.
+- Warnings (such as missing optional profile sections) SHOULD be reported to authors but MUST NOT cause a non-zero exit code. Unrecognized profile names are `PROF-001` errors.
 
 ```bash
 # CI Conformance Check
@@ -169,7 +169,7 @@ ods:
 | **Unknown Top-Level Frontmatter Key** (e.g. `layout`, `hero_image`) | **Preserve and Ignore**: Re-emit untouched during formatting and migrations. |
 | **Top-Level Key Listed by `required_keys`** | **Profile-Scoped Requirement**: Validate presence for documents using the declaring custom profile; preserve the key and its value. |
 | **Unknown Nested Key under `ods:`** | **Report Warning**: Warn author of unknown engine key; preserve during formatting. |
-| **Unrecognized `ods.profile`** | **Warning & Fallback**: Warn author; treat as `note` (no required sections) during lint. |
+| **Unrecognized `ods.profile`** | **Fatal Profile Error**: Report `PROF-001`; do not fall back to `note` or another profile. |
 | **Unknown `code` role** | **Fatal Error**: Reject immediately; projects MUST NOT invent custom code roles. |
 | **Invalid `ods.share` value** | **Fatal Error**: Reject immediately to prevent unintended privacy leaks. |
 | **Legacy Flat Engine Keys** (without nested `ods:`) | **Migration Mode**: Accept during read; format tooling (`ods fmt --migrate`) MUST nest under `ods:`. |
