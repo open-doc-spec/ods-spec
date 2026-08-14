@@ -402,35 +402,33 @@ ods:
 
 ## 8. Custom Profile Definition Keys
 
-The following fields are allowed in the frontmatter of a registered custom profile-definition Markdown file. They describe the profile schema; they are not ordinary document engine keys.
+The following keys are allowed under `ods.custom_profile` in a registered custom profile-definition Markdown file. They describe the profile schema; they are not ordinary document engine keys.
 
 | Key | Placement | Type | Purpose |
 | :--- | :--- | :--- | :--- |
-| `name` | Profile-definition frontmatter, top level | string, optional | Profile identifier. If omitted, the profile file stem is used. |
-| `description` | Profile-definition frontmatter, top level | string, optional | Human-readable description of the profile. |
-| `expected_keys` | Profile-definition frontmatter, top level | list of strings, optional | Names of top-level document metadata keys required when the profile is selected. The compatibility alias `expected-keys` is also accepted. |
+| `name` | `ods.custom_profile.name` | string, optional | Profile identifier. If omitted, the profile file stem is used. |
+| `required_keys` | `ods.custom_profile.required_keys` | list of strings, optional | Names of top-level document keys required when the profile is selected. |
+| `optional_keys` | `ods.custom_profile.optional_keys` | list of strings, optional | Names of useful top-level document keys that are not required. |
+| `forbidden_keys` | `ods.custom_profile.forbidden_keys` | list of strings, optional | Names of top-level document keys that should not appear with the profile. |
 
-`expected_keys` MUST NOT be placed under the document's `ods:` block. It does not add a new core ODS key, validate a value type, or make third-party metadata globally required. It only adds a presence requirement to documents using the declaring custom profile. See [profiles.md](profiles.md#711-profile-definition-metadata) for the complete contract.
-
-`expected_keys` is the canonical spelling. Implementations MAY accept `expected-keys` as a compatibility alias; the two spellings have identical semantics.
+`ods.custom_profile` is valid only in a registered profile-definition file. It is not copied into documents using the profile and does not make third-party metadata globally required. See [profiles.md](profiles.md#711-profile-definition-metadata) for the complete contract.
 
 ```yaml
-# VALID: profile-definition file
-name: incident
-description: Production incident record.
-expected_keys:
-  - github-issue
-  - service
 ods:
-  profile: custom-profile
-  status: stable
+  custom_profile:
+    name: incident
+    required_keys:
+      - github-issue
+      - service
+    optional_keys: []
+    forbidden_keys: []
 ```
 
 ```yaml
-# INVALID: profile-required metadata is not an engine key
+# INVALID: profile-definition keys must be grouped under custom_profile
 ods:
   profile: custom-profile
-  expected_keys:
+  required_keys:
     - github-issue
 ```
 

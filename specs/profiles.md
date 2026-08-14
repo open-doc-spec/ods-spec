@@ -543,10 +543,13 @@ Workspaces can define domain-specific custom profiles by creating profile defini
 
 ```markdown
 ---
-name: rfc
-description: Request for Comments (RFC) engineering proposal.
-expected_keys:
-  - github-issue
+ods:
+  custom_profile:
+    name: rfc
+    required_keys:
+      - github-issue
+    optional_keys: []
+    forbidden_keys: []
 ---
 
 # Profile: RFC
@@ -563,23 +566,24 @@ expected_keys:
 ```
 
 - Pipe characters (`|`) in section headings define acceptable heading alternatives.
-- The profile identifier is derived from frontmatter `name:` or the file stem (`rfc`).
+- The profile identifier is derived from `ods.custom_profile.name` or the file stem (`rfc`).
 
 ### 7.1.1 Profile-definition metadata
 
-The frontmatter of a registered profile-definition file MAY contain these profile-definition fields:
+The `ods.custom_profile` block of a registered profile-definition file MAY contain these profile-definition keys:
 
-| Field | Placement | Meaning |
+| Key | Placement | Meaning |
 | :--- | :--- | :--- |
-| `name` | Top-level profile-definition frontmatter | Optional profile identifier. When absent, the file stem is used. |
-| `description` | Top-level profile-definition frontmatter | Optional human-readable description of the profile. |
-| `expected_keys` | Top-level profile-definition frontmatter | Optional list of document metadata keys required when the profile is selected. |
+| `name` | `ods.custom_profile.name` | Optional profile identifier. When absent, the file stem is used. |
+| `required_keys` | `ods.custom_profile.required_keys` | Keys that documents using the profile SHOULD contain. |
+| `optional_keys` | `ods.custom_profile.optional_keys` | Useful keys that are documented for the profile but are not required. |
+| `forbidden_keys` | `ods.custom_profile.forbidden_keys` | Keys that documents using the profile SHOULD NOT contain. |
 
-`expected_keys` applies to documents using that custom profile; it is not copied into those documents. Each listed key MUST be present as a top-level frontmatter key in the document. Profile-specific keys MUST NOT be nested under `ods:`. The standard engine keys (`profile`, `status`, `id`, `share`, `depends`, `related`, `resources`, `code`, and `context`) remain the only keys defined under `ods:`.
+These keys describe the profile definition; they are not copied into documents using the profile. Each `required_keys` entry is matched against a top-level frontmatter key in the target document. Profile-specific document keys MUST NOT be nested under `ods:`. The standard engine keys (`profile`, `status`, `id`, `share`, `depends`, `related`, `resources`, `code`, and `context`) remain separate from profile-definition metadata.
 
-The requirement is presence-only: a conformant tool MUST NOT infer a value type, enum, or business meaning from `expected_keys`. A key satisfies the requirement when it is present with a non-null YAML value, including an empty list or structured value. An absent or explicit null key does not satisfy it. Key matching is case-insensitive after normalization; authors SHOULD write keys in lowercase.
+`required_keys` is a presence-only contract: a conformant tool MUST NOT infer a value type, enum, or business meaning from it. A key satisfies the requirement when it is present with a non-null YAML value, including an empty list or structured value. An absent or explicit null key does not satisfy it. Key matching is case-insensitive after normalization; authors SHOULD write keys in lowercase.
 
-`expected_keys` is the canonical spelling. Implementations MAY accept `expected-keys` as a compatibility alias with identical semantics.
+`optional_keys` and `forbidden_keys` do not define value types. A tool SHOULD report a `PROF-004` warning when a target document contains a `forbidden_keys` entry.
 
 Missing profile-required keys MUST be reported as a profile validation warning (`PROF-003`). Under the binary compliance contract, warnings do not cause a non-zero exit code unless another error is present. Tools MAY offer a stricter policy, but it is outside the ODS 0.1 core contract.
 
@@ -596,7 +600,7 @@ ods:
 # RFC: Retry Policy
 ```
 
-Profile-required metadata is for domain facts such as issue IDs, service names, or owners. Agent and skill execution contracts remain Markdown body sections, not `expected_keys` entries.
+Profile-required metadata is for domain keys such as issue IDs, service names, or owners. Agent and skill execution contracts remain Markdown body sections, not `required_keys` entries.
 
 ### 7.2 Registering Custom Profiles in `ods.toml`
 

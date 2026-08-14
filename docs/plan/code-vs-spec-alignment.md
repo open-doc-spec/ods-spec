@@ -75,7 +75,7 @@ graph TD
         C1["Tooling CLI: ods agents sync, ods skill install, ods lsp, ods doctor, ods undo, ods bench"]
         C2["ods.toml sub-keys: specs.okf/skills check_keys & ignore_keys"]
         C3["CLI suppression flags: --skip-keys, --ignore-keys, --canonical-refs"]
-        C4["Profile schema enforcement: expected_keys"]
+        C4["Profile schema enforcement: required_keys / forbidden_keys"]
     end
 ```
 
@@ -104,7 +104,7 @@ graph TD
 | **LSP Server (`ods lsp`)** | Full Language Server Protocol over stdio for IDE completions, hover diagnostics, and jump-to-definition. | Not mentioned in `specs/`. | Document under Implementer Conformance in `specs/validation.md`. |
 | **`[specs.okf]` & `[specs.skills]` Config Options** | `check_keys = bool`, `ignore_keys = [...]` in `ods.toml` + CLI flags `--skip-keys`, `--ignore-keys`. | `specs/indexes.md` only shows `enabled = false`. | Document the key-checking sub-options in `specs/indexes.md`. |
 | **Workspace Maintenance Commands** | `ods doctor`, `ods undo`, `ods diff`, `ods schema`, `ods clean`, `ods bench`, `ods setup`, `ods upgrade`. | Specs focus primarily on the core spec operations (`lint`, `context`, `find`, `mv`, `rm`, `adopt`, `fmt`). | Document these operational tools in CLI tooling reference. |
-| **Profile Authoring Frontmatter** | `expected_keys` (or `expected-keys`) and `name` used when authoring custom profile documents. | Documented in `specs/profiles.md`, `specs/keys.md`, and `specs/validation.md`; runtime enforcement and conformance coverage are addressed by [open-doc-spec/ods#50](https://github.com/open-doc-spec/ods/pull/50). | Keep the specification and implementation changes synchronized; merge the linked implementation PR with this documentation update. |
+| **Profile Authoring Frontmatter** | `ods.custom_profile` with `name`, `required_keys`, `optional_keys`, and `forbidden_keys` used when authoring custom profile documents. | Documented in `specs/profiles.md`, `specs/keys.md`, and `specs/validation.md`; runtime enforcement and conformance coverage are addressed by [open-doc-spec/ods#50](https://github.com/open-doc-spec/ods/pull/50). | Keep the specification and implementation changes synchronized; merge the linked implementation PR with this documentation update. |
 
 ---
 
@@ -133,7 +133,7 @@ graph TD
 
 ### Step 2: Document Missing Code Capabilities in `ods-spec`
 1. **Update `specs/indexes.md`**: Include `[specs.okf]` and `[specs.skills]` configuration tables with `check_keys` and `ignore_keys`.
-2. **Update `specs/keys.md`**: Add `expected_keys` and `name` under Custom Profile Definition keys (documented by this alignment update).
+2. **Update `specs/keys.md`**: Add `ods.custom_profile` with `name`, `required_keys`, `optional_keys`, and `forbidden_keys` under Custom Profile Definition keys (documented by this alignment update).
 3. **Update `specs/README.md`**: Add an overview of extended CLI tooling (`agents sync`, `skill install`, `lsp`, `doctor`).
 
 ### Step 3: CI and Verification
