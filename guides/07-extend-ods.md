@@ -46,6 +46,8 @@ If you write RFCs every month, define the shape once.
 ---
 name: rfc
 description: Engineering Request for Comments.
+expected_keys:
+  - github-issue
 ---
 
 # Profile: RFC
@@ -70,6 +72,17 @@ custom_profiles = ["docs/profiles/rfc.md"]
 ```
 
 Then documents may say `ods.profile: rfc`. Resolution order is: built-in profiles, then `custom_profiles`, then `packs`. First match wins.
+
+The optional `expected_keys` list makes profile-specific domain metadata explicit. Each listed key must appear at the top level of documents using the profile:
+
+```yaml
+github-issue: 123
+ods:
+  profile: rfc
+  status: draft
+```
+
+These keys are profile-scoped metadata, not new `ods:` engine keys. Missing keys produce a `PROF-003` warning; they do not change the standard engine-key placement rules.
 
 Do not build inheritance (`rfc` extends `feature` extends `base`). Flat shapes stay debuggable. Full rules: [`specs/profiles.md`](../specs/profiles.md).
 

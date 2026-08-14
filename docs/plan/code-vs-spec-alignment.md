@@ -75,7 +75,7 @@ graph TD
         C1["Tooling CLI: ods agents sync, ods skill install, ods lsp, ods doctor, ods undo, ods bench"]
         C2["ods.toml sub-keys: specs.okf/skills check_keys & ignore_keys"]
         C3["CLI suppression flags: --skip-keys, --ignore-keys, --canonical-refs"]
-        C4["Profile schema keys: expected_keys, name"]
+        C4["Profile schema enforcement: expected_keys"]
     end
 ```
 
@@ -104,7 +104,7 @@ graph TD
 | **LSP Server (`ods lsp`)** | Full Language Server Protocol over stdio for IDE completions, hover diagnostics, and jump-to-definition. | Not mentioned in `specs/`. | Document under Implementer Conformance in `specs/validation.md`. |
 | **`[specs.okf]` & `[specs.skills]` Config Options** | `check_keys = bool`, `ignore_keys = [...]` in `ods.toml` + CLI flags `--skip-keys`, `--ignore-keys`. | `specs/indexes.md` only shows `enabled = false`. | Document the key-checking sub-options in `specs/indexes.md`. |
 | **Workspace Maintenance Commands** | `ods doctor`, `ods undo`, `ods diff`, `ods schema`, `ods clean`, `ods bench`, `ods setup`, `ods upgrade`. | Specs focus primarily on the core spec operations (`lint`, `context`, `find`, `mv`, `rm`, `adopt`, `fmt`). | Document these operational tools in CLI tooling reference. |
-| **Profile Authoring Frontmatter** | `expected_keys` (or `expected-keys`) and `name` used when authoring custom profile documents. | `specs/profiles.md` mentions custom profiles but doesn't explicitly document `expected_keys` in the key dictionary. | Add `expected_keys` and `name` to `specs/keys.md` under Custom Profile Schema keys. |
+| **Profile Authoring Frontmatter** | `expected_keys` (or `expected-keys`) and `name` used when authoring custom profile documents. | Now documented in `specs/profiles.md`, `specs/keys.md`, and `specs/validation.md`; implementation enforcement still needs conformance tests and a custom-frontmatter lookup fix. | Update the implementation to validate parsed top-level custom keys and add `PROF-003` coverage. |
 
 ---
 
@@ -133,7 +133,7 @@ graph TD
 
 ### Step 2: Document Missing Code Capabilities in `ods-spec`
 1. **Update `specs/indexes.md`**: Include `[specs.okf]` and `[specs.skills]` configuration tables with `check_keys` and `ignore_keys`.
-2. **Update `specs/keys.md`**: Add `expected_keys` and `name` under Custom Profile Definition keys.
+2. **Update `specs/keys.md`**: Add `expected_keys` and `name` under Custom Profile Definition keys (documented by this alignment update).
 3. **Update `specs/README.md`**: Add an overview of extended CLI tooling (`agents sync`, `skill install`, `lsp`, `doctor`).
 
 ### Step 3: CI and Verification

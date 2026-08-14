@@ -62,7 +62,7 @@ ods lint .
 | Exit `0`, zero errors | **Compliant.** Warnings are allowed. |
 | Exit `1`, one or more errors | **Non-compliant.** Fix, then re-run. |
 
-Warnings: missing profile headings, unknown profile name, unknown key under `ods:`.  
+Warnings: missing profile headings, missing profile-required metadata keys, unknown profile name, unknown key under `ods:`.
 Errors: bad YAML, `title:` in frontmatter, engine keys at the top level, cycles in `depends`, missing paths, line numbers on `code` paths, illegal enums.
 
 Rule IDs and remediations: [`specs/validation.md`](../specs/validation.md).

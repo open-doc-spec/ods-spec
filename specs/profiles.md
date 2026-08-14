@@ -16,11 +16,11 @@ ods:
 
 # ODS · Document Profiles & Shapes
 
-This document specifies **Document Profiles** in Open Document Spec (ODS): their purpose, standard shapes, section heading validation, copy-paste templates, custom profile catalogs, and reusable packs.
+This document specifies **Document Profiles** in Open Document Spec (ODS): their purpose, standard shapes, section heading validation, optional profile-required metadata keys, copy-paste templates, custom profile catalogs, and reusable packs.
 
 ## At a glance
 
-- **What this chapter defines:** The 13 standard profiles, expected `##` headings, aliases, custom profiles, and packs.
+- **What this chapter defines:** The 13 standard profiles, expected `##` headings, aliases, profile-definition metadata, custom profiles, and packs.
 - **Why it exists:** A `decision` should contain the same sections in every repo so humans and agents know where to look.
 - **When you need it:** You are picking a shape, authoring a template, or validating headings.
 - **When you can skip it:** You only write how-tos — `profile: guide` is enough ([Pick a shape](../guides/02-pick-a-shape.md)).
@@ -37,10 +37,11 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 
 ## 2. What is a Profile?
 
-A **Profile** defines the *structural shape* and semantic nature of a document by establishing the list of expected `##` H2 section headings.
+A **Profile** defines the *structural shape* and semantic nature of a document by establishing the list of expected `##` H2 section headings. A custom profile MAY also declare profile-required document metadata keys.
 
 - A profile is **not** a file extension or a layout template.
 - A profile is a **structural validation contract** that ensures documents of a specific kind (e.g. PRDs, ADRs, SOPs, Guides, Agent Prompts, Skills) contain all required sections.
+- Profile-required metadata is additive to the section contract. It does not create a new ODS engine key or a closed registry of third-party metadata.
 - When an AI agent or human reads a document with `profile: decision`, they can rely on finding `## Context`, `## Decision`, `## Alternatives`, and `## Consequences`.
 
 ---
@@ -542,6 +543,8 @@ Workspaces can define domain-specific custom profiles by creating profile defini
 ---
 name: rfc
 description: Request for Comments (RFC) engineering proposal.
+expected_keys:
+  - github-issue
 ---
 
 # Profile: RFC
@@ -559,6 +562,37 @@ description: Request for Comments (RFC) engineering proposal.
 
 - Pipe characters (`|`) in section headings define acceptable heading alternatives.
 - The profile identifier is derived from frontmatter `name:` or the file stem (`rfc`).
+
+### 7.1.1 Profile-definition metadata
+
+The frontmatter of a registered profile-definition file MAY contain these profile-definition fields:
+
+| Field | Placement | Meaning |
+| :--- | :--- | :--- |
+| `name` | Top-level profile-definition frontmatter | Optional profile identifier. When absent, the file stem is used. |
+| `description` | Top-level profile-definition frontmatter | Optional human-readable description of the profile. |
+| `expected_keys` | Top-level profile-definition frontmatter | Optional list of document metadata keys required when the profile is selected. |
+
+`expected_keys` applies to documents using that custom profile; it is not copied into those documents. Each listed key MUST be present as a top-level frontmatter key in the document. Profile-specific keys MUST NOT be nested under `ods:`. The standard engine keys (`profile`, `status`, `id`, `share`, `depends`, `related`, `resources`, `code`, and `context`) remain the only keys defined under `ods:`.
+
+The requirement is presence-only: a conformant tool MUST NOT infer a value type, enum, or business meaning from `expected_keys`. A key satisfies the requirement when it is present with a non-null YAML value. An absent or explicit null key does not satisfy it. Key matching is case-insensitive after normalization; authors SHOULD write keys in lowercase.
+
+Missing profile-required keys MUST be reported as a profile validation warning (`PROF-003`). Under the binary compliance contract, warnings do not cause a non-zero exit code unless another error is present. Tools MAY offer a stricter policy, but it is outside the ODS 0.1 core contract.
+
+Example target document:
+
+```markdown
+---
+github-issue: 123
+ods:
+  profile: rfc
+  status: draft
+---
+
+# RFC: Retry Policy
+```
+
+Profile-required metadata is for domain facts such as issue IDs, service names, or owners. Agent and skill execution contracts remain Markdown body sections, not `expected_keys` entries.
 
 ### 7.2 Registering Custom Profiles in `ods.toml`
 
@@ -666,4 +700,3 @@ Profile inheritance (e.g. `guide` extends `base-doc` extends `root`) adds signif
 | [← Previous Chapter](keys.md) | [📑 Specification Index](README.md) | [Next Chapter →](graph.md) |
 | :--- | :---: | ---: |
 | **03. Frontmatter Key Dictionary** | **Open Document Spec (ODS)** | **05. Document Graph & Identity** |
-

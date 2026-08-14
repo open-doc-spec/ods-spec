@@ -92,6 +92,7 @@ All conformant ODS linters MUST enforce the following validation rules:
 | | `ASSET-004` | `ods.context.load` paths MUST resolve to existing files. | **Error** | Fix or remove dangling context load path. |
 | **Profiles** | `PROF-001` | `ods.profile` SHOULD resolve to a known standard or custom profile. | **Warning** | Define custom profile in `ods.toml` or fix typo. |
 | | `PROF-002` | Document SHOULD contain expected `##` H2 sections for its declared profile. | **Warning** | Add missing section heading or registered alias. |
+| | `PROF-003` | A document MUST contain each non-null top-level metadata key listed by its selected custom profile's `expected_keys`. | **Warning** | Add the missing key to top-level frontmatter; do not nest it under `ods:`. |
 
 ---
 
@@ -163,6 +164,7 @@ ods:
 | Encountered Content | Tooling Behavior |
 | :--- | :--- |
 | **Unknown Top-Level Frontmatter Key** (e.g. `layout`, `hero_image`) | **Preserve and Ignore**: Re-emit untouched during formatting and migrations. |
+| **Top-Level Key Listed by `expected_keys`** | **Profile-Scoped Requirement**: Validate presence for documents using the declaring custom profile; preserve the key and its value. |
 | **Unknown Nested Key under `ods:`** | **Report Warning**: Warn author of unknown engine key; preserve during formatting. |
 | **Unrecognized `ods.profile`** | **Warning & Fallback**: Warn author; treat as `note` (no required sections) during lint. |
 | **Unknown `code` role** | **Fatal Error**: Reject immediately; projects MUST NOT invent custom code roles. |
@@ -216,6 +218,8 @@ error[ASSET-003]: line numbers are prohibited in code paths
 
 ### Profile & Discovery Engine
 - [ ] Validate expected `##` H2 headings for standard profiles using alias matching.
+- [ ] Parse `name`, `description`, and `expected_keys` from registered custom profile definitions.
+- [ ] Validate each selected custom profile's `expected_keys` against top-level document frontmatter and emit `PROF-003` warnings for missing keys.
 - [ ] Resolve custom profiles registered in `ods.toml`.
 - [ ] Support progressive CLI discovery without generating committed folder indexes.
 

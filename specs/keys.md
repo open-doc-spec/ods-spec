@@ -23,7 +23,7 @@ This document is the normative reference for **every frontmatter key** in the Op
 
 ## At a glance
 
-- **What this chapter defines:** Where each key lives (top-level vs `ods:` vs `ods.toml`), types, and valid/invalid examples.
+- **What this chapter defines:** Where each key lives (top-level vs `ods:` vs `ods.toml`), profile-definition metadata, types, and valid/invalid examples.
 - **Why it exists:** Authors and parsers need one dictionary, not ten overlapping lists.
 - **When you need it:** You are adding a field or implementing a frontmatter parser.
 - **When you can skip it:** Day-1 authoring only needs `description`, `tags`, `ods.profile`, `ods.status` — see below.
@@ -396,6 +396,50 @@ ods:
       - ../schemas/sample-payload.json
     ignore:
       - legacy/
+```
+
+---
+
+## 8. Custom Profile Definition Keys
+
+The following fields are allowed in the frontmatter of a registered custom profile-definition Markdown file. They describe the profile schema; they are not ordinary document engine keys.
+
+| Key | Placement | Type | Purpose |
+| :--- | :--- | :--- | :--- |
+| `name` | Profile-definition frontmatter, top level | string, optional | Profile identifier. If omitted, the profile file stem is used. |
+| `description` | Profile-definition frontmatter, top level | string, optional | Human-readable description of the profile. |
+| `expected_keys` | Profile-definition frontmatter, top level | list of strings, optional | Names of top-level document metadata keys required when the profile is selected. |
+
+`expected_keys` MUST NOT be placed under the document's `ods:` block. It does not add a new core ODS key, validate a value type, or make third-party metadata globally required. It only adds a presence requirement to documents using the declaring custom profile. See [profiles.md](profiles.md#711-profile-definition-metadata) for the complete contract.
+
+```yaml
+# VALID: profile-definition file
+name: incident
+description: Production incident record.
+expected_keys:
+  - github-issue
+  - service
+ods:
+  profile: custom-profile
+  status: stable
+```
+
+```yaml
+# INVALID: profile-required metadata is not an engine key
+ods:
+  profile: custom-profile
+  expected_keys:
+    - github-issue
+```
+
+In a document using `incident`, the required metadata remains top-level:
+
+```yaml
+github-issue: 123
+service: checkout
+ods:
+  profile: incident
+  status: draft
 ```
 
 ---
