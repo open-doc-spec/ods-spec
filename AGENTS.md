@@ -1,3 +1,26 @@
+---
+description: Operational heuristics, golden rules, and bounded context algorithms for AI agents authoring and navigating ODS workspaces.
+tags:
+  - agent
+  - ods
+  - guidelines
+  - ai
+owner: team:ods
+created: 2026-08-14
+updated: 2026-08-14
+ods:
+  profile: note
+  status: stable
+  share: public
+  depends:
+    - specs/README.md
+    - specs/keys.md
+  related:
+    - specs/context.md
+    - specs/validation.md
+    - specs/profiles.md
+---
+
 # AGENTS.md — Agent Guidelines for Open Document Spec (ODS)
 
 This document provides normative guidance and operational heuristics for AI coding agents, autonomous LLM tools, and prompt engines operating within an **ODS (Open Document Spec)** repository or authoring ODS documents.
