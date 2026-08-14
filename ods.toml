@@ -1,0 +1,20 @@
+# ═════════════════════════════════════════════════════════════════
+# ods.toml — Repository root configuration (Workspace Boundary)
+# ═════════════════════════════════════════════════════════════════
+
+# Targeted ODS specification version
+spec = "0.1"
+
+# Directory path prefixes excluded from document scanning and linting
+ignore = [
+  "target",
+  "node_modules",
+  "dist",
+  ".ods"
+]
+
+# Background watcher & memory budget settings
+[service]
+mode = "poll"
+poll_secs = 2
+max_rss_mb = 10
