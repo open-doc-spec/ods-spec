@@ -23,7 +23,7 @@ This document is the normative reference for **every frontmatter key** in the Op
 
 ## At a glance
 
-- **What this chapter defines:** Where each key lives (top-level vs `ods:` vs `ods.toml`), types, and valid/invalid examples.
+- **What this chapter defines:** Where each key lives (top-level vs `ods:` vs `ods.toml`), profile-definition metadata, types, and valid/invalid examples.
 - **Why it exists:** Authors and parsers need one dictionary, not ten overlapping lists.
 - **When you need it:** You are adding a field or implementing a frontmatter parser.
 - **When you can skip it:** Day-1 authoring only needs `description`, `tags`, `ods.profile`, `ods.status` — see below.
@@ -72,7 +72,7 @@ updated: 2026-08-14
 # TIER 2: ODS ENGINE KEYS (Scoped under ods: to prevent collisions)
 # ═════════════════════════════════════════════════════════════════
 ods:
-  profile: guide                              # Document shape / expected H2 sections
+  profile: guide                              # Document shape / expected H2 or H3 sections
   status: stable                              # Lifecycle maturity: draft | stable | deprecated | archived
   share: public                               # Privacy boundary: public | org | private
 
@@ -247,7 +247,7 @@ All engine keys MUST be nested inside the `ods:` mapping.
 
 ### 7.1 `ods.profile`
 - **Type**: `string` (default: `"note"`)
-- **Purpose**: Declares the structural shape and expected `##` H2 sections of the document.
+- **Purpose**: Declares the structural shape and expected H2 or H3 sections (`##` or `###`) of the document.
 - **Values**: Standard profiles (`note`, `guide`, `feature`, `decision`, `sop`, `api`, `architecture`, `policy`, `meeting`, `faq`, `checklist`, `agent`, `skill`) or custom profiles registered in `ods.toml`. See [profiles.md](profiles.md).
 
 ```yaml
@@ -396,6 +396,52 @@ ods:
       - ../schemas/sample-payload.json
     ignore:
       - legacy/
+```
+
+---
+
+## 8. Custom Profile Definition Keys
+
+The following keys are allowed under `ods.custom_profile` in a registered custom profile-definition Markdown file. They describe the profile schema; they are not ordinary document engine keys.
+
+| Key | Placement | Type | Purpose |
+| :--- | :--- | :--- | :--- |
+| `name` | `ods.custom_profile.name` | string, optional | Profile identifier. If omitted, the profile file stem is used. |
+| `required_keys` | `ods.custom_profile.required_keys` | list of strings, optional | Names of top-level document keys required when the profile is selected. |
+| `optional_keys` | `ods.custom_profile.optional_keys` | list of strings, optional | Names of useful top-level document keys that are not required. |
+| `forbidden_keys` | `ods.custom_profile.forbidden_keys` | list of strings, optional | Names of top-level document keys that should not appear with the profile. |
+
+`ods.custom_profile` is valid only in a registered profile-definition file selected by `custom_profiles` (or a registered pack). It is not copied into documents using the profile and does not make third-party metadata globally required. Tools MUST reject the block in any other document. See [profiles.md](profiles.md#711-profile-definition-metadata) for the complete contract.
+
+Every `custom_profiles` path in `ods.toml` MUST exist at the exact configured location. A missing path, a non-Markdown file, or invalid profile-definition frontmatter is a `PROF-005` error. An `ods.profile` value that does not resolve to a standard or loaded custom profile is a `PROF-001` error; the diagnostic MUST identify the configured profile paths.
+
+```yaml
+ods:
+  custom_profile:
+    name: incident
+    required_keys:
+      - github-issue
+      - service
+```
+
+`required_keys`, `optional_keys`, and `forbidden_keys` are optional lists of top-level key names. Add one `-` entry for each key. If a list has no entries, omit that profile-definition key; `[]` is valid YAML for an explicitly empty list but is not required.
+
+```yaml
+# INVALID: profile-definition keys must be grouped under custom_profile
+ods:
+  profile: custom-profile
+  required_keys:
+    - github-issue
+```
+
+In a document using `incident`, the required metadata remains top-level:
+
+```yaml
+github-issue: 123
+service: checkout
+ods:
+  profile: incident
+  status: draft
 ```
 
 ---

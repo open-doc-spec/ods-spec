@@ -68,7 +68,7 @@ Full dictionary: [`glossary.md`](glossary.md). Only these are required to naviga
 | **Workspace** | Directory tree whose root `ods.toml` declares `spec`. | [indexes.md](indexes.md) |
 | **Document** | Any `.md` file in the workspace. Frontmatter is optional. | [core.md](core.md) |
 | **Frontmatter** | Optional YAML between `---` lines at the top of a document. | [core.md](core.md) |
-| **Profile** | Document *shape* (expected `##` headings), not a file type. | [profiles.md](profiles.md) |
+| **Profile** | Document *shape* (expected H2/H3 headings), not a file type. | [profiles.md](profiles.md) |
 
 ---
 

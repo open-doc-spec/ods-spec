@@ -21,7 +21,7 @@ ods:
 
 ## Overview
 
-A **profile** is the *shape* of a document: which `##` headings a reader should find. It is not a file type and not a layout template.
+A **profile** is the *shape* of a document: which H2 or H3 headings a reader should find. It is not a file type and not a layout template.
 
 `guide` got you through [the first document](01-first-document.md). This page teaches you to pick the next shape without memorizing all thirteen standard profiles.
 
@@ -57,7 +57,7 @@ That covers most engineering repos. The other profiles (`api`, `architecture`, `
 
 ### 2. Fill the headings the profile promises
 
-| Profile | Expected `##` headings | Why those, not others |
+| Profile | Expected H2/H3 headings | Why those, not others |
 | :--- | :--- | :--- |
 | `guide` | Overview, Prerequisites, Steps, Troubleshooting | A how-to that cannot be followed is decoration. |
 | `decision` | Context, Decision, Alternatives, Consequences | Future you needs the rejected options, not only the winner. |
@@ -153,7 +153,7 @@ Never drop production data.
 3. Run the tests.
 ```
 
-YAML is for facts a linter and an indexer should enforce. Prompts, guardrails, and workflows are prose. They belong under `##` headings so any human or model can read them without a special parser.
+YAML is for facts a linter and an indexer should enforce. Prompts, guardrails, and workflows are prose. They belong under H2/H3 headings so any human or model can read them without a special parser.
 
 ## Troubleshooting
 

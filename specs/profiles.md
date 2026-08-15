@@ -16,11 +16,11 @@ ods:
 
 # ODS · Document Profiles & Shapes
 
-This document specifies **Document Profiles** in Open Document Spec (ODS): their purpose, standard shapes, section heading validation, copy-paste templates, custom profile catalogs, and reusable packs.
+This document specifies **Document Profiles** in Open Document Spec (ODS): their purpose, standard shapes, section heading validation, optional profile-required metadata keys, copy-paste templates, custom profile catalogs, and reusable packs.
 
 ## At a glance
 
-- **What this chapter defines:** The 13 standard profiles, expected `##` headings, aliases, custom profiles, and packs.
+- **What this chapter defines:** The 13 standard profiles, expected H2/H3 headings, aliases, profile-definition metadata, custom profiles, and packs.
 - **Why it exists:** A `decision` should contain the same sections in every repo so humans and agents know where to look.
 - **When you need it:** You are picking a shape, authoring a template, or validating headings.
 - **When you can skip it:** You only write how-tos — `profile: guide` is enough ([Pick a shape](../guides/02-pick-a-shape.md)).
@@ -37,10 +37,13 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 
 ## 2. What is a Profile?
 
-A **Profile** defines the *structural shape* and semantic nature of a document by establishing the list of expected `##` H2 section headings.
+A **Profile** defines the *structural shape* and semantic nature of a document by establishing the list of expected H2 or H3 section headings (`##` or `###`). A custom profile MAY also declare profile-required document metadata keys.
+
+Profile section matching is heading-level agnostic between H2 and H3: an expected section written as either `## Context` or `### Context` satisfies the same profile requirement. The document title remains the first `#` H1 heading, and H1, H4, or deeper headings MUST NOT satisfy an expected profile section.
 
 - A profile is **not** a file extension or a layout template.
 - A profile is a **structural validation contract** that ensures documents of a specific kind (e.g. PRDs, ADRs, SOPs, Guides, Agent Prompts, Skills) contain all required sections.
+- Profile-required metadata is additive to the section contract. It does not create a new ODS engine key or a closed registry of third-party metadata.
 - When an AI agent or human reads a document with `profile: decision`, they can rely on finding `## Context`, `## Decision`, `## Alternatives`, and `## Consequences`.
 
 ---
@@ -49,7 +52,7 @@ A **Profile** defines the *structural shape* and semantic nature of a document b
 
 ODS provides 13 built-in standard profiles that cover common software engineering, autonomous agent execution, and organizational documentation:
 
-| Profile | Intent & Usage | Expected `##` H2 Sections |
+| Profile | Intent & Usage | Expected H2/H3 Sections (`##` or `###`) |
 | :--- | :--- | :--- |
 | **`note`** | Free-form notes, scratchpads, and unstructured knowledge. (Default profile). | *(None required)* |
 | **`guide`** | Step-by-step tutorials, setup instructions, and how-to procedures. | `Overview`, `Prerequisites`, `Steps`, `Troubleshooting` |
@@ -534,14 +537,17 @@ Eval = ["Benchmark Suite", "Model Evals"]
 
 ## 7. Custom Profiles & Profile Definition Files
 
-Workspaces can define domain-specific custom profiles by creating profile definition Markdown files and registering them in `ods.toml`.
+Workspaces can define domain-specific custom profiles by creating profile definition Markdown files and registering their exact paths in `ods.toml`.
 
 ### 7.1 Custom Profile Definition File (`docs/profiles/rfc.md`)
 
 ```markdown
 ---
-name: rfc
-description: Request for Comments (RFC) engineering proposal.
+ods:
+  custom_profile:
+    name: rfc
+    required_keys:
+      - github-issue
 ---
 
 # Profile: RFC
@@ -558,7 +564,49 @@ description: Request for Comments (RFC) engineering proposal.
 ```
 
 - Pipe characters (`|`) in section headings define acceptable heading alternatives.
-- The profile identifier is derived from frontmatter `name:` or the file stem (`rfc`).
+- The profile identifier is derived from `ods.custom_profile.name` or the file stem (`rfc`).
+- Every path listed in `custom_profiles` MUST exist at the configured location and MUST resolve to a Markdown file or a profile directory. Tools MUST NOT silently skip a missing path or search another location.
+- A file containing `ods.custom_profile` MUST be one of the registered profile-definition files (or a file inside a registered profile directory). Ordinary documents MUST use `ods.profile` to select the registered profile.
+
+### 7.1.1 Profile-definition metadata
+
+The `ods.custom_profile` block of a registered profile-definition file MAY contain these profile-definition keys:
+
+| Key | Placement | Meaning |
+| :--- | :--- | :--- |
+| `name` | `ods.custom_profile.name` | Optional profile identifier. When absent, the file stem is used. |
+| `required_keys` | `ods.custom_profile.required_keys` | Keys that documents using the profile SHOULD contain. |
+| `optional_keys` | `ods.custom_profile.optional_keys` | Useful keys that are documented for the profile but are not required. |
+| `forbidden_keys` | `ods.custom_profile.forbidden_keys` | Keys that documents using the profile SHOULD NOT contain. |
+
+These keys describe the profile definition; they are not copied into documents using the profile. Each `required_keys` entry is matched against a top-level frontmatter key in the target document. Profile-specific document keys MUST NOT be nested under `ods:`. The standard engine keys (`profile`, `status`, `id`, `share`, `depends`, `related`, `resources`, `code`, and `context`) remain separate from profile-definition metadata.
+
+`required_keys`, `optional_keys`, and `forbidden_keys` are optional lists of top-level key names. Add one `-` entry for each key. If a list has no entries, omit that profile-definition key; `[]` is valid YAML for an explicitly empty list but is not required.
+
+`required_keys` is a presence-only contract: a conformant tool MUST NOT infer a value type, enum, or business meaning from it. A key satisfies the requirement when it is present with a non-null YAML value, including an empty list or structured value. An absent or explicit null key does not satisfy it. Key matching is case-insensitive after normalization; authors SHOULD write keys in lowercase.
+
+`optional_keys` and `forbidden_keys` do not define value types. A tool SHOULD report a `PROF-004` warning when a target document contains a `forbidden_keys` entry.
+
+If a document declares an `ods.profile` name that is not a standard profile or a profile loaded from a registered definition path, the tool MUST report a `PROF-001` error. The diagnostic MUST identify the configured `custom_profiles` paths so the author can correct the exact file location or profile name.
+
+If a path declared by `custom_profiles` does not exist, is not a Markdown file or profile directory, or contains invalid profile-definition frontmatter, the tool MUST fail with a `PROF-005` error and identify the configured path. If `ods.custom_profile` appears in a file that is not selected by `custom_profiles` or a registered pack, the tool MUST fail with a `PROF-006` error.
+
+Missing profile-required keys MUST be reported as a profile validation warning (`PROF-003`). Under the binary compliance contract, warnings do not cause a non-zero exit code unless another error is present. Tools MAY offer a stricter policy, but it is outside the ODS 0.1 core contract.
+
+Example target document:
+
+```markdown
+---
+github-issue: 123
+ods:
+  profile: rfc
+  status: draft
+---
+
+# RFC: Retry Policy
+```
+
+Profile-required metadata is for domain keys such as issue IDs, service names, or owners. Agent and skill execution contracts remain Markdown body sections, not `required_keys` entries.
 
 ### 7.2 Registering Custom Profiles in `ods.toml`
 
@@ -592,7 +640,7 @@ When resolving a document's `ods.profile`, tools MUST search in this priority or
 2. **Explicit workspace `custom_profiles`** paths declared in `ods.toml`
 3. **Imported `packs`** in the order declared in `ods.toml`
 
-If a profile name is declared in multiple places, the first resolved definition wins, and tools SHOULD emit a diagnostic warning. Unresolved profile names fallback to `note` behavior and emit a validation warning.
+If a profile name is declared in multiple places, the first resolved definition wins, and tools SHOULD emit a diagnostic warning. Unresolved profile names MUST NOT fall back to `note` behavior; they produce a `PROF-001` error.
 
 ---
 
@@ -621,7 +669,7 @@ We choose PostgreSQL 16 managed on AWS RDS.
 ## Consequences
 We gain strong consistency and JSONB support; we must manage RDS connection pooling.
 ```
-*Why it is valid*: All 4 required sections (`Context`, `Decision`, `Alternatives Considered` [alias], `Consequences`) are present as `##` H2 headings.
+*Why it is valid*: All 4 required sections (`Context`, `Decision`, `Alternatives Considered` [alias], `Consequences`) are present as recognized H2/H3 profile headings.
 
 ### Invalid Agent Document (Frontmatter Pollution Anti-Pattern)
 ```markdown
@@ -647,7 +695,7 @@ Implement route handlers.
 
 ## 10. Design Decisions
 
-### Why use `##` Headings instead of rigid JSON/YAML schemas for document bodies?
+### Why use H2/H3 headings instead of rigid JSON/YAML schemas for document bodies?
 Engineers and authors write Markdown naturally using section headings. Forcing authors into structured JSON arrays or proprietary markdown frontmatter fields damages readability in text editors and breaks standard Markdown rendering.
 
 ### Why headings instead of frontmatter keys for agent prompts and skills?
@@ -666,4 +714,3 @@ Profile inheritance (e.g. `guide` extends `base-doc` extends `root`) adds signif
 | [← Previous Chapter](keys.md) | [📑 Specification Index](README.md) | [Next Chapter →](graph.md) |
 | :--- | :---: | ---: |
 | **03. Frontmatter Key Dictionary** | **Open Document Spec (ODS)** | **05. Document Graph & Identity** |
-

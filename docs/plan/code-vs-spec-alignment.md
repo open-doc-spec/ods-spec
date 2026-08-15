@@ -75,7 +75,7 @@ graph TD
         C1["Tooling CLI: ods agents sync, ods skill install, ods lsp, ods doctor, ods undo, ods bench"]
         C2["ods.toml sub-keys: specs.okf/skills check_keys & ignore_keys"]
         C3["CLI suppression flags: --skip-keys, --ignore-keys, --canonical-refs"]
-        C4["Profile schema keys: expected_keys, name"]
+        C4["Profile schema enforcement: required_keys / forbidden_keys"]
     end
 ```
 
@@ -87,8 +87,8 @@ graph TD
 
 | Feature / Area | Specification (`ods-spec`) | Implementation (`ods`) | Discrepancy & Impact |
 | :--- | :--- | :--- | :--- |
-| **`agent` Profile** | Defined in `specs/profiles.md` & `AGENTS.md` with 15 expected `##` H2 sections (`Goal`, `Task`, `Scope`, `Non-Scope`, `Context`, `Inputs`, `Constraints`, `Priority`, `Steps`, `Output`, `Success Criteria`, `Failure Modes`, `Dependencies`, `Assumptions`, `Examples`). | Missing from `standard_profile_definitions()` in `src/ods-core/src/profiles/mod.rs`. | Authoring `agent.md` with `ods: profile: agent` triggers an `unknown profile` lint warning unless custom profile is defined. |
-| **`skill` Profile** | Defined in `specs/profiles.md` & `AGENTS.md` with 16 expected `##` H2 sections (`Purpose`, `Capability`, `Activation`, `Scope`, `Non-Scope`, `Inputs`, `Outputs`, `Workflow`, `Rules`, `Priority`, `Validation`, `Eval`, `Resources`, `Tools`, `Lifecycle`, `Traceability`). | Handled only in `multi_spec/skills/` crate; not registered in built-in `standard_profile_definitions()` in `profiles/mod.rs`. | Standard ODS lint without `--skills` treats `profile: skill` as unknown. |
+| **`agent` Profile** | Defined in `specs/profiles.md` & `AGENTS.md` with 15 expected H2/H3 sections (`Goal`, `Task`, `Scope`, `Non-Scope`, `Context`, `Inputs`, `Constraints`, `Priority`, `Steps`, `Output`, `Success Criteria`, `Failure Modes`, `Dependencies`, `Assumptions`, `Examples`). | Missing from `standard_profile_definitions()` in `src/ods-core/src/profiles/mod.rs`. | Authoring `agent.md` with `ods: profile: agent` triggers an `unknown profile` lint warning unless custom profile is defined. |
+| **`skill` Profile** | Defined in `specs/profiles.md` & `AGENTS.md` with 16 expected H2/H3 sections (`Purpose`, `Capability`, `Activation`, `Scope`, `Non-Scope`, `Inputs`, `Outputs`, `Workflow`, `Rules`, `Priority`, `Validation`, `Eval`, `Resources`, `Tools`, `Lifecycle`, `Traceability`). | Handled only in `multi_spec/skills/` crate; not registered in built-in `standard_profile_definitions()` in `profiles/mod.rs`. | Standard ODS lint without `--skills` treats `profile: skill` as unknown. |
 | **`index` Profile** | Deprecated / eliminated from standard profiles in `specs/scope.md` & `specs/indexes.md`. | Still defined as a built-in profile `profile("index", vec![])` in `profiles/mod.rs`. | Legacy profile definition remaining in codebase. |
 | **`title:` Frontmatter Severity** | `specs/validation.md` Rule `SYNTAX-002` lists frontmatter `title:` as **Error** (Severity: Error, exit code 1). | `spec/schema.rs` emits `Severity::Warning` (`lint_title_discouraged`). | Code is more lenient than spec to prevent breaking legacy markdown during initial adoption. |
 | **Rule Identifiers in Diagnostics** | `specs/validation.md` defines standard rule IDs (`SYNTAX-001`, `PLACE-001`, `ENUM-001`, `GRAPH-004`, `ASSET-003`, etc.). | `error/messages.rs` uses internal snake_case IDs (`invalid_status`, `dangling_reference`) under `ODS_ERROR_CODES=1`. | Diagnostic error messages do not surface the uppercase spec IDs by default. |
@@ -104,7 +104,7 @@ graph TD
 | **LSP Server (`ods lsp`)** | Full Language Server Protocol over stdio for IDE completions, hover diagnostics, and jump-to-definition. | Not mentioned in `specs/`. | Document under Implementer Conformance in `specs/validation.md`. |
 | **`[specs.okf]` & `[specs.skills]` Config Options** | `check_keys = bool`, `ignore_keys = [...]` in `ods.toml` + CLI flags `--skip-keys`, `--ignore-keys`. | `specs/indexes.md` only shows `enabled = false`. | Document the key-checking sub-options in `specs/indexes.md`. |
 | **Workspace Maintenance Commands** | `ods doctor`, `ods undo`, `ods diff`, `ods schema`, `ods clean`, `ods bench`, `ods setup`, `ods upgrade`. | Specs focus primarily on the core spec operations (`lint`, `context`, `find`, `mv`, `rm`, `adopt`, `fmt`). | Document these operational tools in CLI tooling reference. |
-| **Profile Authoring Frontmatter** | `expected_keys` (or `expected-keys`) and `name` used when authoring custom profile documents. | `specs/profiles.md` mentions custom profiles but doesn't explicitly document `expected_keys` in the key dictionary. | Add `expected_keys` and `name` to `specs/keys.md` under Custom Profile Schema keys. |
+| **Profile Authoring Frontmatter** | `ods.custom_profile` with `name`, `required_keys`, `optional_keys`, and `forbidden_keys` used when authoring custom profile documents. | Documented in `specs/profiles.md`, `specs/keys.md`, and `specs/validation.md`; runtime enforcement and conformance coverage are addressed by [open-doc-spec/ods#65](https://github.com/open-doc-spec/ods/pull/65). | Keep the specification and implementation changes synchronized; merge the linked implementation PR with this documentation update. |
 
 ---
 
@@ -133,7 +133,7 @@ graph TD
 
 ### Step 2: Document Missing Code Capabilities in `ods-spec`
 1. **Update `specs/indexes.md`**: Include `[specs.okf]` and `[specs.skills]` configuration tables with `check_keys` and `ignore_keys`.
-2. **Update `specs/keys.md`**: Add `expected_keys` and `name` under Custom Profile Definition keys.
+2. **Update `specs/keys.md`**: Add `ods.custom_profile` with `name`, `required_keys`, `optional_keys`, and `forbidden_keys` under Custom Profile Definition keys (documented by this alignment update).
 3. **Update `specs/README.md`**: Add an overview of extended CLI tooling (`agents sync`, `skill install`, `lsp`, `doctor`).
 
 ### Step 3: CI and Verification

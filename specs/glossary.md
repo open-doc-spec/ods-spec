@@ -117,7 +117,7 @@ graph TD
 
 | Term | Normative Definition | Chapter Reference |
 | :--- | :--- | :--- |
-| **Profile (`ods.profile`)** | A structural validation contract that defines the semantic intent of a document and specifies its expected `##` H2 section headings. Profiles are not file extensions or presentation layouts. | [Chapter 04 · profiles.md](profiles.md#2-what-is-a-profile) |
+| **Profile (`ods.profile`)** | A structural validation contract that defines the semantic intent of a document and specifies its expected H2 or H3 section headings (`##` or `###`). Profiles are not file extensions or presentation layouts. | [Chapter 04 · profiles.md](profiles.md#2-what-is-a-profile) |
 | **13 Standard Profiles** | Built-in profile contracts provided by ODS: `note` (default), `guide`, `feature`, `decision`, `sop`, `api`, `architecture`, `policy`, `meeting`, `faq`, `checklist`, `agent`, and `skill`. | [Chapter 04 · profiles.md](profiles.md#3-standard-profiles-catalog) |
 | **Custom Profiles** | Organization-specific or domain-specific structural contracts declared in workspace documents and registered via `ods.toml`. | [Chapter 04 · profiles.md](profiles.md#5-custom-profile-catalogs) |
 | **Heading Aliases (`[aliases]`)** | Workspace-wide synonym mappings configured in `ods.toml` that allow recognized alternate section titles (e.g. `Overview` ↔ `Summary`, `Prerequisites` ↔ `Requirements`) to satisfy profile heading validation. | [Chapter 04 · profiles.md](profiles.md#6-heading-aliases-and-synonym-matching) |
@@ -177,7 +177,7 @@ graph TD
 
 | Concept | Canonical Field | Purpose | Format | Example |
 | :--- | :--- | :--- | :--- | :--- |
-| **Structural Shape** | `ods.profile` | Defines expected `##` H2 section headings. | Single enum string | `profile: decision` |
+| **Structural Shape** | `ods.profile` | Defines expected H2 or H3 section headings (`##` or `###`). | Single enum string | `profile: decision` |
 | **Search Taxonomy** | `tags` (Top-level) | Categorization for search, filtering, and discovery. | List of lowercase strings | `tags: [auth, security]` |
 | **Legacy / Anti-Pattern** | `type:` / `kind:` | **FORBIDDEN / NON-GOAL**. Redundant taxonomy. | N/A | *Do not use in ODS* |
 
