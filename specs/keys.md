@@ -422,9 +422,9 @@ ods:
     required_keys:
       - github-issue
       - service
-    optional_keys: []
-    forbidden_keys: []
 ```
+
+`required_keys`, `optional_keys`, and `forbidden_keys` are optional lists of top-level key names. Add one `-` entry for each key. If a list has no entries, omit that profile-definition key; `[]` is valid YAML for an explicitly empty list but is not required.
 
 ```yaml
 # INVALID: profile-definition keys must be grouped under custom_profile

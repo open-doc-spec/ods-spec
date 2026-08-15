@@ -548,8 +548,6 @@ ods:
     name: rfc
     required_keys:
       - github-issue
-    optional_keys: []
-    forbidden_keys: []
 ---
 
 # Profile: RFC
@@ -582,6 +580,8 @@ The `ods.custom_profile` block of a registered profile-definition file MAY conta
 | `forbidden_keys` | `ods.custom_profile.forbidden_keys` | Keys that documents using the profile SHOULD NOT contain. |
 
 These keys describe the profile definition; they are not copied into documents using the profile. Each `required_keys` entry is matched against a top-level frontmatter key in the target document. Profile-specific document keys MUST NOT be nested under `ods:`. The standard engine keys (`profile`, `status`, `id`, `share`, `depends`, `related`, `resources`, `code`, and `context`) remain separate from profile-definition metadata.
+
+`required_keys`, `optional_keys`, and `forbidden_keys` are optional lists of top-level key names. Add one `-` entry for each key. If a list has no entries, omit that profile-definition key; `[]` is valid YAML for an explicitly empty list but is not required.
 
 `required_keys` is a presence-only contract: a conformant tool MUST NOT infer a value type, enum, or business meaning from it. A key satisfies the requirement when it is present with a non-null YAML value, including an empty list or structured value. An absent or explicit null key does not satisfy it. Key matching is case-insensitive after normalization; authors SHOULD write keys in lowercase.
 
