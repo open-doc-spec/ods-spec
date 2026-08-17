@@ -1,5 +1,5 @@
 ---
-description: "Extend ODS with custom profiles, heading aliases, and packs, and know which spec chapter to open for expert or implementer work."
+description: "Extend ODS with custom profiles and packs, and know which spec chapter to open for expert or implementer work."
 tags:
   - learn
   - ods
@@ -24,14 +24,14 @@ ods:
 
 ## Overview
 
-Everything before this page is standard ODS. You extend the standard when the thirteen built-in profiles are not the shape you actually write, when your team says "Objective" instead of "Goal", or when you are implementing a parser.
+Everything before this page is standard ODS. You extend the standard when the thirteen built-in profiles are not the shape you actually write, or when you are implementing a parser.
 
 This is the off-ramp into the spec, not a second spec.
 
 ## Prerequisites
 
 - A workspace you already lint ([Run the workspace](06-run-the-workspace.md)).
-- A clear gap: a recurring document kind, a heading synonym, or an engine you are building.
+- A clear gap: a recurring document kind or an engine you are building.
 - Willingness to stay inside [what ODS refuses to add](../specs/scope.md) (no new file extension, no `title:`, no custom code roles, no profile inheritance trees).
 
 ## Steps
@@ -55,18 +55,18 @@ ods:
 
 # Profile: RFC
 
-## Summary | Executive Summary
+## Summary
 
-## Motivation | Problem Statement
+## Motivation
 
-## Proposed Design | Technical Specification
+## Proposed Design
 
-## Drawbacks | Risks
+## Drawbacks
 
-## Unresolved Questions | Open Issues
+## Unresolved Questions
 ```
 
-Pipes are accepted heading aliases. Register the file:
+Register the file in `ods.toml`:
 
 ```toml
 # ods.toml
@@ -89,18 +89,7 @@ These keys are profile-scoped metadata, not new `ods:` engine keys. Missing keys
 
 Do not build inheritance (`rfc` extends `feature` extends `base`). Flat shapes stay debuggable. Full rules: [`specs/profiles.md`](../specs/profiles.md).
 
-### 2. Alias headings the team already uses
-
-```toml
-# ods.toml
-[aliases]
-Goal = ["Target", "Business Objective"]
-Validation = ["Sanity Checks", "Smoke Tests"]
-```
-
-Use this when the built-in synonym table almost fits. Do not alias everything on day one.
-
-### 3. Import a pack when several workspaces share shapes
+### 2. Import a pack when several workspaces share shapes
 
 ```toml
 packs = [
@@ -110,7 +99,7 @@ packs = [
 
 A pack is a versioned folder of profiles (and, optionally, templates or skills). Treat it as shared configuration, not as a plugin marketplace inside the spec.
 
-### 4. Open the spec by job, not by chapter number
+### 3. Open the spec by job, not by chapter number
 
 | You need… | Open |
 | :--- | :--- |

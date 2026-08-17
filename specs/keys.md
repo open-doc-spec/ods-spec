@@ -143,7 +143,7 @@ ods:
 │ -> Scoped to prevent collision with SSG reserved template variables     │
 ├─────────────────────────────────────────────────────────────────────────┤
 │ TIER 3: Workspace Manifest Keys (In root ods.toml only)                │
-│ spec, ignore, custom_profiles, packs, aliases, specs, service           │
+│ spec, ignore, custom_profiles, packs, specs, service                    │
 │ -> Repository-wide boundary and discovery configuration                 │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
