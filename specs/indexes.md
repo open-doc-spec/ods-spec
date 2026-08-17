@@ -66,11 +66,6 @@ packs = [
   "vendor/engineering-pack"
 ]
 
-# Workspace-wide section heading synonyms for profile validation
-[aliases]
-Goal = ["Objective", "Purpose", "Target"]
-Validation = ["Sanity Checks", "Smoke Tests", "Verification"]
-
 # Multi-spec dialect activation
 [specs.okf]
 enabled = false                               # Google OKF knowledge verification checks

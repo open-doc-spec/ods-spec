@@ -55,7 +55,7 @@ Teach-through: [Pick a shape](02-pick-a-shape.md). Templates: [`specs/profiles.m
 | One-line summary, tags, owner, optional dates | Top-level frontmatter |
 | Profile, status, share, id, depends, related, resources, code, context | Under `ods:` |
 | Procedure, decision text, guardrails, workflow, tools, eval | `##` body headings |
-| Spec version, ignore paths, custom profiles, packs, aliases | Root `ods.toml` only |
+| Spec version, ignore paths, custom profiles, packs | Root `ods.toml` only |
 
 Never: `title:` in YAML. Never: `tags` under `ods:`. Never: `profile` at the top level. Never: `role:` / `workflow:` / `refusal_guardrails:` in YAML.
 

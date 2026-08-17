@@ -20,7 +20,7 @@ This document specifies **Document Profiles** in Open Document Spec (ODS): their
 
 ## At a glance
 
-- **What this chapter defines:** The 13 standard profiles, expected H2/H3 headings, aliases, profile-definition metadata, custom profiles, and packs.
+- **What this chapter defines:** The 13 standard profiles, expected H2/H3 headings, profile-definition metadata, custom profiles, and packs.
 - **Why it exists:** A `decision` should contain the same sections in every repo so humans and agents know where to look.
 - **When you need it:** You are picking a shape, authoring a template, or validating headings.
 - **When you can skip it:** You only write how-tos — `profile: guide` is enough ([Pick a shape](../guides/02-pick-a-shape.md)).
@@ -476,70 +476,13 @@ Enables autonomous agents and developers to systematically analyze slow query pl
 
 ---
 
-## 6. Section Heading Alias Matching
-
-Human and AI authors frequently use natural variations of heading titles. ODS validation tools MUST perform **alias matching** before reporting a missing section.
-
-### 6.1 Standard Built-in Aliases
-
-| Canonical Section | Recognized Synonyms & Aliases |
-| :--- | :--- |
-| **`Goal`** | `Objective`, `Objectives`, `Purpose`, `Intent` |
-| **`Task`** | `Assignment`, `Prompt`, `Mission`, `Job` |
-| **`Scope`** | `In Scope`, `Boundaries`, `Applicability` |
-| **`Non-Scope`** | `Out of Scope`, `Exclusions`, `Non Goals`, `Non-Goals` |
-| **`Requirements`** | `Functional Requirements`, `Needs`, `Specifications` |
-| **`Acceptance Criteria`** | `Acceptance`, `Success Criteria`, `Definition of Done` |
-| **`Overview`** | `Introduction`, `Summary`, `Background`, `About` |
-| **`Prerequisites`** | `Requirements`, `Before You Begin`, `Setup Required` |
-| **`Steps`** | `Instructions`, `Procedure`, `Process`, `Execution` |
-| **`Troubleshooting`** | `Common Issues`, `FAQ`, `Failure Modes`, `Debugging` |
-| **`Context`** | `Background`, `Problem Statement`, `Motivation` |
-| **`Decision`** | `Outcome`, `Chosen Option`, `Resolution` |
-| **`Alternatives`** | `Options Considered`, `Alternative Approaches`, `Other Solutions` |
-| **`Consequences`** | `Outcome`, `Implications`, `Impact`, `Trade-offs` |
-| **`Validation`** | `Verification`, `Checks`, `Testing`, `Confirmation` |
-| **`Rollback`** | `Recovery`, `Revert Procedure`, `Undo Steps`, `Failover` |
-| **`Rules`** | `Standards`, `Requirements`, `Mandates`, `Guidelines`, `Policies` |
-| **`Action Items`** | `Actions`, `Next Steps`, `TODO`, `Follow-ups` |
-| **`Risks`** | `Risks & Mitigations`, `Concerns`, `Potential Issues` |
-| **`Trade-offs`** | `Tradeoffs`, `Pros & Cons`, `Evaluations` |
-| **`Inputs`** | `Parameters`, `Arguments`, `Input Data`, `Input Schema` |
-| **`Output` / `Outputs`** | `Deliverable`, `Deliverables`, `Result`, `Results`, `Returns`, `Expected Output`, `Response Format` |
-| **`Constraints`** | `Guardrails`, `Refusal Guardrails`, `Limitations`, `Safety Rules` |
-| **`Priority`** | `Context Priority`, `Resolution Priority`, `Precedence` |
-| **`Failure Modes`** | `Failure Scenarios`, `Edge Cases`, `Error Handling`, `Mitigations` |
-| **`Dependencies`** | `Required Docs`, `External Dependencies` |
-| **`Assumptions`** | `Defaults`, `Presumptions`, `Prerequisites Assumptions` |
-| **`Examples`** | `Sample Inputs`, `Sample Prompts`, `Few-Shot Examples`, `Scenarios` |
-| **`Capability`** | `Capabilities`, `Features`, `Actions` |
-| **`Activation`** | `Triggers`, `When to Use`, `Activation Conditions`, `Trigger Conditions` |
-| **`Workflow`** | `Execution Flow`, `Process Flow`, `Operating Workflow` |
-| **`Eval`** | `Evaluation`, `Benchmarks`, `Eval Suite`, `Quality Gates`, `Rubric` |
-| **`Resources`** | `References`, `Assets`, `Knowledge Base` |
-| **`Tools`** | `Tooling`, `Tool Integrations`, `Functions`, `Commands`, `MCP Servers` |
-| **`Lifecycle`** | `Phases`, `State Machine`, `Hooks`, `Execution Lifecycle` |
-| **`Traceability`** | `Auditing`, `Provenance`, `Logging`, `Telemetry` |
-
-### 6.2 Workspace Section Aliases (`ods.toml`)
-
-Workspaces MAY define custom section aliases in `ods.toml` under the `[aliases]` table:
-
-```toml
-# ods.toml
-[aliases]
-Goal = ["Target", "Business Objective"]
-Validation = ["Sanity Checks", "Smoke Tests"]
-Eval = ["Benchmark Suite", "Model Evals"]
-```
-
 ---
 
-## 7. Custom Profiles & Profile Definition Files
+## 6. Custom Profiles & Profile Definition Files
 
 Workspaces can define domain-specific custom profiles by creating profile definition Markdown files and registering their exact paths in `ods.toml`.
 
-### 7.1 Custom Profile Definition File (`docs/profiles/rfc.md`)
+### 6.1 Custom Profile Definition File (`docs/profiles/rfc.md`)
 
 ```markdown
 ---
@@ -552,23 +495,23 @@ ods:
 
 # Profile: RFC
 
-## Summary | Executive Summary
+## Summary
 
-## Motivation | Problem Statement
+## Motivation
 
-## Proposed Design | Technical Specification
+## Proposed Design
 
-## Drawbacks | Risks
+## Drawbacks
 
-## Unresolved Questions | Open Issues
+## Unresolved Questions
 ```
 
-- Pipe characters (`|`) in section headings define acceptable heading alternatives.
+- Profile section contracts must match exact canonical H2 or H3 heading titles (`##` or `###`). Synonyms and pipe alternatives are not recognized.
 - The profile identifier is derived from `ods.custom_profile.name` or the file stem (`rfc`).
 - Every path listed in `custom_profiles` MUST exist at the configured location and MUST resolve to a Markdown file or a profile directory. Tools MUST NOT silently skip a missing path or search another location.
 - A file containing `ods.custom_profile` MUST be one of the registered profile-definition files (or a file inside a registered profile directory). Ordinary documents MUST use `ods.profile` to select the registered profile.
 
-### 7.1.1 Profile-definition metadata
+### 6.1.1 Profile-definition metadata
 
 The `ods.custom_profile` block of a registered profile-definition file MAY contain these profile-definition keys:
 
@@ -608,7 +551,7 @@ ods:
 
 Profile-required metadata is for domain keys such as issue IDs, service names, or owners. Agent and skill execution contracts remain Markdown body sections, not `required_keys` entries.
 
-### 7.2 Registering Custom Profiles in `ods.toml`
+### 6.2 Registering Custom Profiles in `ods.toml`
 
 ```toml
 # ods.toml
@@ -622,7 +565,7 @@ custom_profiles = [
 
 ---
 
-## 8. ODS Packs (Reusable Profile Catalogs)
+## 7. ODS Packs (Reusable Profile Catalogs)
 
 An **ODS Pack** is a versioned repository or directory containing reusable profiles, templates, and agent skills.
 
@@ -634,7 +577,7 @@ packs = [
 ]
 ```
 
-### 8.1 Profile Resolution Order
+### 7.1 Profile Resolution Order
 When resolving a document's `ods.profile`, tools MUST search in this priority order:
 1. **Standard built-in profiles** (`note`, `guide`, `feature`, `agent`, `skill`, etc.)
 2. **Explicit workspace `custom_profiles`** paths declared in `ods.toml`
@@ -644,7 +587,7 @@ If a profile name is declared in multiple places, the first resolved definition 
 
 ---
 
-## 9. Valid vs. Invalid Profile Usage Examples
+## 8. Valid vs. Invalid Profile Usage Examples
 
 ### Valid Decision Document
 ```markdown
@@ -662,14 +605,14 @@ We need a reliable relational database for financial ledger records.
 ## Decision
 We choose PostgreSQL 16 managed on AWS RDS.
 
-## Alternatives Considered
+## Alternatives
 - DynamoDB: Fast but lacks ACID multi-row transactions.
 - MySQL: Viable, but team has deeper Postgres expertise.
 
 ## Consequences
 We gain strong consistency and JSONB support; we must manage RDS connection pooling.
 ```
-*Why it is valid*: All 4 required sections (`Context`, `Decision`, `Alternatives Considered` [alias], `Consequences`) are present as recognized H2/H3 profile headings.
+*Why it is valid*: All 4 required sections (`Context`, `Decision`, `Alternatives`, `Consequences`) are present as exact canonical H2/H3 profile headings.
 
 ### Invalid Agent Document (Frontmatter Pollution Anti-Pattern)
 ```markdown
@@ -693,7 +636,7 @@ Implement route handlers.
 
 ---
 
-## 10. Design Decisions
+## 9. Design Decisions
 
 ### Why use H2/H3 headings instead of rigid JSON/YAML schemas for document bodies?
 Engineers and authors write Markdown naturally using section headings. Forcing authors into structured JSON arrays or proprietary markdown frontmatter fields damages readability in text editors and breaks standard Markdown rendering.

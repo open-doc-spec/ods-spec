@@ -65,7 +65,7 @@ That covers most engineering repos. The other profiles (`api`, `architecture`, `
 | `sop` | Purpose, Prerequisites, Steps, Validation, Rollback | A runbook without rollback is an incident waiting. |
 | `note` | *(none)* | Scratchpads should not fail lint. |
 
-Heading names are matched loosely. `## Alternatives Considered` counts as `Alternatives`. `## Out of Scope` counts as `Non-Scope`. You do not need to memorize aliases; write the obvious heading.
+Heading names must match the exact canonical section title (e.g. `## Alternatives`, `## Non-Scope`). Write the exact expected heading.
 
 Missing expected headings are **warnings**, not errors. The file is still compliant. The warning exists so a `decision` does not ship without `## Consequences`.
 
