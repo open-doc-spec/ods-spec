@@ -40,7 +40,8 @@ When reading, updating, or generating documentation in an ODS workspace, agents 
    - **ODS engine keys** (`profile`, `status`, `id`, `share`, `depends`, `related`, `resources`, `code`, `context`) MUST be nested under the **`ods:`** block.
    - Never nest `tags` or `description` under `ods:`.
    - Never put operational execution keys (`role`, `help`, `qualification_gate`, `context_resolution_priority`, `refusal_guardrails`, `workflow`, `tools`, `eval`, `decision`, `branch`) in frontmatter. Operational contracts belong in standard `##` H2 body headings.
-   - Workspace boundary keys (`spec`, `ignore`, `custom_profiles`, `packs`) belong ONLY in root `ods.toml`.
+   - Workspace boundary keys (`spec`, `ignore`, `custom_profiles`, `packs`, `specs`, `service`) belong ONLY in root `ods.toml`.
+   - The workspace marker is `ods.toml` (`spec`). Do not treat root `index.md` / `index.ods.md` or scalar `ods: 0.1` as the workspace boundary.
 
 3. **Maintain Knowledge Graph Purity**:
    - `ods.depends` is strictly for conceptual dependencies to other **Markdown documents**.

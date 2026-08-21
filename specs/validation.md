@@ -79,6 +79,8 @@ All conformant ODS linters MUST enforce the following validation rules:
 | | `SYNTAX-002` | Frontmatter MUST NOT contain a `title:` key. | **Error** | Remove `title:` from frontmatter; declare title in first `# H1` body heading. |
 | **Placement** | `PLACE-001` | `tags` MUST appear at the top level; MUST NOT be nested under `ods:`. | **Warning** | Hoist `tags` to top-level frontmatter. |
 | | `PLACE-002` | Engine keys (`profile`, `status`, `depends`, etc.) MUST be nested under `ods:`. | **Error** | Nest engine keys under `ods:` mapping. |
+| | `PLACE-003` | Document frontmatter MUST NOT contain workspace policy keys (`spec`, `ignore`, `packs`, `specs`, `custom_profiles` / `custom-profiles`). Those keys belong in root `ods.toml`. | **Error** | Move the keys into `ods.toml`; do not keep a dual marker in `index.md`. |
+| **Workspace** | `WS-001` | An ODS workspace MUST have root `ods.toml` with a non-empty `spec`. Root `index.md` / scalar `ods: 0.1` is not a workspace marker. | **Error** | Run `ods init` (writes `ods.toml`) then retry. |
 | **Enums** | `ENUM-001` | `ods.status` MUST be one of `draft`, `stable`, `deprecated`, `archived`. | **Error** | Change status to a recognized lifecycle state. |
 | | `ENUM-002` | `ods.share` (when present) MUST be one of `public`, `org`, `private`. | **Error** | Set share to `public`, `org`, or `private`. |
 | | `ENUM-003` | `ods.code[].role` MUST be one of the 8 standard roles. | **Error** | Change role to a valid standard role (e.g. `entrypoint`, `implementation`). |
@@ -123,7 +125,23 @@ ods:
 # Checkout Guide                      # CORRECT: Title declared as first H1 in body
 ```
 
-### 5.2 Line Numbers in Code Bindings (`ASSET-003`)
+### 5.2 Workspace Policy Keys in Frontmatter (`PLACE-003`, `WS-001`)
+```yaml
+# ERRONEOUS CODE (root index.md is not a workspace):
+---
+ods: 0.1
+packs:
+  - vendor/engineering-pack           # ERROR [PLACE-003]: policy key in frontmatter
+---
+```
+
+```toml
+# CORRECTED CODE (root ods.toml):
+spec = "0.1"                          # CORRECT [WS-001]: workspace marker
+packs = ["vendor/engineering-pack"]   # CORRECT: packs in ods.toml
+```
+
+### 5.3 Line Numbers in Code Bindings (`ASSET-003`)
 ```yaml
 # ERRONEOUS CODE:
 ods:
@@ -139,7 +157,7 @@ ods:
       symbol: processCheckout         # CORRECT: refactor-resilient symbol reference
 ```
 
-### 5.3 Cyclic Dependency Loops (`GRAPH-004`)
+### 5.4 Cyclic Dependency Loops (`GRAPH-004`)
 ```yaml
 # ERRONEOUS CODE (Doc A depends on Doc B, Doc B depends on Doc A):
 # In auth.md:
@@ -173,6 +191,7 @@ ods:
 | **Unknown `code` role** | **Fatal Error**: Reject immediately; projects MUST NOT invent custom code roles. |
 | **Invalid `ods.share` value** | **Fatal Error**: Reject immediately to prevent unintended privacy leaks. |
 | **Legacy Flat Engine Keys** (without nested `ods:`) | **Migration Mode**: Accept during read; format tooling (`ods fmt --migrate`) MUST nest under `ods:`. |
+| **Workspace Policy Keys in Document Frontmatter** (`spec`, `ignore`, `packs`, `specs`, `custom_profiles`) | **Fatal Error** (`PLACE-003`): Move into root `ods.toml`. A missing `ods.toml` is `WS-001`, not a root `index.md`. |
 
 ---
 
@@ -229,6 +248,9 @@ error[ASSET-003]: line numbers are prohibited in code paths
 - [ ] Emit `PROF-004` warnings when selected profile `forbidden_keys` are present.
 - [ ] Resolve custom profiles registered in `ods.toml`.
 - [ ] Support progressive CLI discovery without generating committed folder indexes.
+- [ ] Treat root `ods.toml` with `spec` as the only workspace marker (`WS-001`); reject a tree that has only root `index.md` with `ods: 0.1`.
+- [ ] Error when document frontmatter contains `spec`, `ignore`, `packs`, `specs`, or `custom_profiles` (`PLACE-003`).
+- [ ] Record packs and custom profiles in `ods.toml`, not in root index frontmatter.
 
 ---
 

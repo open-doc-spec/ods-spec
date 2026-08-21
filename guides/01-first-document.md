@@ -43,7 +43,7 @@ Create `ods.toml` at the repository root with one required line:
 spec = "0.1"
 ```
 
-That file is the workspace boundary. Until it exists, a folder of Markdown is just a folder of Markdown.
+That file is the workspace boundary. Until it exists, a folder of Markdown is just a folder of Markdown. Do **not** create a root `index.md` with `ods: 0.1` instead of `ods.toml` — the CLI will not treat that folder as a workspace.
 
 You can add `ignore = ["node_modules", "target", "dist"]` later. You do not need it yet.
 
@@ -149,7 +149,7 @@ No CLI? Re-read the three placement rules and the four `guide` headings. You alr
 
 You now have:
 
-- A workspace marker
+- A workspace marker (`ods.toml`, not root `index.md`)
 - One document a human can follow
 - Metadata a tool can list and lint
 

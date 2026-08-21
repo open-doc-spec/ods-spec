@@ -154,6 +154,26 @@ ods:
 | **2. ODS Engine** | **Under `ods:` map only** | ODS CLI, linters, AI agents, context builders | Engine-specific metadata for DAG edges, assets, and AI context. |
 | **3. Workspace** | **Root `ods.toml` only** | ODS runtime, CI runners, build systems | Global repository settings, ignore patterns, and pack imports. |
 
+Workspace policy keys (`spec`, `ignore`, `custom_profiles`, `packs`, `specs`, `service`) MUST NOT appear in document frontmatter. A scalar `ods: 0.1` pin on a Markdown file is not a workspace marker.
+
+```yaml
+# INVALID — policy keys on a document (PLACE-003)
+---
+ods: 0.1
+packs:
+  - vendor/engineering-pack
+ignore:
+  - node_modules
+---
+```
+
+```toml
+# VALID — same policy in root ods.toml
+spec = "0.1"
+ignore = ["node_modules"]
+packs = ["vendor/engineering-pack"]
+```
+
 ---
 
 ## 4. Subsystem Matrix of Engine Keys

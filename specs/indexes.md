@@ -19,8 +19,8 @@ This document specifies the **ODS Workspace Configuration** (`ods.toml`), the el
 
 ## At a glance
 
-- **What this chapter defines:** Root `ods.toml`, ignore defaults, and discovery commands (`overview` → `find` / `ls` / `tree` → `context`).
-- **Why it exists:** A workspace needs one boundary file, not committed folder indexes that churn in Git.
+- **What this chapter defines:** Root `ods.toml` as the **only** workspace marker, ignore defaults, and discovery commands (`overview` → `find` / `ls` / `tree` → `context`).
+- **Why it exists:** A workspace needs one boundary file (`ods.toml`), not a root `index.md` and not committed folder indexes that churn in Git.
 - **When you need it:** You are configuring a repo, adding ignore rules, or implementing discovery.
 - **When you can skip it:** `spec = "0.1"` is already enough to start — see [Your first document](../guides/01-first-document.md).
 - **Learn this first:** [Run the workspace](../guides/06-run-the-workspace.md)
@@ -79,6 +79,32 @@ mode = "poll"                                 # Background watcher mode: "poll" 
 poll_secs = 2                                 # Polling interval in seconds
 max_rss_mb = 10                               # Soft memory (RSS) budget for daemon
 ```
+
+A directory is an ODS workspace **if and only if** that root file exists and `spec` is a non-empty string (for example `"0.1"`). Conformant tools MUST discover the workspace by walking ancestors for `ods.toml`, not by searching for a root Markdown file.
+
+### 2.1 What is not the workspace marker
+
+The following MUST NOT be treated as the workspace boundary or policy file:
+
+- Root `index.md` or `index.ods.md`
+- Scalar document frontmatter `ods: 0.1` or `ods: ">=x.y.z"`
+- Nested folder indexes (committed child lists)
+
+A tree that contains only a root `index.md` with `ods: 0.1` is **not** an ODS workspace. Tools MUST reject it the same way they reject a folder with no `ods.toml` (for example: *not an ODS workspace (no root ods.toml with spec)*).
+
+Optional navigation documents MAY use `ods.profile: index`. They are ordinary documents. They MUST NOT carry workspace policy keys.
+
+### 2.2 Policy home and tooling writes
+
+Workspace policy keys (`spec`, `ignore`, `custom_profiles`, `packs`, `specs`, `service`) belong **only** in root `ods.toml`. They MUST NOT appear in document YAML frontmatter (see `PLACE-003` in [validation.md](validation.md)).
+
+Conformant CLI behavior:
+
+- `ods init` MUST write or update root `ods.toml`. It MUST NOT create a root index as the workspace marker.
+- `ods pack add` MUST append the pack path to `ods.toml` `packs = […]`. It MUST NOT insert a `packs:` list into `index.md` frontmatter.
+- `ods profile init` (when registering) MUST append the definition path to `ods.toml` `custom_profiles`.
+
+`ods init` MAY migrate policy keys from a legacy root index into `ods.toml`. After that write, `ods.toml` is the marker; the leftover Markdown file is optional navigation only.
 
 ---
 
@@ -174,6 +200,9 @@ vendor/        .* (hidden files and folders)
 
 ### Why `ods.toml` instead of a YAML configuration file?
 TOML provides unambiguous typing for configuration tables and array structures, preventing syntax ambiguity between document YAML frontmatter and repository-level configuration.
+
+### Why a config file at all? (not a Zero Config-File workspace)
+ODS requires **one** workspace config file: root `ods.toml`. That is the workspace marker. ODS does **not** require additional proprietary files (`.odsconfig`, `workspace.toml`, `.odsignore`) as the boundary. Ignore patterns live in `ods.toml` `ignore`. Documents stay ordinary `.md`; the config file is not a document.
 
 ### Why progressive discovery over static sitemaps?
 Progressive discovery scales effortlessly to monorepos containing tens of thousands of documents. AI agents can start with a 100-token overview and drill down to a 2,000-token context payload without ever loading unnecessary directory trees.
