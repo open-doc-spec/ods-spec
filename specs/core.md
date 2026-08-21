@@ -103,7 +103,7 @@ stateDiagram-v2
 | State | Definition | Validation Criteria |
 | :--- | :--- | :--- |
 | **Plain Markdown** | Markdown files without a workspace root marker. | Valid Markdown; not managed by ODS. |
-| **ODS Workspace** | Directory tree containing a root `ods.toml` marker. | Tooling discovers documents and enforces ODS rules. |
+| **ODS Workspace** | Directory tree whose root **`ods.toml`** has a non-empty `spec`. A root `index.md` (even with `ods: 0.1`) is **not** sufficient. | Tooling discovers documents and enforces ODS rules. |
 | **Compliant** | An ODS workspace where `ods lint` passes with **zero errors** (exit code `0`). | Graph edges resolve, IDs are unique, no cycles exist, paths exist, schemas conform. |
 | **Non-Compliant** | An ODS workspace containing one or more lint **errors** (exit code `1`). | Tooling reports directive diagnostics and remediation steps. |
 
@@ -135,6 +135,13 @@ tags: [setup]
 
 - Parsers MUST accept legacy flat engine keys on read.
 - Migration and formatting tools (`ods fmt --migrate`) MUST hoist universal keys (`description`, `tags`) to the top level, nest engine keys (`profile`, `status`) under `ods:`, and preserve all unknown third-party keys.
+
+### 5.3 Legacy root index → `ods.toml`
+Early workspaces used a root `index.md` / `index.ods.md` with scalar `ods: 0.1` and policy keys (`packs`, `ignore`, `custom-profiles`) in frontmatter. That form is **not** a workspace marker.
+
+- `ods init` MUST write root `ods.toml` and MAY copy those policy keys into it.
+- After `ods.toml` exists, tools MUST load policy from `ods.toml` only. They MUST NOT write `packs:` / `custom-profiles:` back into document frontmatter.
+- A leftover root `index.md` MAY remain as optional navigation (`ods.profile: index`). It MUST NOT keep workspace policy keys (`PLACE-003`).
 
 ---
 

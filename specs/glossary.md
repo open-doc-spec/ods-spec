@@ -67,7 +67,8 @@ graph TD
 
 | Term | Normative Definition | Chapter Reference |
 | :--- | :--- | :--- |
-| **Workspace** | A directory tree declared by the presence of a root `ods.toml` manifest containing a `spec` version. The workspace defines the boundary for document discovery, identity resolution, graph traversal, and CI validation. | [Chapter 08 · indexes.md](indexes.md#2-workspace-marker-odstoml) |
+| **Workspace** | A directory tree declared by the presence of a root `ods.toml` manifest containing a `spec` version. The workspace defines the boundary for document discovery, identity resolution, graph traversal, and CI validation. Root `index.md` is **not** this marker. | [Chapter 08 · indexes.md](indexes.md#2-workspace-marker-odstoml) |
+| **Navigation index** | An optional Markdown document with `ods.profile: index`. It may list children for humans. It is **not** the workspace marker and MUST NOT hold policy keys (`spec`, `ignore`, `packs`, `custom_profiles`, `specs`). | [Chapter 08 · indexes.md](indexes.md#21-what-is-not-the-workspace-marker) |
 | **Document** | Any standard Markdown (`.md`) file located within an ODS workspace. ODS documents maintain 100% Markdown compatibility without requiring proprietary file extensions. Frontmatter is optional. | [Chapter 02 · core.md](core.md#3-format-model) |
 | **Frontmatter** | A YAML metadata block delimited by opening and closing `---` markers at the top of a document. Contains machine-readable metadata partitioned strictly into 3 tiers. | [Chapter 02 · core.md](core.md#31-frontmatter) |
 | **Body Prose** | The human-readable Markdown text following the frontmatter. Contains narrative explanations, workflows, headings, and code snippets. The document's title is declared exclusively by the first `# H1` heading in the body. | [Chapter 02 · core.md](core.md#32-body-prose) |
