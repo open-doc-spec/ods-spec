@@ -10,6 +10,7 @@ ignore = [
   "target",
   "node_modules",
   "dist",
+  "tests",
   ".ods"
 ]
 

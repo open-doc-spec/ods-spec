@@ -15,6 +15,7 @@ ods:
     - scope.md
     - glossary.md
     - ../guides/README.md
+    - ../docs/report/README.md
 ---
 
 # ODS · Specification Map (Reference)

@@ -16,6 +16,7 @@ ods:
     - specs/README.md
     - AGENTS.md
     - docs/plan/code-vs-spec-alignment.md
+    - docs/report/README.md
 ---
 
 # Open Document Spec (ODS)
@@ -27,6 +28,7 @@ This repository is the normative specification. **New readers should not start i
 | You are… | Start here |
 | :--- | :--- |
 | **Learning ODS** (author, tech writer, team lead) | **[Learn ODS: novice → expert](./guides/README.md)** |
+| **Evaluating ecosystem & spec strategy** | **[Comparative Spec Analysis & Roadmap](./docs/report/README.md)** |
 | **Looking up a rule** (key, profile, lint ID) | [Specification map](./specs/README.md) |
 | **Using JSON Schemas in IDEs** (VS Code, JetBrains, Zed) | [JSON Schemas (Draft 2020-12)](./schemas/README.md) |
 | **Implementing a parser or linter** | [Format model](./specs/core.md) → [keys](./specs/keys.md) → [validation](./specs/validation.md) |
