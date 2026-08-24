@@ -1,0 +1,272 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.0.0/document.schema.json",
+  "title": "ODS Document Frontmatter Schema",
+  "description": "Machine-readable JSON Schema for Open Document Spec (ODS) Markdown YAML frontmatter. Enforces the 3-Tier layering model, engine constraints, and rule contracts.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional URI of the ODS document frontmatter schema for editor auto-completion and validation."
+    },
+    "description": {
+      "type": "string",
+      "description": "Tier 1: High-level summary of the document purpose (used in search and previews)."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "description": "Tier 1: Categorical discovery keywords and search facets."
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^(team|user|role):[a-z0-9_.-]+$",
+      "description": "Tier 1: Accountable team, user, or role maintainer (e.g. 'team:docs', 'user:alice', 'role:security-lead')."
+    },
+    "created": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
+      "description": "Tier 1: Document creation timestamp (YYYY-MM-DD or ISO-8601)."
+    },
+    "updated": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
+      "description": "Tier 1: Document last modified timestamp (YYYY-MM-DD or ISO-8601)."
+    },
+    "ods": {
+      "$ref": "#/$defs/odsEngine"
+    }
+  },
+  "propertyNames": {
+    "not": {
+      "enum": [
+        "title"
+      ]
+    }
+  },
+  "$defs": {
+    "odsEngine": {
+      "type": "object",
+      "description": "Tier 2: ODS engine metadata, knowledge graph, code bindings, and context bounds.",
+      "properties": {
+        "profile": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]+$",
+          "default": "note",
+          "description": "Profile contract defining document shape and expected headings (e.g., note, guide, feature, decision, sop, api, architecture, policy, meeting, faq, checklist, agent, skill)."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "stable",
+            "deprecated",
+            "archived"
+          ],
+          "default": "stable",
+          "description": "Lifecycle readiness state of the document (ENUM-001)."
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_/-]+$",
+          "description": "Explicit document ID override (defaults to workspace-relative path without .md)."
+        },
+        "share": {
+          "type": "string",
+          "enum": [
+            "public",
+            "org",
+            "private"
+          ],
+          "default": "public",
+          "description": "Visibility boundary for exports and AI context assembly (ENUM-002)."
+        },
+        "depends": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "Hard conceptual Markdown prerequisites auto-traversed in context resolution."
+        },
+        "related": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "Soft lateral cross-references forming the discovery graph."
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/resourceEntry"
+          },
+          "description": "Asset catalog referencing disk-level non-code files (diagrams, schemas, data)."
+        },
+        "code": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/codeBinding"
+          },
+          "description": "Bidirectional bindings to source code implementations and test fixtures."
+        },
+        "context": {
+          "$ref": "#/$defs/contextConfig"
+        },
+        "custom_profile": {
+          "$ref": "#/$defs/customProfileDefinition"
+        }
+      },
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "tags",
+            "description",
+            "owner",
+            "created",
+            "updated"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "resourceEntry": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Workspace-relative or document-relative path to asset file."
+        },
+        "description": {
+          "type": "string",
+          "description": "Short explanation of the asset."
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "codeBinding": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!.*:[Ll]?\\d+).*$",
+          "description": "Workspace-relative path to source code file. Line numbers (e.g. :L45) are forbidden (ASSET-003)."
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "entrypoint",
+            "implementation",
+            "interface",
+            "test",
+            "fixture",
+            "schema",
+            "migration",
+            "config"
+          ],
+          "description": "Semantic role of the bound source code artifact (ENUM-003)."
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Precise symbol identifier (function, class, struct, type, constant) in source file."
+        },
+        "description": {
+          "type": "string",
+          "description": "Short explanation of the code binding."
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "contextConfig": {
+      "type": "object",
+      "properties": {
+        "max-depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 2,
+          "description": "Maximum recursive hops for dependency graph traversal in prompt resolution."
+        },
+        "load": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Auxiliary non-markdown text files to load into context budget."
+        },
+        "ignore": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Subtrees to exclude during recursive dependency loading."
+        }
+      },
+      "additionalProperties": false
+    },
+    "customProfileDefinition": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Unique identifier name for the custom profile."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable summary of the custom profile purpose."
+        },
+        "required_sections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Headings (H2/H3) that MUST appear in conforming documents."
+        },
+        "optional_sections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Headings (H2/H3) that MAY appear in conforming documents."
+        },
+        "required_keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Top-level frontmatter keys that MUST appear in conforming documents."
+        },
+        "forbidden_keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Top-level frontmatter keys that MUST NOT appear in conforming documents."
+        }
+      },
+      "required": [
+        "name",
+        "required_sections"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

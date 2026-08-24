@@ -61,6 +61,10 @@ When reading, updating, or generating documentation in an ODS workspace, agents 
    - Hard prerequisites belong in `ods.depends`. Soft references belong in `ods.related`.
    - The `depends` graph MUST NOT contain cyclic loops.
 
+8. **Leverage JSON Schema for Syntactic Validation**:
+   - When generating or updating frontmatter, validate structure against [`schemas/1.0.0/document.schema.json`](./schemas/1.0.0/document.schema.json).
+   - Recognize that `$schema` in frontmatter is optional; never reject or alter valid documents that omit `$schema`.
+
 ---
 
 ## 2. Bounded Context Loading Algorithm for Agents

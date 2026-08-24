@@ -1,0 +1,15 @@
+spec = { version = "1.0.0", dialect = "standard" }
+
+ignore = { paths = ["target", "node_modules", "dist", ".ods"] }
+
+custom_profiles = { paths = ["tests/fixtures/valid/valid-custom-profile.md"] }
+
+packs = { load = ["core", "security"] }
+
+[aliases]
+"auth-spec" = "guides/auth.md"
+
+[service]
+mode = "poll"
+poll_secs = 2
+max_rss_mb = 10

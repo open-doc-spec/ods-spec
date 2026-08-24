@@ -235,9 +235,35 @@ owner:
 ```
 
 ### 6.4 `created` and `updated`
-- **Type**: `string` (`YYYY-MM-DD` or ISO-8601 format)
-- **Purpose**: Optional human-readable timestamps for workflows where Git history is unavailable or flattened (e.g. exported static sites).
-- **Normative Rules**: In Git-native environments, authors SHOULD rely on Git commit timestamps rather than manually maintaining these fields. `last_updated` is recognized as an alias of `updated`.
+- **Type**: `string` (ISO-8601 or `YYYY-MM-DD` date)
+- **Purpose**: Document lifecycle timestamps for static site generators, search indexes, and export manifests.
+- **Normative Rules**:
+  - Values SHOULD follow `YYYY-MM-DD` or full ISO-8601 UTC timestamp (`YYYY-MM-DDTHH:MM:SSZ`).
+  - Git history is authoritative for file revision tracking; frontmatter `created`/`updated` fields are optional and intended for external publishing tools.
+
+```yaml
+# VALID: Standard date strings
+created: 2026-01-15
+updated: 2026-08-14
+```
+
+### 6.5 `$schema` (Optional)
+- **Type**: `string` (URI)
+- **Purpose**: Enables real-time editor autocomplete, hover tooltips, and instant validation in VS Code, Cursor, JetBrains, and Zed.
+- **Normative Rules**:
+  - MUST be placed at the top level of frontmatter.
+  - MAY reference the canonical URI (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.0.0/document.schema.json`) or a workspace-relative path.
+  - `$schema` is OPTIONAL. Markdown documents without `$schema` remain 100% compliant ODS documents.
+
+```yaml
+# VALID: Editor schema binding
+$schema: https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.0.0/document.schema.json
+description: Guide for setting up user authentication.
+tags: [auth, security]
+ods:
+  profile: guide
+  status: stable
+```
 
 ---
 

@@ -85,6 +85,14 @@ An ODS Document is a Markdown file (`.md`) containing optional YAML frontmatter.
 - The body MUST NOT re-declare metadata already declared in frontmatter (such as `owner`, `status`, or edge lists).
 - The document's primary title MUST be defined as the first `# H1` heading in the body.
 
+### 3.3 Machine-Readable JSON Schemas
+The normative data structures of ODS are formally defined using **JSON Schema Draft 2020-12**:
+- **Frontmatter Schema**: [`schemas/1.0.0/document.schema.json`](../schemas/1.0.0/document.schema.json) (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.0.0/document.schema.json`)
+- **Workspace Config Schema**: [`schemas/1.0.0/config.schema.json`](../schemas/1.0.0/config.schema.json) (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.0.0/config.schema.json`)
+- **Custom Profile Schema**: [`schemas/1.0.0/profile.schema.json`](../schemas/1.0.0/profile.schema.json) (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.0.0/profile.schema.json`)
+
+Tooling, linters, and language servers SHOULD use these schemas for Stage 1 structural validation and editor autocompletion.
+
 ---
 
 ## 4. Compliance Model (Binary)

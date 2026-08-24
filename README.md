@@ -28,6 +28,7 @@ This repository is the normative specification. **New readers should not start i
 | :--- | :--- |
 | **Learning ODS** (author, tech writer, team lead) | **[Learn ODS: novice → expert](./guides/README.md)** |
 | **Looking up a rule** (key, profile, lint ID) | [Specification map](./specs/README.md) |
+| **Using JSON Schemas in IDEs** (VS Code, JetBrains, Zed) | [JSON Schemas (Draft 2020-12)](./schemas/README.md) |
 | **Implementing a parser or linter** | [Format model](./specs/core.md) → [keys](./specs/keys.md) → [validation](./specs/validation.md) |
 
 ---
@@ -120,6 +121,15 @@ Normative modules for lookup and implementers. Each chapter opens with when to r
 | **09** | [`validation.md`](./specs/validation.md) | Lint rules, exit 0/1 |
 | **10** | [`scope.md`](./specs/scope.md) | Intentional non-goals |
 | **REF** | [`glossary.md`](./specs/glossary.md) | Formal terminology |
+
+---
+
+## JSON Schemas (Draft 2020-12)
+
+Machine-readable JSON Schemas are published in [`schemas/1.0.0/`](./schemas/README.md):
+- **Document Frontmatter**: [`document.schema.json`](./schemas/1.0.0/document.schema.json)
+- **Workspace Config**: [`config.schema.json`](./schemas/1.0.0/config.schema.json)
+- **Custom Profile**: [`profile.schema.json`](./schemas/1.0.0/profile.schema.json)
 
 ---
 

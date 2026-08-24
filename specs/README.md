@@ -77,6 +77,11 @@ Full dictionary: [`glossary.md`](glossary.md). Only these are required to naviga
 The specification is structured into 10 focused modules and a terminology reference. **Authors should not read 01–10 linearly** — use [Learn ODS](../guides/README.md). Implementers may walk 02 → 03 → 09 (`core` → `keys` → `validation`) first.
 
 ```
+schemas/             # Machine-readable JSON Schemas (Draft 2020-12)
+├── 1.0.0/
+│   ├── document.schema.json  # Frontmatter schema
+│   ├── config.schema.json    # ods.toml schema
+│   └── profile.schema.json   # Custom profile schema
 guides/              # Human learning track (start at guides/README.md)
 specs/
 ├── README.md        # Chapter 01 · Specification map (you are here) — not the tutorial

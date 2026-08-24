@@ -64,8 +64,21 @@ ODS enforces clear separation between verification in CI and context resolution 
 
 | Phase | Command | What is Checked / Executed | Primary Purpose |
 | :--- | :--- | :--- | :--- |
-| **Phase 1: Authoring & Verification** | `ods lint` | • YAML syntax<br>• 3-tier key placement<br>• DAG acyclicity (no cycles in `depends`)<br>• File existence on disk for `resources`, `code`, and `load`<br>• Absence of line numbers in code paths | Enforces repository health, consistency, and zero dead links in CI. |
+| **Phase 1: Authoring & Verification** | `ods lint` | • YAML syntax & schema constraints<br>• 3-tier key placement<br>• DAG acyclicity (no cycles in `depends`)<br>• File existence on disk for `resources`, `code`, and `load`<br>• Absence of line numbers in code paths | Enforces repository health, consistency, and zero dead links in CI. |
 | **Phase 2: AI Context Resolution** | `ods context <id>` | • Traverses `depends` up to `max-depth` (default: 2)<br>• Ingests `context.load` text files<br>• Prunes `context.ignore` and `share: private`<br>• Emits unified bounded prompt payload | Assembles deterministic prompt context within token budget. |
+
+---
+
+## 3.1 Two-Tier Validation Architecture
+
+To ensure high performance and determinism across both offline linters and language servers, validation is split into two explicit tiers:
+
+1. **Tier 1 (Schema Layer - Zero-IO / Fast AST)**:
+   - Validates document YAML frontmatter against [`document.schema.json`](../schemas/1.0.0/document.schema.json) and `ods.toml` against [`config.schema.json`](../schemas/1.0.0/config.schema.json) using standard JSON Schema Draft 2020-12 validators.
+   - Enforces key placement (3-tier model), forbidden keys (e.g. `title:` via `SYNTAX-002`), enum validity (`status`, `share`, `code[].role`), and string regex patterns.
+   - Executes in `<1ms` per document with zero filesystem I/O.
+2. **Tier 2 (Semantic & Graph Layer - Deep Workspace Analysis)**:
+   - Validates multi-document graph properties: DAG acyclicity (`GRAPH-004`), unique document IDs (`GRAPH-001`), disk file resolution for assets and source code (`ASSET-001..004`), and Markdown body heading conformance (`PROF-002`).
 
 ---
 
@@ -73,29 +86,29 @@ ODS enforces clear separation between verification in CI and context resolution 
 
 All conformant ODS linters MUST enforce the following validation rules:
 
-| Category | Rule Identifier | Rule Condition | Severity | Remediation Action |
-| :--- | :--- | :--- | :---: | :--- |
-| **Syntax** | `SYNTAX-001` | Frontmatter MUST parse as valid YAML delimited by `---`. | **Error** | Fix YAML syntax error. |
-| | `SYNTAX-002` | Frontmatter MUST NOT contain a `title:` key. | **Error** | Remove `title:` from frontmatter; declare title in first `# H1` body heading. |
-| **Placement** | `PLACE-001` | `tags` MUST appear at the top level; MUST NOT be nested under `ods:`. | **Warning** | Hoist `tags` to top-level frontmatter. |
-| | `PLACE-002` | Engine keys (`profile`, `status`, `depends`, etc.) MUST be nested under `ods:`. | **Error** | Nest engine keys under `ods:` mapping. |
-| **Enums** | `ENUM-001` | `ods.status` MUST be one of `draft`, `stable`, `deprecated`, `archived`. | **Error** | Change status to a recognized lifecycle state. |
-| | `ENUM-002` | `ods.share` (when present) MUST be one of `public`, `org`, `private`. | **Error** | Set share to `public`, `org`, or `private`. |
-| | `ENUM-003` | `ods.code[].role` MUST be one of the 8 standard roles. | **Error** | Change role to a valid standard role (e.g. `entrypoint`, `implementation`). |
-| **Graph** | `GRAPH-001` | Document IDs MUST be unique across the workspace. | **Error** | Rename duplicate file or override via `ods.id`. |
-| | `GRAPH-002` | `ods.depends` targets MUST resolve to existing documents. | **Error** | Fix or remove dangling dependency path. |
-| | `GRAPH-003` | `ods.related` targets MUST resolve to existing documents. | **Error** | Fix or remove dangling related path. |
-| | `GRAPH-004` | `ods.depends` graph MUST NOT contain cyclic dependency loops. | **Error** | Break circular dependency loop using `ods.related`. |
-| **Assets** | `ASSET-001` | `ods.resources[].path` MUST resolve to an existing file. | **Error** | Fix path or verify file existence on disk. |
-| | `ASSET-002` | `ods.code[].path` MUST resolve to an existing file. | **Error** | Fix path or verify source code file on disk. |
-| | `ASSET-003` | `ods.code[].path` MUST NOT contain line number suffixes (e.g. `:L45`). | **Error** | Remove `:L45`; use `symbol` field instead. |
-| | `ASSET-004` | `ods.context.load` paths MUST resolve to existing files. | **Error** | Fix or remove dangling context load path. |
-| **Profiles** | `PROF-001` | `ods.profile` MUST resolve to a known standard or registered custom profile. | **Error** | Fix the profile name or define and register the profile at the path declared in `ods.toml`. |
-| | `PROF-002` | Document SHOULD contain expected H2 or H3 sections (`##` or `###`) for its declared profile. | **Warning** | Add missing section heading or registered alias. |
-| | `PROF-003` | A document SHOULD contain each non-null top-level key listed by its selected custom profile's `required_keys`. | **Warning** | Add the missing key to top-level frontmatter; do not nest it under `ods:`. |
-| | `PROF-004` | A document SHOULD NOT contain a top-level key listed by its selected custom profile's `forbidden_keys`. | **Warning** | Remove the forbidden key or choose a profile that permits it. |
-| | `PROF-005` | Every `custom_profiles` path in `ods.toml` MUST resolve to an existing Markdown file or profile directory. | **Error** | Create the profile definition at the exact configured path or update the `custom_profiles` entry. |
-| | `PROF-006` | `ods.custom_profile` MUST appear only in a profile-definition file selected by `custom_profiles` (or a registered pack). | **Error** | Move the definition to its registered path and use `ods.profile` in ordinary documents. |
+| Category | Rule Identifier | Validation Tier | Rule Condition | Severity | Remediation Action |
+| :--- | :--- | :---: | :--- | :---: | :--- |
+| **Syntax** | `SYNTAX-001` | **Tier 1 (Schema)** | Frontmatter MUST parse as valid YAML delimited by `---`. | **Error** | Fix YAML syntax error. |
+| | `SYNTAX-002` | **Tier 1 (Schema)** | Frontmatter MUST NOT contain a `title:` key. | **Error** | Remove `title:` from frontmatter; declare title in first `# H1` body heading. |
+| **Placement** | `PLACE-001` | **Tier 1 (Schema)** | `tags` MUST appear at the top level; MUST NOT be nested under `ods:`. | **Warning** | Hoist `tags` to top-level frontmatter. |
+| | `PLACE-002` | **Tier 1 (Schema)** | Engine keys (`profile`, `status`, `depends`, etc.) MUST be nested under `ods:`. | **Error** | Nest engine keys under `ods:` mapping. |
+| **Enums** | `ENUM-001` | **Tier 1 (Schema)** | `ods.status` MUST be one of `draft`, `stable`, `deprecated`, `archived`. | **Error** | Change status to a recognized lifecycle state. |
+| | `ENUM-002` | **Tier 1 (Schema)** | `ods.share` (when present) MUST be one of `public`, `org`, `private`. | **Error** | Set share to `public`, `org`, or `private`. |
+| | `ENUM-003` | **Tier 1 (Schema)** | `ods.code[].role` MUST be one of the 8 standard roles. | **Error** | Change role to a valid standard role (e.g. `entrypoint`, `implementation`). |
+| **Graph** | `GRAPH-001` | **Tier 2 (Semantic)** | Document IDs MUST be unique across the workspace. | **Error** | Rename duplicate file or override via `ods.id`. |
+| | `GRAPH-002` | **Tier 2 (Semantic)** | `ods.depends` targets MUST resolve to existing documents. | **Error** | Fix or remove dangling dependency path. |
+| | `GRAPH-003` | **Tier 2 (Semantic)** | `ods.related` targets MUST resolve to existing documents. | **Error** | Fix or remove dangling related path. |
+| | `GRAPH-004` | **Tier 2 (Semantic)** | `ods.depends` graph MUST NOT contain cyclic dependency loops. | **Error** | Break circular dependency loop using `ods.related`. |
+| **Assets** | `ASSET-001` | **Tier 2 (Semantic)** | `ods.resources[].path` MUST resolve to an existing file. | **Error** | Fix path or verify file existence on disk. |
+| | `ASSET-002` | **Tier 2 (Semantic)** | `ods.code[].path` MUST resolve to an existing file. | **Error** | Fix path or verify source code file on disk. |
+| | `ASSET-003` | **Tier 1 (Schema)** | `ods.code[].path` MUST NOT contain line number suffixes (e.g. `:L45`). | **Error** | Remove `:L45`; use `symbol` field instead. |
+| | `ASSET-004` | **Tier 2 (Semantic)** | `ods.context.load` paths MUST resolve to existing files. | **Error** | Fix or remove dangling context load path. |
+| **Profiles** | `PROF-001` | **Tier 1 (Schema)** | `ods.profile` MUST resolve to a known standard or registered custom profile. | **Error** | Fix the profile name or define and register the profile at the path declared in `ods.toml`. |
+| | `PROF-002` | **Tier 2 (Semantic)** | Document SHOULD contain expected H2 or H3 sections (`##` or `###`) for its declared profile. | **Warning** | Add missing section heading or registered alias. |
+| | `PROF-003` | **Tier 1 / 2** | A document SHOULD contain each non-null top-level key listed by its selected custom profile's `required_keys`. | **Warning** | Add the missing key to top-level frontmatter; do not nest it under `ods:`. |
+| | `PROF-004` | **Tier 1 / 2** | A document SHOULD NOT contain a top-level key listed by its selected custom profile's `forbidden_keys`. | **Warning** | Remove the forbidden key or choose a profile that permits it. |
+| | `PROF-005` | **Tier 2 (Semantic)** | Every `custom_profiles` path in `ods.toml` MUST resolve to an existing Markdown file or profile directory. | **Error** | Create the profile definition at the exact configured path or update the `custom_profiles` entry. |
+| | `PROF-006` | **Tier 1 / 2** | `ods.custom_profile` MUST appear only in a profile-definition file selected by `custom_profiles` (or a registered pack). | **Error** | Move the definition to its registered path and use `ods.profile` in ordinary documents. |
 
 ---
 
