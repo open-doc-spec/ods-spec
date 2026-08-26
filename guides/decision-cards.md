@@ -41,7 +41,7 @@ Short cards. If a card is not enough, follow the link.
 | A release or deploy gate | `checklist` |
 | An executable agent prompt (`agent.md`) | `agent` |
 | A reusable skill (`SKILL.md`) | `skill` |
-| Anything else, or not sure | `note` |
+| Free-form notes, entity definitions, memory logs, computations | `note` (default) |
 
 Teach-through: [Pick a shape](02-pick-a-shape.md). Templates: [`specs/profiles.md`](../specs/profiles.md).
 
@@ -51,13 +51,13 @@ Teach-through: [Pick a shape](02-pick-a-shape.md). Templates: [`specs/profiles.m
 
 | Fact | Lives in |
 | :--- | :--- |
-| Document title | First `# H1` in the body |
-| One-line summary, tags, owner, optional dates | Top-level frontmatter |
-| Profile, status, share, id, depends, related, resources, code, context | Under `ods:` |
+| Document title | First `# H1` in the body (or top-level `title:` for OKF compatibility) |
+| Summary, tags, owner, dates, OKF keys (`type`, `sources`, `verified`, `runtime`, `parameters`) | Top-level frontmatter |
+| Profile, status, share, entity, domain, schema, relations, invariants, tier, valid_from, valid_to, mutations, pin, depends, related, resources, code, context | Directly under `ods:` |
 | Procedure, decision text, guardrails, workflow, tools, eval | `##` body headings |
-| Spec version, ignore paths, custom profiles, packs, aliases | Root `ods.toml` only |
+| Spec version, ignore paths, custom profiles, packs, aliases, ontology, memory | Root `ods.toml` only |
 
-Never: `title:` in YAML. Never: `tags` under `ods:`. Never: `profile` at the top level. Never: `role:` / `workflow:` / `refusal_guardrails:` in YAML.
+Never: `tags` under `ods:`. Never: `profile` at top-level. Never: nested namespace wrappers (`ods.ontology:` or `ods.memory:`).
 
 ---
 
@@ -70,16 +70,33 @@ Never: `title:` in YAML. Never: `tags` under `ods:`. Never: `profile` at the top
 | Human diagram / PDF (do not prompt-dump) | `ods.resources` |
 | Named symbol in source | `ods.code` + `symbol` |
 | Small JSON/CSV/text the model must read | `ods.context.load` |
-
-One file, one primary home. A schema may be both `resources` (catalog) and `load` (prompt). It must not be in `depends`.
+| Business class schema validator | `ods.schema` |
 
 ---
 
-## 4. Minimum keys vs later keys
+## 4. `entity` vs `tags` vs `type`
+
+| Need | Key | Example |
+| :--- | :--- | :--- |
+| **Canonical Business Class** | `ods.entity` | `entity: Customer` |
+| **Categorical Search Facets** | `tags` (Top-level) | `tags: [billing, security]` |
+| **OKF Concept Type / Profile Alias** | `type` (Top-level) | `type: BigQuery Table` |
+
+---
+
+## 5. Minimum keys vs later keys
 
 **Write these on day 1**
 
 `description`, `tags`, `ods.profile`, `ods.status`
+
+**Add when building domain ontologies**
+
+`ods.entity`, `ods.domain`, `ods.schema`, `ods.relations`, `ods.invariants`
+
+**Add when recording agent memory**
+
+`ods.tier`, `ods.valid_from`, `ods.valid_to`, `ods.mutations`, `ods.pin`
 
 **Add when two docs relate**
 
@@ -89,8 +106,5 @@ One file, one primary home. A schema may be both `resources` (catalog) and `load
 
 `ods.resources`, `ods.code`, `ods.context`
 
-**Rare**
-
-`ods.id` (rename stability), `ods.share` (privacy), `owner`, `created`, `updated`
-
 Dictionary: [`specs/keys.md`](../specs/keys.md).
+

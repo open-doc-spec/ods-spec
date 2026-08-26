@@ -70,7 +70,7 @@ Pipes are accepted heading aliases. Register the file:
 
 ```toml
 # ods.toml
-spec = "0.1"
+spec = "1.1"
 custom_profiles = ["docs/profiles/rfc.md"]
 ```
 

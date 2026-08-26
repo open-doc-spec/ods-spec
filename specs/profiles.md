@@ -50,11 +50,11 @@ Profile section matching is heading-level agnostic between H2 and H3: an expecte
 
 ## 3. Standard Profiles Catalog
 
-ODS 1.1 provides 17 built-in standard profiles that cover software engineering, neuro-symbolic domain modeling, autonomous agent cognition, and verifiable computations:
+ODS standardizes **13 Universal Profiles** covering human prose structures, engineering workflows, and autonomous agent prompt execution contracts:
 
 | Profile | Intent & Usage | Expected H2/H3 Sections (`##` or `###`) |
 | :--- | :--- | :--- |
-| **`note`** | Free-form notes, scratchpads, and unstructured knowledge. (Default profile). | *(None required)* |
+| **`note`** | Free-form notes, scratchpads, entities, and unstructured knowledge. (Default fallback). | *(None required)* |
 | **`guide`** | Step-by-step tutorials, setup instructions, and how-to procedures. | `Overview`, `Prerequisites`, `Steps`, `Troubleshooting` |
 | **`feature`** | Product Requirement Documents (PRDs), feature specs, and user capabilities. | `Goal`, `Scope`, `Requirements`, `Acceptance Criteria`, `Risks` |
 | **`decision`** | Architecture Decision Records (ADRs), RFC outcomes, and technical trade-offs. | `Context`, `Decision`, `Alternatives`, `Consequences` |
@@ -67,10 +67,16 @@ ODS 1.1 provides 17 built-in standard profiles that cover software engineering, 
 | **`checklist`** | Verifiable quality gates, deployment checklists, and release criteria. | `Overview`, `Items`, `Verification`, `Notes` |
 | **`agent`** | Autonomous agent instructions, prompt execution contracts, and agent runbooks (`agent.md`). | `Goal`, `Task`, `Scope`, `Non-Scope`, `Context`, `Inputs`, `Constraints`, `Priority`, `Steps`, `Output`, `Success Criteria`, `Failure Modes`, `Dependencies`, `Assumptions`, `Examples` |
 | **`skill`** | Reusable agent capability packages, tool integrations, and execution runbooks (`SKILL.md`). | `Purpose`, `Capability`, `Activation`, `Scope`, `Non-Scope`, `Inputs`, `Outputs`, `Workflow`, `Rules`, `Priority`, `Validation`, `Eval`, `Resources`, `Tools`, `Lifecycle`, `Traceability` |
-| **`ontology`** | Neuro-symbolic entity class definition, domain invariants, and technical mappings. | `Overview`, `Attributes`, `Relationships`, `Invariants`, `Examples` |
-| **`memory-episode`** | Time-stamped episodic interaction trace, session log, and state delta. | `Interaction Summary`, `Tool Execution Trace`, `State Mutations` |
-| **`memory-profile`** | Distilled living state profile for an entity or user synthesized across episodes. | `Profile Summary`, `Core Preferences`, `Active State`, `Recent Decisions` |
-| **`attested-computation`** | Verifiable computation carrying a sanctioned query/code runner and deterministic attester. | `Computation`, `Parameters`, `Verification Rationale` |
+
+---
+
+### 3.1 Orthogonal Machine Capabilities vs Document Profiles
+
+In ODS, **Profiles** define **Prose Shapes** (`## Overview`, `## Steps`, `## Decision`), while **Pareto Keys** define **Machine Capabilities**:
+
+1. **Ontology Primitives (`ods.entity`, `ods.domain`, `ods.invariants`)**: Can be declared on *any* profile (`note`, `architecture`, `feature`, `api`). An entity does not need a proprietary profile.
+2. **Cognitive Memory Primitives (`ods.tier`, `ods.mutations`, `ods.valid_from`)**: Can be attached to a `note` or `sop`. The `ods.tier` field directly declares the cognitive memory level (`episodic` / `profile`).
+3. **Attested Computations (`type: Attested Computation`, `runtime: bigquery`)**: Defined natively via top-level Google OKF keys over a standard `note` or `feature` document.
 
 ---
 
@@ -264,9 +270,41 @@ curl -X POST https://api.example.com/v1/refunds \
   -H "Authorization: Bearer sec_key" \
   -d '{"charge_id":"ch_12345","amount_cents":2500}'
 ```
+### 4.6 `checklist` Template (Verifiable Release & Quality Gate)
+```markdown
+---
+description: Release readiness checklist for staging-to-production deployment.
+tags: [release, deployment, quality-gate]
+owner: team:platform
+ods:
+  profile: checklist
+  status: stable
+  depends:
+    - ../specs/release-v1.1.md
+---
+
+# Production Release Quality Gate
+
+## Overview
+Mandatory verification checklist that must be satisfied before promoting staging builds to production.
+
+## Items
+- [ ] Database schema migrations tested on staging replica.
+- [ ] End-to-end synthetic API smoke tests pass (100%).
+- [ ] Zero critical or high severity security vulnerabilities in container scan.
+- [ ] Datadog APM latency monitors configured for new endpoints.
+- [ ] Rollback runbook verified by the on-call engineer.
+
+## Verification
+1. Run CI release suite: `pnpm run test:e2e:staging`.
+2. Inspect Trivy container scan report in GitHub Actions.
+3. Confirm sign-off in `#release-approvals` Slack channel.
+
+## Notes
+- Deployment freeze takes effect Fridays after 14:00 UTC.
 ```
 
-### 4.6 `agent` Template (Autonomous Agent & Prompt Instruction Contract / `agent.md`)
+### 4.7 `agent` Template (Autonomous Agent & Prompt Instruction Contract / `agent.md`)
 ```markdown
 ---
 description: Autonomous coding agent prompt contract for implementing API endpoints.
@@ -354,7 +392,7 @@ Our API service uses Express with Zod validation. All errors must map to standar
 ```
 ```
 
-### 4.7 `skill` Template (Reusable Agent Capability Package / `SKILL.md`)
+### 4.8 `skill` Template (Reusable Agent Capability Package / `SKILL.md`)
 ```markdown
 ---
 description: Reusable skill package for analyzing and optimizing PostgreSQL query plans.
@@ -595,7 +633,7 @@ If a document declares an `ods.profile` name that is not a standard profile or a
 
 If a path declared by `custom_profiles` does not exist, is not a Markdown file or profile directory, or contains invalid profile-definition frontmatter, the tool MUST fail with a `PROF-005` error and identify the configured path. If `ods.custom_profile` appears in a file that is not selected by `custom_profiles` or a registered pack, the tool MUST fail with a `PROF-006` error.
 
-Missing profile-required keys MUST be reported as a profile validation warning (`PROF-003`). Under the binary compliance contract, warnings do not cause a non-zero exit code unless another error is present. Tools MAY offer a stricter policy, but it is outside the ODS 0.1 core contract.
+Missing profile-required keys MUST be reported as a profile validation warning (`PROF-003`). Under the binary compliance contract, warnings do not cause a non-zero exit code unless another error is present. Tools MAY offer a stricter policy, but it is outside the ODS 1.1 core contract.
 
 Example target document:
 
@@ -616,7 +654,7 @@ Profile-required metadata is for domain keys such as issue IDs, service names, o
 
 ```toml
 # ods.toml
-spec = "0.1"
+spec = "1.1"
 
 custom_profiles = [
   "docs/profiles/rfc.md",

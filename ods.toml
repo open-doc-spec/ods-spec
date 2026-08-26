@@ -3,16 +3,32 @@
 # ═════════════════════════════════════════════════════════════════
 
 # Targeted ODS specification version
-spec = "0.1"
+spec = "1.1"
 
 # Directory path prefixes excluded from document scanning and linting
 ignore = [
   "target",
+  ".artifacts",
   "node_modules",
   "dist",
   "tests",
   ".ods"
 ]
+
+# Neuro-symbolic ontology subsystem
+[ontology]
+default_domain = "Core"
+strict_invariants = true
+
+# Temporal cognitive memory settings
+[memory]
+backend = "markdown"
+decay_days = 30
+auto_dream = true
+
+# Google OKF native superset interoperability
+[okf]
+enabled = true
 
 # Background watcher & memory budget settings
 [service]

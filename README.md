@@ -79,7 +79,7 @@ An ODS workspace is declared by placing an `ods.toml` marker in the repository r
 
 ```toml
 # ods.toml — repository root only
-spec = "0.1"
+spec = "1.1"
 
 ignore = ["src", "target", "node_modules"]
 custom_profiles = ["docs/profiles/rfc.md"]
@@ -100,7 +100,8 @@ Do not read the ten spec chapters linearly to learn the product. Follow the ladd
 | 4 | [Bind files and code](./guides/04-bind-code-and-files.md) | You can place a PNG, a function, and a JSON schema. |
 | 5 | [Give AI a reading list](./guides/05-ai-reading-list.md) | Agents get a bundle, not the repo. |
 | 6 | [Run the workspace](./guides/06-run-the-workspace.md) | CI lints; renames do not break edges. |
-| 7 | [Extend ODS](./guides/07-extend-ods.md) | You need custom profiles or the implementer map. |
+| 7 | [Ontologies & Agent Memory](./guides/07-ontologies-and-memory.md) | You are building neuro-symbolic domain models & agent memory. |
+| 8 | [Extend ODS](./guides/07-extend-ods.md) | You need custom profiles or the implementer map. |
 
 Pocket refs: [decision cards](./guides/decision-cards.md) · [common mistakes](./guides/mistakes.md) · [FAQ](./guides/faq.md)
 
@@ -113,25 +114,25 @@ Normative modules for lookup and implementers. Each chapter opens with when to r
 | Chapter | Module | Lookup for |
 | :---: | :--- | :--- |
 | **01** | [`specs/README.md`](./specs/README.md) | Spec map (not the human intro) |
-| **02** | [`core.md`](./specs/core.md) | Format model, compliance, lifecycle operations |
-| **03** | [`keys.md`](./specs/keys.md) | Every frontmatter key |
-| **04** | [`profiles.md`](./specs/profiles.md) | 13 profiles, templates, packs |
-| **05** | [`graph.md`](./specs/graph.md) | IDs, `depends` / `related`, DAG |
-| **06** | [`context.md`](./specs/context.md) | Bounded AI context algorithm |
-| **07** | [`assets.md`](./specs/assets.md) | `resources`, `code` roles, no line numbers |
-| **08** | [`indexes.md`](./specs/indexes.md) | `ods.toml`, discovery CLI |
-| **09** | [`validation.md`](./specs/validation.md) | Lint rules, exit 0/1 |
-| **10** | [`scope.md`](./specs/scope.md) | Intentional non-goals |
-| **REF** | [`glossary.md`](./specs/glossary.md) | Formal terminology |
+| **02** | [`core.md`](./specs/core.md) | Format model, compliance, OKF superset |
+| **03** | [`keys.md`](./specs/keys.md) | Frontmatter dictionary & flat Pareto keys |
+| **04** | [`profiles.md`](./specs/profiles.md) | 13 universal profiles, templates, packs |
+| **05** | [`graph.md`](./specs/graph.md) | Dual-graph (domain & lexical), bi-temporal memory |
+| **06** | [`context.md`](./specs/context.md) | Bounded AI context, trust tiers, token budgets |
+| **07** | [`assets.md`](./specs/assets.md) | `resources`, `code` bindings, attested computations |
+| **08** | [`indexes.md`](./specs/indexes.md) | `ods.toml`, discovery CLI, OKF bundle root |
+| **09** | [`validation.md`](./specs/validation.md) | Lint rules (ONT-*, MEM-*, OKF-*, ATT-*), exit 0/1 |
+| **10** | [`scope.md`](./specs/scope.md) | Intentional non-goals & boundaries |
+| **REF** | [`glossary.md`](./specs/glossary.md) | Formal normative terminology |
 
 ---
 
 ## JSON Schemas (Draft 2020-12)
 
-Machine-readable JSON Schemas are published in [`schemas/1.0.0/`](./schemas/README.md):
-- **Document Frontmatter**: [`document.schema.json`](./schemas/1.0.0/document.schema.json)
-- **Workspace Config**: [`config.schema.json`](./schemas/1.0.0/config.schema.json)
-- **Custom Profile**: [`profile.schema.json`](./schemas/1.0.0/profile.schema.json)
+Machine-readable JSON Schemas are published in [`schemas/1.1.0/`](./schemas/README.md):
+- **Document Frontmatter**: [`document.schema.json`](./schemas/1.1.0/document.schema.json)
+- **Workspace Config**: [`config.schema.json`](./schemas/1.1.0/config.schema.json)
+- **Custom Profile**: [`profile.schema.json`](./schemas/1.1.0/profile.schema.json)
 
 ---
 

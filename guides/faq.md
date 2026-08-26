@@ -71,6 +71,18 @@ No. The spec is the files on disk. The CLI is the reference engine that lints an
 
 No. Those render or navigate. ODS labels and links the Markdown they already consume. Unknown keys are preserved.
 
+## How does ODS 1.1 integrate with Google OKF?
+
+ODS 1.1 is a strict superset of Google Open Knowledge Format (OKF v0.2). Any valid OKF bundle from Google's Knowledge Catalog is automatically 100% compliant ODS without file conversions or extra plugins.
+
+## Why are ontology and memory keys flat under `ods:` instead of nested?
+
+To eliminate YAML indentation fatigue. Adding `ontology:` and `memory:` wrappers adds nesting without adding meaning. Direct Pareto keys (`ods.entity`, `ods.tier`, `ods.invariants`) provide maximum signal with minimum indentation.
+
+## What is memory dreaming?
+
+Dreaming is an asynchronous background process that consolidates episodic agent interaction traces into clean, living entity profiles, resolves contradictory facts, and prunes decayed historical memories.
+
 ## Should I start in `specs/` or `guides/`?
 
 Humans: [`guides/README.md`](README.md). Implementers: [`specs/README.md`](../specs/README.md).

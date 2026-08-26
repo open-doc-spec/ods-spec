@@ -40,7 +40,7 @@ Create `ods.toml` at the repository root with one required line:
 
 ```toml
 # ods.toml — repository root only
-spec = "0.1"
+spec = "1.1"
 ```
 
 That file is the workspace boundary. Until it exists, a folder of Markdown is just a folder of Markdown.

@@ -3,6 +3,19 @@
   "$id": "https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/document.schema.json",
   "title": "ODS Document Frontmatter Schema (v1.1.0 — Flat Pareto with Key Lifecycle)",
   "description": "Machine-readable JSON Schema for Open Document Spec (ODS v1.1.0) Markdown YAML frontmatter. Enforces the flat Pareto key model with direct ontology and memory keys under ods:, native Google OKF v0.2 top-level keys, and 'x-ods-lifecycle' metadata tracking key introduction, status, spec chapter, and versioning.",
+  "x-ods-supported-specs": {
+    "ods": {
+      "version": "1.1.0",
+      "status": "active",
+      "url": "https://github.com/open-doc-spec/ods-spec"
+    },
+    "okf": {
+      "version": "0.2.0",
+      "dialect": "okf-superset",
+      "status": "fully-supported",
+      "source_spec": "google/knowledge-catalog"
+    }
+  },
   "type": "object",
   "properties": {
     "$schema": {
@@ -891,11 +904,24 @@
             "type": "string"
           },
           "description": "Frontmatter keys that MUST be populated for this profile."
+        },
+        "optional_keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Frontmatter keys that MAY be populated for this profile."
+        },
+        "forbidden_keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Frontmatter keys that MUST NOT appear with this profile."
         }
       },
       "required": [
-        "name",
-        "description"
+        "name"
       ],
       "additionalProperties": false
     }

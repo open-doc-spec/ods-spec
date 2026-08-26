@@ -3,7 +3,7 @@ description: Canonical customer entity definition with neuro-symbolic domain rel
 tags: [ontology, customer, billing]
 owner: team:billing
 ods:
-  profile: ontology
+  profile: note
   status: stable
   share: public
   entity: Customer

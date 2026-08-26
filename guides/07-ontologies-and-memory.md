@@ -62,7 +62,7 @@ All ontology keys live directly under `ods:` with zero unnecessary nesting:
 
 ```yaml
 ods:
-  profile: ontology                           # Document shape for entity classes
+  profile: note                               # Standard universal profile (or architecture / feature)
   status: stable
 
   entity: Customer                            # Canonical entity class name
@@ -109,11 +109,11 @@ As AI agents execute tasks, they observe events and make decisions. **Cognitive 
 
 ### The Direct Pareto Memory Keys
 
-Memory keys also sit directly under `ods:`:
+Memory keys also sit directly under `ods:` on a standard profile:
 
 ```yaml
 ods:
-  profile: memory-episode                     # Document shape for session logs
+  profile: note                               # Standard universal profile (or sop / meeting)
   status: stable
 
   tier: episodic                              # semantic | procedural | episodic | profile
@@ -155,7 +155,7 @@ description: Canonical customer entity definition with neuro-symbolic domain rel
 tags: [ontology, customer, billing]
 owner: team:billing
 ods:
-  profile: ontology
+  profile: note
   status: stable
   share: public
   entity: Customer
@@ -214,7 +214,7 @@ description: Episodic agent memory recording customer plan upgrade from Starter 
 tags: [memory, episodic, billing]
 owner: agent:billing-assistant
 ods:
-  profile: memory-episode
+  profile: note
   status: stable
   tier: episodic
   valid_from: "2026-08-26T10:00:00Z"

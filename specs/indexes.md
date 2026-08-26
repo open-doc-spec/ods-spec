@@ -22,7 +22,7 @@ This document specifies the **ODS Workspace Configuration** (`ods.toml`), the el
 - **What this chapter defines:** Root `ods.toml`, ignore defaults, and discovery commands (`overview` → `find` / `ls` / `tree` → `context`).
 - **Why it exists:** A workspace needs one boundary file, not committed folder indexes that churn in Git.
 - **When you need it:** You are configuring a repo, adding ignore rules, or implementing discovery.
-- **When you can skip it:** `spec = "0.1"` is already enough to start — see [Your first document](../guides/01-first-document.md).
+- **When you can skip it:** `spec = "1.1"` is already enough to start — see [Your first document](../guides/01-first-document.md).
 - **Learn this first:** [Run the workspace](../guides/06-run-the-workspace.md)
 - **Prerequisite chapters:** [keys.md](keys.md)
 

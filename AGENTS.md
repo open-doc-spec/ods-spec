@@ -85,7 +85,7 @@ When authoring new documents, pick the profile matching the document's intent an
 
 | Profile | Primary Intent | Expected Sections |
 | :--- | :--- | :--- |
-| `note` | Free-form knowledge / quick note (default) | *(none required)* |
+| `note` | Free-form knowledge, entities, memory, and scratchpads (default) | *(none required)* |
 | `guide` | Step-by-step how-to tutorial | Overview, Prerequisites, Steps, Troubleshooting |
 | `feature` | Product capability / PRD specification | Goal, Scope, Requirements, Acceptance Criteria, Risks |
 | `decision` | Architecture Decision Record (ADR) | Context, Decision, Alternatives, Consequences |
@@ -98,10 +98,6 @@ When authoring new documents, pick the profile matching the document's intent an
 | `checklist` | Verifiable deployment or release gates | Overview, Items, Verification, Notes |
 | `agent` | Autonomous agent instructions / prompt execution contracts (`agent.md`) | Goal, Task, Scope, Non-Scope, Context, Inputs, Constraints, Priority, Steps, Output, Success Criteria, Failure Modes, Dependencies, Assumptions, Examples |
 | `skill` | Reusable skill packages and tool contracts (`SKILL.md`) | Purpose, Capability, Activation, Scope, Non-Scope, Inputs, Outputs, Workflow, Rules, Priority, Validation, Eval, Resources, Tools, Lifecycle, Traceability |
-| `ontology` | Neuro-symbolic entity class definition, domain invariants, and technical mappings | Overview, Attributes, Relationships, Invariants, Examples |
-| `memory-episode` | Time-stamped episodic interaction trace, session log, and state delta | Interaction Summary, Tool Execution Trace, State Mutations |
-| `memory-profile` | Distilled living state profile for an entity or user synthesized across episodes | Profile Summary, Core Preferences, Active State, Recent Decisions |
-| `attested-computation` | Verifiable computation carrying a sanctioned query/code runner and deterministic attester | Computation, Parameters, Verification Rationale |
 
 ---
 

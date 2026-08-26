@@ -3,7 +3,7 @@ description: Episodic agent memory recording customer tier upgrade event.
 tags: [memory, episodic, billing]
 owner: agent:billing-assistant
 ods:
-  profile: memory-episode
+  profile: note
   status: stable
   tier: episodic
   valid_from: "2026-08-26T10:00:00Z"

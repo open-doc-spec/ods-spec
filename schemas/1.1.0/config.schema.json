@@ -3,6 +3,19 @@
   "$id": "https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/config.schema.json",
   "title": "ODS Workspace Configuration Schema (v1.1.0)",
   "description": "Machine-readable JSON Schema for ods.toml workspace configuration in ODS v1.1.0, supporting OKF superset dialect, ontology registries, and memory stores.",
+  "x-ods-supported-specs": {
+    "ods": {
+      "version": "1.1.0",
+      "status": "active",
+      "url": "https://github.com/open-doc-spec/ods-spec"
+    },
+    "okf": {
+      "version": "0.2.0",
+      "dialect": "okf-superset",
+      "status": "fully-supported",
+      "source_spec": "google/knowledge-catalog"
+    }
+  },
   "type": "object",
   "properties": {
     "$schema": {
@@ -10,29 +23,38 @@
       "description": "Optional URI of the ODS workspace configuration schema."
     },
     "spec": {
-      "type": "object",
-      "properties": {
-        "version": {
+      "oneOf": [
+        {
           "type": "string",
           "pattern": "^\\d+\\.\\d+(?:\\.\\d+)?$",
-          "description": "Target ODS specification version (e.g., '1.1' or '1.1.0')."
+          "description": "Target ODS specification version (e.g. '1.1')."
         },
-        "dialect": {
-          "type": "string",
-          "enum": [
-            "standard",
-            "strict",
-            "agentic",
-            "okf-superset"
+        {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "string",
+              "pattern": "^\\d+\\.\\d+(?:\\.\\d+)?$",
+              "description": "Target ODS specification version (e.g., '1.1' or '1.1.0')."
+            },
+            "dialect": {
+              "type": "string",
+              "enum": [
+                "standard",
+                "strict",
+                "agentic",
+                "okf-superset"
+              ],
+              "default": "standard",
+              "description": "Enforcement mode for lint rules, OKF compatibility, and validation severity."
+            }
+          },
+          "required": [
+            "version"
           ],
-          "default": "standard",
-          "description": "Enforcement mode for lint rules, OKF compatibility, and validation severity."
+          "additionalProperties": false
         }
-      },
-      "required": [
-        "version"
-      ],
-      "additionalProperties": false
+      ]
     },
     "ignore": {
       "type": [
@@ -64,6 +86,15 @@
           },
           "description": "Paths to external JSON Schema / Pydantic / Zod entity definitions."
         },
+        "default_domain": {
+          "type": "string",
+          "description": "Default business domain partition if omitted on entities."
+        },
+        "strict_invariants": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to fail CI when invariant expressions evaluate to false."
+        },
         "export_format": {
           "type": "string",
           "enum": [
@@ -89,16 +120,47 @@
           ],
           "default": "markdown"
         },
+        "backend": {
+          "type": "string",
+          "enum": [
+            "markdown",
+            "sqlite",
+            "duckdb"
+          ],
+          "default": "markdown"
+        },
         "decay_rate": {
           "type": "number",
           "minimum": 0,
           "default": 0.05,
           "description": "Daily exponential decay rate for unpinned episodic memories."
         },
+        "decay_days": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 30,
+          "description": "Number of days before unpinned episodic memories decay."
+        },
         "dream_interval": {
           "type": "string",
           "default": "1d",
           "description": "Cron interval or duration for automated memory distillation."
+        },
+        "auto_dream": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to run background memory dreaming and profile distillation."
+        }
+      },
+      "additionalProperties": false
+    },
+    "okf": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable native Google OKF v0.2 superset dialect parsing."
         }
       },
       "additionalProperties": false
@@ -148,11 +210,23 @@
           "default": "poll",
           "description": "Filesystem change detection strategy for ODS daemon."
         },
+        "poll_secs": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 2,
+          "description": "Polling interval in seconds when service.mode is 'poll'."
+        },
         "interval_seconds": {
           "type": "integer",
           "minimum": 1,
           "default": 5,
           "description": "Polling interval in seconds when service.mode is 'poll'."
+        },
+        "max_rss_mb": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 10,
+          "description": "Maximum resident set size memory budget in MB."
         }
       },
       "additionalProperties": false

@@ -89,7 +89,7 @@ specs/
 ├── README.md        # Chapter 01 · Specification map (you are here) — not the tutorial
 ├── core.md          # Chapter 02 · Format Model, Binary Compliance & OKF Superset
 ├── keys.md          # Chapter 03 · Frontmatter Key Dictionary & Flat Pareto Rules
-├── profiles.md      # Chapter 04 · Structural Profiles (17 Standard Shapes) & Packs
+├── profiles.md      # Chapter 04 · Structural Profiles (13 Universal Shapes) & Packs
 ├── graph.md         # Chapter 05 · Dual-Graph (Domain & Lexical) & Bi-Temporal Memory
 ├── context.md       # Chapter 06 · Bounded AI Context, Trust Tiers & Token Optimization
 ├── assets.md        # Chapter 07 · Non-Markdown Resources, Code Bindings & Attestations

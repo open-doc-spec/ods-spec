@@ -58,11 +58,11 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 
 ---
 
-## 4. Graph & Context Scoping Non-Goals
+## 4. Graph, Ontology & Context Scoping Non-Goals
 
 | Excluded Feature | Architectural Rationale |
 | :--- | :--- |
-| **No Complex Ontologies in Core** | High-order edge types (`implements`, `extends`, `replaces`, `conflicts-with`) introduce high cognitive overhead for authors without improving automated AI prompt assembly. Core standardizes only `depends` (hard prerequisite) and `related` (soft reference). |
+| **No Heavyweight Academic Description Logic / OWL Provers** | While ODS 1.1 supports pragmatic neuro-symbolic domain ontologies (`ods.entity`, `ods.relations`, `ods.invariants`), ODS intentionally avoids complex semantic web ontology overhead (e.g. OWL DL reasoning, RDF triplestores). ODS is optimized for fast, deterministically verifiable developer documentation and LLM context assembly. |
 | **No Blurring of Graph Prerequisites vs Prompt Fixtures** | Non-document fixtures (JSON schemas, mock CSVs) MUST NOT be placed in `depends`. They do not participate in DAG topological sorting. Prompt fixtures belong strictly in `context.load`. |
 | **No Auto-Loading of Arbitrary Resources** | `ods.resources` contains 50MB PDFs and binary PNG diagrams. Automatically dumping all resources into the AI prompt window causes immediate token budget exhaustion. Authors surgically declare prompt payloads via `context.load`. |
 | **No Universal Frontmatter `url:`** | External URLs belong in the Markdown body prose where context and anchor text explain their relevance. |

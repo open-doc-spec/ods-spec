@@ -74,13 +74,13 @@ A typical GitHub Actions step is exactly `ods lint .`.
 Minimum, which you already have:
 
 ```toml
-spec = "0.1"
+spec = "1.1"
 ```
 
 Useful next:
 
 ```toml
-spec = "0.1"
+spec = "1.1"
 
 ignore = [
   "src",

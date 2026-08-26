@@ -136,6 +136,27 @@ ods:
 
 Those words are headings the `agent` profile already expects (`## Constraints`, `## Steps`, `## Task`). Put them in the body. See [Pick a shape](02-pick-a-shape.md).
 
+### 7. Nested namespace anti-pattern (`PLACE-002`)
+
+In ODS 1.1, ontology and memory keys use the **Flat Pareto Model**. Do not introduce extra indentation layers:
+
+```yaml
+# Wrong: Nested wrapper
+ods:
+  ontology:
+    entity: Customer
+    domain: Billing
+  memory:
+    tier: episodic
+
+# Right: Flat Pareto keys directly under ods:
+ods:
+  entity: Customer
+  domain: Billing
+  tier: episodic
+  valid_from: 2026-08-26T00:00:00Z
+```
+
 ## Troubleshooting
 
 - **Error vs warning.** Missing `## Troubleshooting` on a guide is a warning. Anything in the list above except a missing heading is an error (or, for tags-under-`ods:`, a warning that still needs fixing).

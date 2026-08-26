@@ -74,7 +74,7 @@ ODS enforces clear separation between verification in CI and context resolution 
 To ensure high performance and determinism across both offline linters and language servers, validation is split into two explicit tiers:
 
 1. **Tier 1 (Schema Layer - Zero-IO / Fast AST)**:
-   - Validates document YAML frontmatter against [`document.schema.json`](../schemas/1.0.0/document.schema.json) and `ods.toml` against [`config.schema.json`](../schemas/1.0.0/config.schema.json) using standard JSON Schema Draft 2020-12 validators.
+   - Validates document YAML frontmatter against [`document.schema.json`](../schemas/1.1.0/document.schema.json) and `ods.toml` against [`config.schema.json`](../schemas/1.1.0/config.schema.json) using standard JSON Schema Draft 2020-12 validators.
    - Enforces key placement (3-tier model), forbidden keys (e.g. `title:` via `SYNTAX-002`), enum validity (`status`, `share`, `code[].role`), and string regex patterns.
    - Executes in `<1ms` per document with zero filesystem I/O.
 2. **Tier 2 (Semantic & Graph Layer - Deep Workspace Analysis)**:

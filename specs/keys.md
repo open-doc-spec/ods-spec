@@ -42,12 +42,12 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 
 Do not treat the cheat sheet below as mandatory on day one. Adopt keys in this order:
 
-| When | Keys |
-| :--- | :--- |
-| **Day 1** | `description`, `tags`, `ods.profile`, `ods.status` |
-| **When linking documents** | `ods.depends`, `ods.related` |
-| **When attaching the world** | `ods.resources`, `ods.code`, `ods.context` |
-| **Rare** | `ods.id` (rename stability), `ods.share` (privacy), `owner`, `created`, `updated` |
+| When                         | Keys                                                                              |
+| :--------------------------- | :-------------------------------------------------------------------------------- |
+| **Day 1**                    | `description`, `tags`, `ods.profile`, `ods.status`                                |
+| **When linking documents**   | `ods.depends`, `ods.related`                                                      |
+| **When attaching the world** | `ods.resources`, `ods.code`, `ods.context`                                        |
+| **Rare**                     | `ods.id` (rename stability), `ods.share` (privacy), `owner`, `created`, `updated` |
 
 Teaching path: [Your first document](../guides/01-first-document.md). Pocket form: [Decision cards](../guides/decision-cards.md).
 
@@ -67,7 +67,7 @@ tags:
 owner: team:support
 created: 2026-01-15
 updated: 2026-08-14
-type: BigQuery Table                          # OKF v0.2 concept type / profile alias
+type: BigQuery Table # OKF v0.2 concept type / profile alias
 sources:
   - id: bq-schema
     resource: datasets/billing/customers.sql
@@ -82,16 +82,16 @@ stale_after: 2026-12-31T00:00:00Z
 # TIER 2: FLAT ODS ENGINE KEYS (Direct under ods:, zero extra nesting!)
 # ═════════════════════════════════════════════════════════════════
 ods:
-  profile: guide                              # Document shape / expected H2 or H3 sections
-  status: stable                              # Lifecycle maturity: draft | stable | deprecated | archived
-  share: public                               # Privacy boundary: public | org | private
+  profile: guide # Document shape / expected H2 or H3 sections
+  status: stable # Lifecycle maturity: draft | stable | deprecated | archived
+  share: public # Privacy boundary: public | org | private
 
   # ─────────────────────────────────────────────────────────────
   # Subsystem 1: Neuro-Symbolic Ontology (Direct Pareto Keys)
   # ─────────────────────────────────────────────────────────────
-  entity: Customer                            # Canonical entity class name
-  domain: Billing                             # Business domain partition
-  schema: schemas/customer.schema.json        # "Paid at the door" disk schema validator
+  entity: Customer # Canonical entity class name
+  domain: Billing # Business domain partition
+  schema: schemas/customer.schema.json # "Paid at the door" disk schema validator
   relations:
     - predicate: owns
       target: entities/subscription.md
@@ -106,10 +106,10 @@ ods:
   # ─────────────────────────────────────────────────────────────
   # Subsystem 2: Temporal Agent Memory (Direct Pareto Keys)
   # ─────────────────────────────────────────────────────────────
-  tier: episodic                              # semantic | procedural | episodic | profile
+  tier: episodic # semantic | procedural | episodic | profile
   valid_from: 2026-08-26T00:00:00Z
-  valid_to: null                              # null = currently active reality
-  pin: true                                   # Protects from decay pruning
+  valid_to: null # null = currently active reality
+  pin: true # Protects from decay pruning
   mutations:
     - entity: Customer
       id: cust-4048
@@ -163,7 +163,6 @@ ods:
     ignore:
       - archive/
 ---
-
 # Document Title Lives Only in the H1 Body Heading
 ```
 
@@ -195,25 +194,25 @@ ods:
 
 ## 4. Subsystem Matrix of Engine Keys
 
-| Key | Engine Subsystem | Auto-loaded in `ods context`? | Verified by `ods lint`? | Key Purpose |
-| :--- | :--- | :---: | :---: | :--- |
-| **`ods.entity`** | Ontology Subsystem | **Yes** (Identity header) | **Yes** (valid identifier) | Class/concept name in Domain Graph. |
-| **`ods.domain`** | Ontology Subsystem | **Yes** (Domain header) | **Yes** (valid identifier) | Business domain boundary partition. |
-| **`ods.schema`** | Ontology Subsystem | **Yes** (Schema shapes) | **Yes** (path exists on disk) | "Paid at the door" disk schema contract. |
-| **`ods.relations`** | Ontology Subsystem | **Yes** (Typed closure) | **Yes** (targets exist, valid enum) | Directed typed semantic graph edges. |
-| **`ods.invariants`**| Ontology Subsystem | **Yes** (Guardrail list) | **Yes** (parseable expression) | Deterministic boolean refusal rules. |
-| **`ods.tier`** | Memory Subsystem | **Yes** (Memory filter) | **Yes** (valid tier enum) | Cognitive memory classification. |
-| **`ods.valid_from`**| Memory Subsystem | **Yes** (Temporal filter) | **Yes** (ISO-8601) | Real-world validity start instant. |
-| **`ods.valid_to`** | Memory Subsystem | **Yes** (Staleness gate) | **Yes** (valid_to $\ge$ valid_from) | Real-world expiration instant (`null` = active). |
-| **`ods.mutations`** | Memory Subsystem | **Yes** (State delta) | **Yes** (entity/id/property present) | Graphiti-style structured attribute changes. |
-| **`ods.pin`** | Memory Subsystem | **No** (Pruning flag) | **Yes** (boolean) | Protects from automated decay pruning. |
-| **`ods.depends`** | Knowledge Graph | **Yes** (up to `max-depth`) | **Yes** (strict DAG, no cycles) | Hard structural prerequisites. |
-| **`ods.related`** | Discovery Graph | **Yes** (1-line index) | **Yes** (path must exist) | Soft associative reading. |
-| **`ods.resources`** | Asset Inventory | **Yes** (Schema metadata) | **Yes** (file must exist on disk) | Physical non-Markdown attachments (PDF, CSV). |
-| **`ods.code`** | Code Bindings | **Optional** (`--with-code`) | **Yes** (path exists, valid role, no `:L45`) | Links to implementation, tests, and infra. |
-| **`ods.context.load`**| AI Prompt Scoping | **Yes** (injected directly) | **Yes** (file must exist on disk) | Auxiliary JSON schemas, CSVs, and fixtures. |
-| **`ods.context.max-depth`**| Traversal Bound | Governs recursion limit | **Yes** (integer $\ge 0$) | Max graph distance to follow `depends`. |
-| **`ods.context.ignore`**| Scoping Boundary | Filters expansion queue | **Yes** (list of prefixes) | Path prefixes pruned during traversal. |
+| Key                         | Engine Subsystem   | Auto-loaded in `ods context`? |           Verified by `ods lint`?            | Key Purpose                                      |
+| :-------------------------- | :----------------- | :---------------------------: | :------------------------------------------: | :----------------------------------------------- |
+| **`ods.entity`**            | Ontology Subsystem |   **Yes** (Identity header)   |          **Yes** (valid identifier)          | Class/concept name in Domain Graph.              |
+| **`ods.domain`**            | Ontology Subsystem |    **Yes** (Domain header)    |          **Yes** (valid identifier)          | Business domain boundary partition.              |
+| **`ods.schema`**            | Ontology Subsystem |    **Yes** (Schema shapes)    |        **Yes** (path exists on disk)         | "Paid at the door" disk schema contract.         |
+| **`ods.relations`**         | Ontology Subsystem |    **Yes** (Typed closure)    |     **Yes** (targets exist, valid enum)      | Directed typed semantic graph edges.             |
+| **`ods.invariants`**        | Ontology Subsystem |   **Yes** (Guardrail list)    |        **Yes** (parseable expression)        | Deterministic boolean refusal rules.             |
+| **`ods.tier`**              | Memory Subsystem   |    **Yes** (Memory filter)    |          **Yes** (valid tier enum)           | Cognitive memory classification.                 |
+| **`ods.valid_from`**        | Memory Subsystem   |   **Yes** (Temporal filter)   |              **Yes** (ISO-8601)              | Real-world validity start instant.               |
+| **`ods.valid_to`**          | Memory Subsystem   |   **Yes** (Staleness gate)    |     **Yes** (valid_to $\ge$ valid_from)      | Real-world expiration instant (`null` = active). |
+| **`ods.mutations`**         | Memory Subsystem   |     **Yes** (State delta)     |     **Yes** (entity/id/property present)     | Graphiti-style structured attribute changes.     |
+| **`ods.pin`**               | Memory Subsystem   |     **No** (Pruning flag)     |              **Yes** (boolean)               | Protects from automated decay pruning.           |
+| **`ods.depends`**           | Knowledge Graph    |  **Yes** (up to `max-depth`)  |       **Yes** (strict DAG, no cycles)        | Hard structural prerequisites.                   |
+| **`ods.related`**           | Discovery Graph    |    **Yes** (1-line index)     |          **Yes** (path must exist)           | Soft associative reading.                        |
+| **`ods.resources`**         | Asset Inventory    |   **Yes** (Schema metadata)   |      **Yes** (file must exist on disk)       | Physical non-Markdown attachments (PDF, CSV).    |
+| **`ods.code`**              | Code Bindings      | **Optional** (`--with-code`)  | **Yes** (path exists, valid role, no `:L45`) | Links to implementation, tests, and infra.       |
+| **`ods.context.load`**      | AI Prompt Scoping  |  **Yes** (injected directly)  |      **Yes** (file must exist on disk)       | Auxiliary JSON schemas, CSVs, and fixtures.      |
+| **`ods.context.max-depth`** | Traversal Bound    |    Governs recursion limit    |          **Yes** (integer $\ge 0$)           | Max graph distance to follow `depends`.          |
+| **`ods.context.ignore`**    | Scoping Boundary   |    Filters expansion queue    |          **Yes** (list of prefixes)          | Path prefixes pruned during traversal.           |
 
 ---
 
@@ -232,6 +231,7 @@ $$\text{profile} \longrightarrow \text{status} \longrightarrow \text{id} \longri
 Universal keys MUST appear at the top level of frontmatter. They MUST NOT be placed under `ods:`.
 
 ### 6.1 `description`
+
 - **Type**: `string`
 - **Purpose**: A concise, one-sentence summary of the document used in index listings, search previews, and AI tool calling descriptions.
 - **Normative Rules**: SHOULD be between 10 and 200 characters. MUST NOT contain multi-paragraph markdown prose.
@@ -247,6 +247,7 @@ description: |
 ```
 
 ### 6.2 `tags`
+
 - **Type**: `list of strings`
 - **Purpose**: Free-form categorical keywords for multi-dimensional filtering, search facets, and team taxonomy.
 - **Normative Rules**:
@@ -263,10 +264,11 @@ tags:
 
 # INVALID: tags placed under ods:
 ods:
-  tags: [billing, refunds]  # INVALID: tags MUST NOT be nested under ods:
+  tags: [billing, refunds] # INVALID: tags MUST NOT be nested under ods:
 ```
 
 ### 6.3 `owner`
+
 - **Type**: `string` or `list of strings`
 - **Purpose**: Identifies the individual or team accountable for maintaining the accuracy of the document.
 - **Normative Rules**: RECOMMENDED format is a GitHub team slug (e.g. `team:billing`), individual handle (`alice`), or email.
@@ -282,6 +284,7 @@ owner:
 ```
 
 ### 6.4 `created` and `updated`
+
 - **Type**: `string` (ISO-8601 or `YYYY-MM-DD` date)
 - **Purpose**: Document lifecycle timestamps for static site generators, search indexes, and export manifests.
 - **Normative Rules**:
@@ -295,16 +298,17 @@ updated: 2026-08-14
 ```
 
 ### 6.5 `$schema` (Optional)
+
 - **Type**: `string` (URI)
 - **Purpose**: Enables real-time editor autocomplete, hover tooltips, and instant validation in VS Code, Cursor, JetBrains, and Zed.
 - **Normative Rules**:
   - MUST be placed at the top level of frontmatter.
-  - MAY reference the canonical URI (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.0.0/document.schema.json`) or a workspace-relative path.
+  - MAY reference the canonical URI (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/document.schema.json`) or a workspace-relative path.
   - `$schema` is OPTIONAL. Markdown documents without `$schema` remain 100% compliant ODS documents.
 
 ```yaml
 # VALID: Editor schema binding
-$schema: https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.0.0/document.schema.json
+$schema: https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/document.schema.json
 description: Guide for setting up user authentication.
 tags: [auth, security]
 ods:
@@ -319,6 +323,7 @@ ods:
 All engine keys MUST be nested inside the `ods:` mapping.
 
 ### 7.1 `ods.profile`
+
 - **Type**: `string` (default: `"note"`)
 - **Purpose**: Declares the structural shape and expected H2 or H3 sections (`##` or `###`) of the document.
 - **Values**: Standard profiles (`note`, `guide`, `feature`, `decision`, `sop`, `api`, `architecture`, `policy`, `meeting`, `faq`, `checklist`, `agent`, `skill`) or custom profiles registered in `ods.toml`. See [profiles.md](profiles.md).
@@ -329,10 +334,11 @@ ods:
   profile: agent
 
 # INVALID: Placed at top level
-profile: agent  # INVALID: engine key must be under ods:
+profile: agent # INVALID: engine key must be under ods:
 ```
 
 ### 7.2 `ods.status`
+
 - **Type**: `enum` (default: `"draft"`)
 - **Purpose**: Declares the document's lifecycle maturity.
 - **Allowed Values**:
@@ -349,10 +355,11 @@ ods:
 
 # INVALID: Non-standard status value
 ods:
-  status: in-review  # INVALID: must be one of [draft, stable, deprecated, archived]
+  status: in-review # INVALID: must be one of [draft, stable, deprecated, archived]
 ```
 
 ### 7.3 `ods.id`
+
 - **Type**: `string` (default: workspace-relative path without `.md`)
 - **Purpose**: Explicit document identifier override used for **rename stability**.
 - **Normative Rules**: Authors SHOULD omit this field and rely on automatic path-derived IDs unless preserving external links during a major directory restructuring.
@@ -365,6 +372,7 @@ ods:
 ```
 
 ### 7.4 `ods.share`
+
 - **Type**: `enum` (default: `"public"`)
 - **Purpose**: Visibility control for context export filtering and prompt boundary protection.
 - **Allowed Values**:
@@ -380,6 +388,7 @@ ods:
 ```
 
 ### 7.5 `ods.depends`
+
 - **Type**: `list of strings` (relative file paths)
 - **Subsystem**: **Knowledge Graph (Structural Prerequisites)**
 - **Purpose**: Hard directional prerequisites. The reader or AI agent MUST understand the target document(s) before acting on this document.
@@ -397,6 +406,7 @@ ods:
 ```
 
 ### 7.6 `ods.related`
+
 - **Type**: `list of strings` (relative file paths)
 - **Subsystem**: **Discovery Graph (Human Associative Links)**
 - **Purpose**: Soft associative references and suggested further reading.
@@ -412,6 +422,7 @@ ods:
 ```
 
 ### 7.7 `ods.resources`
+
 - **Type**: `list of maps` containing a required `path` string.
 - **Subsystem**: **Asset Catalog (Disk Inventory)**
 - **Purpose**: Non-Markdown attachments associated with the document (diagrams, PDFs, CSVs, OpenAPI specs).
@@ -429,6 +440,7 @@ ods:
 ```
 
 ### 7.8 `ods.code`
+
 - **Type**: `list of maps` with `path` (`string`, required), `role` (`enum`, required), and `symbol` (`string` or `list of strings`, optional).
 - **Subsystem**: **Code Bindings**
 - **Purpose**: Binds the document to implementation source code, test suites, infrastructure definitions, and CI pipelines.
@@ -452,6 +464,7 @@ ods:
 ```
 
 ### 7.9 `ods.context`
+
 - **Type**: `map` containing optional `max-depth` (`integer`), `load` (`list of strings`), and `ignore` (`list of strings`).
 - **Subsystem**: **AI Prompt Bounds & Inclusions**
 - **Purpose**: Declares a deterministic bounded reading list for AI agent prompt assembly.
@@ -477,11 +490,11 @@ ods:
 
 The following keys are allowed under `ods.custom_profile` in a registered custom profile-definition Markdown file. They describe the profile schema; they are not ordinary document engine keys.
 
-| Key | Placement | Type | Purpose |
-| :--- | :--- | :--- | :--- |
-| `name` | `ods.custom_profile.name` | string, optional | Profile identifier. If omitted, the profile file stem is used. |
-| `required_keys` | `ods.custom_profile.required_keys` | list of strings, optional | Names of top-level document keys required when the profile is selected. |
-| `optional_keys` | `ods.custom_profile.optional_keys` | list of strings, optional | Names of useful top-level document keys that are not required. |
+| Key              | Placement                           | Type                      | Purpose                                                                   |
+| :--------------- | :---------------------------------- | :------------------------ | :------------------------------------------------------------------------ |
+| `name`           | `ods.custom_profile.name`           | string, optional          | Profile identifier. If omitted, the profile file stem is used.            |
+| `required_keys`  | `ods.custom_profile.required_keys`  | list of strings, optional | Names of top-level document keys required when the profile is selected.   |
+| `optional_keys`  | `ods.custom_profile.optional_keys`  | list of strings, optional | Names of useful top-level document keys that are not required.            |
 | `forbidden_keys` | `ods.custom_profile.forbidden_keys` | list of strings, optional | Names of top-level document keys that should not appear with the profile. |
 
 `ods.custom_profile` is valid only in a registered profile-definition file selected by `custom_profiles` (or a registered pack). It is not copied into documents using the profile and does not make third-party metadata globally required. Tools MUST reject the block in any other document. See [profiles.md](profiles.md#711-profile-definition-metadata) for the complete contract.
@@ -521,6 +534,6 @@ ods:
 
 ## Navigation & Reading Order
 
-| [← Previous Chapter](core.md) | [📑 Specification Index](README.md) | [Next Chapter →](profiles.md) |
-| :--- | :---: | ---: |
-| **02. Core Format Model & Conformance** | **Open Document Spec (ODS)** | **04. Structural Profiles & Shapes** |
+| [← Previous Chapter](core.md)           | [📑 Specification Index](README.md) |        [Next Chapter →](profiles.md) |
+| :-------------------------------------- | :---------------------------------: | -----------------------------------: |
+| **02. Core Format Model & Conformance** |    **Open Document Spec (ODS)**     | **04. Structural Profiles & Shapes** |
