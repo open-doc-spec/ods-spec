@@ -109,6 +109,19 @@ All conformant ODS linters MUST enforce the following validation rules:
 | | `PROF-004` | **Tier 1 / 2** | A document SHOULD NOT contain a top-level key listed by its selected custom profile's `forbidden_keys`. | **Warning** | Remove the forbidden key or choose a profile that permits it. |
 | | `PROF-005` | **Tier 2 (Semantic)** | Every `custom_profiles` path in `ods.toml` MUST resolve to an existing Markdown file or profile directory. | **Error** | Create the profile definition at the exact configured path or update the `custom_profiles` entry. |
 | | `PROF-006` | **Tier 1 / 2** | `ods.custom_profile` MUST appear only in a profile-definition file selected by `custom_profiles` (or a registered pack). | **Error** | Move the definition to its registered path and use `ods.profile` in ordinary documents. |
+| **Ontology** | `ONT-001` | **Tier 2 (Semantic)** | `ods.schema` MUST resolve to an existing schema file on disk. | **Error** | Fix path or verify schema existence on disk. |
+| | `ONT-002` | **Tier 1 (Schema)** | `ods.invariants` expressions MUST parse as valid boolean expressions. | **Error** | Correct invariant expression syntax. |
+| | `ONT-003` | **Tier 2 (Semantic)** | `ods.relations[].target` MUST resolve to an existing document. | **Error** | Fix broken semantic relation target. |
+| | `ONT-004` | **Tier 2 (Semantic)** | `is_a` inheritance relations MUST NOT contain cyclic loops. | **Error** | Break circular entity inheritance loop. |
+| **Memory** | `MEM-001` | **Tier 1 (Schema)** | `ods.valid_to` MUST NOT be chronologically earlier than `ods.valid_from`. | **Error** | Ensure valid_to $\ge$ valid_from. |
+| | `MEM-002` | **Tier 2 (Semantic)** | `ods.mutations[].entity` SHOULD resolve to a declared entity class in the workspace. | **Warning** | Declare entity in workspace or check spelling. |
+| | `MEM-003` | **Tier 2 (Semantic)** | Stale memory node exceeds retention window without `ods.pin: true`. | **Warning** | Pin memory node or allow pruning during dreaming. |
+| **OKF & Attest** | `OKF-001` | **Tier 1 (Schema)** | OKF concepts MUST contain a non-empty `type` field. | **Error** | Provide non-empty `type` string. |
+| | `OKF-002` | **Tier 1 (Schema)** | `sources[].resource` MUST NOT be empty. | **Error** | Provide canonical URL or file path in sources entry. |
+| | `OKF-003` | **Tier 1 (Schema)** | Concept is stale if `now >= stale_after`. | **Warning** | Refresh concept or update staleness window. |
+| | `ATT-001` | **Tier 1 (Schema)** | `type: Attested Computation` MUST declare a `runtime`. | **Error** | Specify execution runtime (e.g. `bigquery`, `postgres`, `dbt`, `python`). |
+| | `ATT-002` | **Tier 2 (Semantic)** | Attested computation parameter values MUST match declared `parameters` schema. | **Error** | Pass valid typed parameters. |
+| | `ATT-003` | **Tier 2 (Runtime)** | Attester verification code MUST return exit code 0 when inspecting execution receipt. | **Error** | Fix computation logic or check attester assertion. |
 
 ---
 

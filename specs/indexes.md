@@ -44,7 +44,7 @@ An ODS workspace is declared by the presence of a single **`ods.toml`** file at 
 # ═════════════════════════════════════════════════════════════════
 
 # Targeted ODS specification version (Required workspace marker)
-spec = "0.1"
+spec = "1.1"
 
 # Directory path prefixes excluded from document scanning and linting
 ignore = [
@@ -71,19 +71,35 @@ packs = [
 Goal = ["Objective", "Purpose", "Target"]
 Validation = ["Sanity Checks", "Smoke Tests", "Verification"]
 
-# Multi-spec dialect activation
-[specs.okf]
-enabled = false                               # Google OKF knowledge verification checks
+# Neuro-symbolic ontology subsystem settings
+[ontology]
+default_domain = "Core"
+strict_invariants = true
 
-[specs.skills]
-enabled = false                               # Agent Skills (SKILL.md) package checks
+# Temporal cognitive memory settings
+[memory]
+backend = "markdown"                         # "markdown" or "sqlite" (.ods/memory.db)
+decay_days = 30                              # Decay window for unpinned episodic nodes
+auto_dream = true                            # Background profile distillation
+
+# Attested computation execution gates
+[attestation]
+allowed_runtimes = ["bigquery", "postgres", "python", "dbt"]
+enforce_receipts = true
+
+# Google OKF v0.2 native superset interoperability
+[okf]
+enabled = true                               # Auto-detected if okf_version or Google OKF files present
 
 # Background watcher & memory budget settings
 [service]
-mode = "poll"                                 # Background watcher mode: "poll" or "notify"
-poll_secs = 2                                 # Polling interval in seconds
-max_rss_mb = 10                               # Soft memory (RSS) budget for daemon
+mode = "poll"                                # Background watcher mode: "poll" or "notify"
+poll_secs = 2                                # Polling interval in seconds
+max_rss_mb = 10                              # Soft memory (RSS) budget for daemon
 ```
+
+### 2.1 Zero-Config Google OKF Bundle Root Detection
+If a repository contains a root `index.md` with top-level `okf_version: "0.2"` (or a standard OKF bundle structure without `ods.toml`), ODS tooling MUST automatically recognize the workspace as a valid ODS 1.1 root with dialect `okf-superset`.
 
 ---
 

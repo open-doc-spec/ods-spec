@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/config.schema.json",
+  "title": "ODS Workspace Configuration Schema (v1.1.0)",
+  "description": "Machine-readable JSON Schema for ods.toml workspace configuration in ODS v1.1.0, supporting OKF superset dialect, ontology registries, and memory stores.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional URI of the ODS workspace configuration schema."
+    },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+(?:\\.\\d+)?$",
+          "description": "Target ODS specification version (e.g., '1.1' or '1.1.0')."
+        },
+        "dialect": {
+          "type": "string",
+          "enum": [
+            "standard",
+            "strict",
+            "agentic",
+            "okf-superset"
+          ],
+          "default": "standard",
+          "description": "Enforcement mode for lint rules, OKF compatibility, and validation severity."
+        }
+      },
+      "required": [
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "ignore": {
+      "type": [
+        "object",
+        "array"
+      ],
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Directory prefixes to exclude from document scanning and graph traversal."
+        }
+      },
+      "items": {
+        "type": "string"
+      },
+      "additionalProperties": false,
+      "description": "Paths or configuration table for ignored directories."
+    },
+    "ontology": {
+      "type": "object",
+      "properties": {
+        "schemas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Paths to external JSON Schema / Pydantic / Zod entity definitions."
+        },
+        "export_format": {
+          "type": "string",
+          "enum": [
+            "cypher",
+            "owl",
+            "rdf",
+            "json-schema"
+          ],
+          "default": "cypher"
+        }
+      },
+      "additionalProperties": false
+    },
+    "memory": {
+      "type": "object",
+      "properties": {
+        "storage": {
+          "type": "string",
+          "enum": [
+            "markdown",
+            "sqlite",
+            "duckdb"
+          ],
+          "default": "markdown"
+        },
+        "decay_rate": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0.05,
+          "description": "Daily exponential decay rate for unpinned episodic memories."
+        },
+        "dream_interval": {
+          "type": "string",
+          "default": "1d",
+          "description": "Cron interval or duration for automated memory distillation."
+        }
+      },
+      "additionalProperties": false
+    },
+    "custom_profiles": {
+      "type": "object",
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "File paths to registered custom profile markdown definitions."
+        }
+      },
+      "additionalProperties": false
+    },
+    "packs": {
+      "type": "object",
+      "properties": {
+        "load": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Registered pack identifiers or bundle paths to load into the workspace."
+        }
+      },
+      "additionalProperties": false
+    },
+    "aliases": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Workspace-wide path or symbol aliases for dependency and related resolution."
+    },
+    "service": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "poll",
+            "watch"
+          ],
+          "default": "poll",
+          "description": "Filesystem change detection strategy for ODS daemon."
+        },
+        "interval_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 5,
+          "description": "Polling interval in seconds when service.mode is 'poll'."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "spec"
+  ],
+  "additionalProperties": false
+}

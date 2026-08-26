@@ -206,18 +206,24 @@ flowchart TD
     InjectCode --> Finalize["Assemble Ordered Bounded Payload within Token Budget"]
 ```
 
-### Resolution Steps:
+### Resolution Steps (ODS 1.1):
 1. **Initialize**: Enqueue the entrypoint document $D_0$ at depth $0$.
-2. **Privacy Guard**: If $D_0$ has `ods.share: private` (in an unprivileged session) or matches workspace `ignore`, abort.
-3. **Graph Recursion**:
-   - For each document at current depth $k < \text{max-depth}$, inspect its `ods.depends` array.
-   - For each dependency $D_{k+1}$:
-     - If already visited, skip.
-     - If matching `context.ignore` or `ods.share: private`, prune the branch.
-     - Otherwise, add $D_{k+1}$ to the payload and recurse at depth $k+1$.
-4. **Auxiliary Asset Inclusion**:
-   - Resolve and load all file paths declared in $D_0$'s `ods.context.load` array.
+2. **Privacy & Staleness Guard**:
+   - If $D_0$ has `ods.share: private` (in an unprivileged session) or matches workspace `ignore`, abort.
+   - If $D_0$ has `stale_after` and $\text{now} \ge \text{stale_after}$, flag as stale or refuse if `--strict-freshness` is enabled.
+   - If $D_0$ has `valid_to` and $\text{now} \ge \text{valid_to}$, filter out as superseded historical state unless historical querying is enabled.
+3. **Trust Tier Evaluation**:
+   - Compute trust tier for $D_0$ from `verified`: `unverified`, `machine-confirmed` (process/agent), or `human-reviewed` (`human:<id>`).
+   - If trust tier is below `--trust-min` (or `context.trust-min`), emit warning or filter.
+4. **Adaptive Token-Budget Allocation (4-Tier Payload)**:
+   - **Tier 1 (50% Budget - Primary Focus)**: Target document $D_0$ body + H2 headings.
+   - **Tier 2 (35% Budget - Prerequisites)**: Recurse along `ods.depends` up to `max-depth` (default 2 hops). Frontmatter is stripped to minimize token overhead.
+   - **Tier 3 (10% Budget - Asset & Schema Signatures)**: Load `context.load` files and extract signatures/schemas from `ods.resources` and `ods.schema`.
+   - **Tier 4 (5% Budget - Discovery Index)**: Scan `ods.related` links and append a 1-line **"Related Context Index"** with titles and summaries so the agent knows what exists on demand.
 5. **Code Binding Inclusion**:
+   - When `--with-code` is active, parse `ods.code` bindings and use Tree-sitter to slice the exact function, struct, or class symbol declared in `symbol` without line numbers.
+6. **Final Assembly**:
+   - Emit deterministic, ordered, token-bounded context payload with provenance footnotes and trust tier headers.
    - When code bindings are enabled, resolve all paths declared in `ods.code`.
 6. **Topological Formatting**:
    - Format the aggregated payload in topological order (deepest prerequisites first, entrypoint last) within `--max-tokens`.

@@ -211,10 +211,104 @@ ods:
 
 ---
 
-## 9. Design Decisions
+## 9. OKF Attested Computation Contracts
+
+In addition to static source code bindings, ODS 1.1 natively supports Google OKF v0.2 **Attested Computations** (`type: Attested Computation`). An attested computation turns a Markdown document into a verifiable executable unit carrying sanctioned queries/code, parameter schemas, execution instructions, and deterministic attester verification.
+
+```yaml
+---
+type: Attested Computation
+title: Monthly Active Customer MRR Calculation
+description: Verified BigQuery SQL calculation computing MRR per customer cohort.
+tags: [computation, billing, bigquery]
+runtime: bigquery
+parameters:
+  - name: cohort_year
+    type: integer
+    required: true
+    description: Cohort registration calendar year
+    default: 2026
+executor:
+  resource: skills/run-bigquery.md
+  receipt:
+    - job_id
+    - query_hash
+    - total_bytes_billed
+attester:
+  resource: attesters/verify-mrr-receipt.py
+sources:
+  - id: bq-orders
+    resource: datasets/billing/orders.sql
+    author: team:data-platform
+    usage_count: 8500
+verified:
+  - by: "human:ahormati"
+    at: "2026-08-20T00:00:00Z"
+ods:
+  profile: attested-computation
+  status: stable
+---
+
+# Monthly Active Customer MRR Calculation
+
+## Computation
+```sql
+SELECT
+  customer_id,
+  SUM(amount_usd) AS mrr
+FROM `analytics.billing.active_subscriptions`
+WHERE EXTRACT(YEAR FROM created_at) = @cohort_year
+GROUP BY 1;
+```
+
+## Parameters
+- `@cohort_year`: 4-digit registration year (e.g. 2026).
+
+## Verification Rationale
+Queries production BigQuery replica using signed job credentials with cryptographic hash attestation.
+```
+
+### 9.1 Computation Fields Reference
+
+| Key | Type | Requirement | Semantic Meaning |
+| :--- | :--- | :---: | :--- |
+| **`runtime`** | String | Required | Execution engine (e.g., `bigquery`, `postgres`, `dbt`, `python`, `looker`). |
+| **`parameters`** | Array of mappings | Optional | Named, typed input holes (`name`, `type`, `required`, `default`, `description`). |
+| **`computation`** | String path | Optional | Workspace-relative path to external SQL/Python script (if not inline in body). |
+| **`executor`** | Mapping | Optional | Execution runner instructions (`resource`) and mandatory evidence fields (`receipt`). |
+| **`attester`** | Mapping | Optional | Path to deterministic (non-LLM) verification script (`resource`). |
+
+### 9.2 The 4-Step Attestation Lifecycle
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Agent as Autonomous Agent
+    participant Runtime as ODS Engine / Runner
+    participant Attester as Deterministic Attester
+    
+    Agent->>Runtime: 1. Bind Parameters & Dispatch (ods attest)
+    Runtime->>Runtime: 2. Execute Sanctioned Code & Capture Evidence
+    Runtime->>Agent: 3. Emit Execution Receipt (job_id, query_hash)
+    Runtime->>Attester: 4. Pass Receipt to Attester Code (attester.resource)
+    Attester-->>Runtime: Exit Code 0 (Assertion Verified)
+    Runtime-->>Agent: Output Confirmed (Elevate to machine-confirmed trust)
+```
+
+1. **Parameter Binding**: The agent binds validated parameter arguments to declared holes.
+2. **Sanctioned Execution**: The runner executes the query or script against the target runtime environment.
+3. **Receipt Emission**: The execution engine captures verifiable evidence fields declared in `executor.receipt`.
+4. **Deterministic Attestation**: The non-LLM attester script inspects the receipt and confirms assertions with exit code 0.
+
+---
+
+## 10. Design Decisions
 
 ### Why a closed enum of 8 code roles instead of custom user-defined roles?
 A closed taxonomy of 8 standard code roles ensures that external AI coding agents, linters, and analysis tools can reliably classify code without needing custom project-specific parser rules. Every software artifact naturally falls into one of the 8 universal roles.
+
+### Why separate attested computations from standard guides?
+Attested computations provide mathematical and cryptographic guarantees of reproducibility. Keeping computation parameters, execution runner instructions, and deterministic attester assertions in explicit machine-verifiable frontmatter eliminates hallucinated queries and unauthorized database mutations.
 
 ---
 

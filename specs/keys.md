@@ -58,7 +58,7 @@ Teaching path: [Your first document](../guides/01-first-document.md). Pocket for
 ```yaml
 ---
 # ═════════════════════════════════════════════════════════════════
-# TIER 1: UNIVERSAL TOP-LEVEL KEYS (Visible to all YAML consumers)
+# TIER 1: UNIVERSAL & OKF NATIVE KEYS (Visible to all YAML/OKF tools)
 # ═════════════════════════════════════════════════════════════════
 description: One-line summary for search previews, AI tool calls, and index listings.
 tags:
@@ -67,9 +67,19 @@ tags:
 owner: team:support
 created: 2026-01-15
 updated: 2026-08-14
+type: BigQuery Table                          # OKF v0.2 concept type / profile alias
+sources:
+  - id: bq-schema
+    resource: datasets/billing/customers.sql
+    author: team:data-platform
+    usage_count: 5000
+    last_modified: 2026-08-20T00:00:00Z
+verified:
+  - { by: "human:ahormati", at: "2026-08-22T00:00:00Z" }
+stale_after: 2026-12-31T00:00:00Z
 
 # ═════════════════════════════════════════════════════════════════
-# TIER 2: ODS ENGINE KEYS (Scoped under ods: to prevent collisions)
+# TIER 2: FLAT ODS ENGINE KEYS (Direct under ods:, zero extra nesting!)
 # ═════════════════════════════════════════════════════════════════
 ods:
   profile: guide                              # Document shape / expected H2 or H3 sections
@@ -77,7 +87,38 @@ ods:
   share: public                               # Privacy boundary: public | org | private
 
   # ─────────────────────────────────────────────────────────────
-  # Subsystem 1: Knowledge Graph (Structural Prerequisites)
+  # Subsystem 1: Neuro-Symbolic Ontology (Direct Pareto Keys)
+  # ─────────────────────────────────────────────────────────────
+  entity: Customer                            # Canonical entity class name
+  domain: Billing                             # Business domain partition
+  schema: schemas/customer.schema.json        # "Paid at the door" disk schema validator
+  relations:
+    - predicate: owns
+      target: entities/subscription.md
+    - predicate: governed_by
+      target: policies/refund-sla.md
+    - predicate: maps_to
+      target: datasets/bq-customers.md
+  invariants:
+    - "mrr >= 0"
+    - "email is required"
+
+  # ─────────────────────────────────────────────────────────────
+  # Subsystem 2: Temporal Agent Memory (Direct Pareto Keys)
+  # ─────────────────────────────────────────────────────────────
+  tier: episodic                              # semantic | procedural | episodic | profile
+  valid_from: 2026-08-26T00:00:00Z
+  valid_to: null                              # null = currently active reality
+  pin: true                                   # Protects from decay pruning
+  mutations:
+    - entity: Customer
+      id: cust-4048
+      property: billing_plan
+      old_value: "starter"
+      new_value: "enterprise"
+
+  # ─────────────────────────────────────────────────────────────
+  # Subsystem 3: Knowledge Graph (Structural Prerequisites)
   # • Auto-traversed by 'ods context' up to max-depth (default: 2)
   # • Strict DAG: Cycles are forbidden (checked by 'ods lint')
   # ─────────────────────────────────────────────────────────────
@@ -86,23 +127,22 @@ ods:
     - ../crypto/tokens.md
 
   # ─────────────────────────────────────────────────────────────
-  # Subsystem 2: Discovery Graph (Human Associative Links)
-  # • Skipped by default in 'ods context' (opt-in via --include-related)
+  # Subsystem 4: Discovery Graph (Human Associative Links)
+  # • Appended as 1-line discovery index by 'ods context'
   # • Cycles allowed (e.g. Doc A <-> Doc B)
   # ─────────────────────────────────────────────────────────────
   related:
     - ../policy/refund-sla.md
 
   # ─────────────────────────────────────────────────────────────
-  # Subsystem 3: Asset Catalog (Disk-level Non-Markdown Files)
+  # Subsystem 5: Asset Catalog (Disk-level Non-Markdown Files)
   # • Verified for disk existence by 'ods lint'
-  # • NOT loaded into LLM prompts by default (protects token limits)
   # ─────────────────────────────────────────────────────────────
   resources:
-    - path: ../diagrams/refund-flow.pdf        # Binary PDF diagram (verified, not in prompt)
+    - path: ../diagrams/refund-flow.pdf
 
   # ─────────────────────────────────────────────────────────────
-  # Subsystem 4: Code Bindings (Implementation & Tests)
+  # Subsystem 6: Code Bindings (Implementation & Tests)
   # • Binds document to source code without line numbers
   # ─────────────────────────────────────────────────────────────
   code:
@@ -114,15 +154,14 @@ ods:
       symbol: TestProcessRefund
 
   # ─────────────────────────────────────────────────────────────
-  # Subsystem 5: AI Prompt Bounds & Inclusions (Surgical Scoping)
-  # • Explicitly injected into the LLM context bundle
+  # Context Bounds & Inclusions (Surgical Prompt Scoping)
   # ─────────────────────────────────────────────────────────────
   context:
-    max-depth: 2                              # Recursion depth along 'depends'
+    max-depth: 2
     load:
-      - ../schemas/refund-request.json        # Injects data schema into AI prompt
+      - ../schemas/refund-request.json
     ignore:
-      - archive/                              # Prunes noisy path prefixes
+      - archive/
 ---
 
 # Document Title Lives Only in the H1 Body Heading
@@ -134,25 +173,23 @@ ods:
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ TIER 1: Universal Top-Level Keys (Common Metadata)                      │
-│ description, tags, owner, created, updated                             │
-│ -> Visible to all YAML consumers (Hugo, Astro, Docusaurus, Obsidian)    │
+│ TIER 1: Universal & OKF Native Keys (Common Metadata)                   │
+│ description, tags, owner, created, updated, type, title, resource,      │
+│ sources, usage_window, generated, verified, status, stale_after,        │
+│ runtime, parameters, computation, executor, attester                    │
+│ -> Visible to all YAML consumers (Hugo, Astro, Docusaurus, OKF tools)    │
 ├─────────────────────────────────────────────────────────────────────────┤
-│ TIER 2: ODS Engine Keys (Scoped under ods:)                            │
-│ profile, status, id, share, depends, related, resources, code, context │
-│ -> Scoped to prevent collision with SSG reserved template variables     │
+│ TIER 2: Flat ODS Engine Keys (Scoped under ods:)                        │
+│ profile, status, id, share, entity, domain, schema, relations,          │
+│ invariants, tier, valid_from, valid_to, mutations, pin, depends,        │
+│ related, resources, code, context                                       │
+│ -> Flat engine metadata with zero unnecessary indentation wrappers      │
 ├─────────────────────────────────────────────────────────────────────────┤
 │ TIER 3: Workspace Manifest Keys (In root ods.toml only)                │
-│ spec, ignore, custom_profiles, packs, aliases, specs, service           │
+│ spec, ignore, custom_profiles, packs, aliases, ontology, memory, service│
 │ -> Repository-wide boundary and discovery configuration                 │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
-
-| Layer | Placement | Target Consumers | Purpose |
-| :--- | :--- | :--- | :--- |
-| **1. Universal** | **Top-level only** | Any YAML consumer (SSGs, CMSs, search indexers, Obsidian) | Common metadata that should be universally readable. |
-| **2. ODS Engine** | **Under `ods:` map only** | ODS CLI, linters, AI agents, context builders | Engine-specific metadata for DAG edges, assets, and AI context. |
-| **3. Workspace** | **Root `ods.toml` only** | ODS runtime, CI runners, build systems | Global repository settings, ignore patterns, and pack imports. |
 
 ---
 
@@ -160,9 +197,19 @@ ods:
 
 | Key | Engine Subsystem | Auto-loaded in `ods context`? | Verified by `ods lint`? | Key Purpose |
 | :--- | :--- | :---: | :---: | :--- |
+| **`ods.entity`** | Ontology Subsystem | **Yes** (Identity header) | **Yes** (valid identifier) | Class/concept name in Domain Graph. |
+| **`ods.domain`** | Ontology Subsystem | **Yes** (Domain header) | **Yes** (valid identifier) | Business domain boundary partition. |
+| **`ods.schema`** | Ontology Subsystem | **Yes** (Schema shapes) | **Yes** (path exists on disk) | "Paid at the door" disk schema contract. |
+| **`ods.relations`** | Ontology Subsystem | **Yes** (Typed closure) | **Yes** (targets exist, valid enum) | Directed typed semantic graph edges. |
+| **`ods.invariants`**| Ontology Subsystem | **Yes** (Guardrail list) | **Yes** (parseable expression) | Deterministic boolean refusal rules. |
+| **`ods.tier`** | Memory Subsystem | **Yes** (Memory filter) | **Yes** (valid tier enum) | Cognitive memory classification. |
+| **`ods.valid_from`**| Memory Subsystem | **Yes** (Temporal filter) | **Yes** (ISO-8601) | Real-world validity start instant. |
+| **`ods.valid_to`** | Memory Subsystem | **Yes** (Staleness gate) | **Yes** (valid_to $\ge$ valid_from) | Real-world expiration instant (`null` = active). |
+| **`ods.mutations`** | Memory Subsystem | **Yes** (State delta) | **Yes** (entity/id/property present) | Graphiti-style structured attribute changes. |
+| **`ods.pin`** | Memory Subsystem | **No** (Pruning flag) | **Yes** (boolean) | Protects from automated decay pruning. |
 | **`ods.depends`** | Knowledge Graph | **Yes** (up to `max-depth`) | **Yes** (strict DAG, no cycles) | Hard structural prerequisites. |
-| **`ods.related`** | Discovery Graph | **No** (opt-in via flag) | **Yes** (path must exist) | Soft associative reading. |
-| **`ods.resources`** | Asset Inventory | **No** (static metadata) | **Yes** (file must exist on disk) | Physical non-Markdown attachments (PDF, CSV). |
+| **`ods.related`** | Discovery Graph | **Yes** (1-line index) | **Yes** (path must exist) | Soft associative reading. |
+| **`ods.resources`** | Asset Inventory | **Yes** (Schema metadata) | **Yes** (file must exist on disk) | Physical non-Markdown attachments (PDF, CSV). |
 | **`ods.code`** | Code Bindings | **Optional** (`--with-code`) | **Yes** (path exists, valid role, no `:L45`) | Links to implementation, tests, and infra. |
 | **`ods.context.load`**| AI Prompt Scoping | **Yes** (injected directly) | **Yes** (file must exist on disk) | Auxiliary JSON schemas, CSVs, and fixtures. |
 | **`ods.context.max-depth`**| Traversal Bound | Governs recursion limit | **Yes** (integer $\ge 0$) | Max graph distance to follow `depends`. |
@@ -174,7 +221,7 @@ ods:
 
 When scaffolding (`ods new`), adopting (`ods adopt`), or formatting (`ods fmt`), tools MUST emit keys inside the `ods:` map in this exact sequence:
 
-$$\text{profile} \longrightarrow \text{status} \longrightarrow \text{id} \longrightarrow \text{share} \longrightarrow \text{depends} \longrightarrow \text{related} \longrightarrow \text{resources} \longrightarrow \text{code} \longrightarrow \text{context}$$
+$$\text{profile} \longrightarrow \text{status} \longrightarrow \text{id} \longrightarrow \text{share} \longrightarrow \text{entity} \longrightarrow \text{domain} \longrightarrow \text{schema} \longrightarrow \text{relations} \longrightarrow \text{invariants} \longrightarrow \text{tier} \longrightarrow \text{valid\_from} \longrightarrow \text{valid\_to} \longrightarrow \text{mutations} \longrightarrow \text{pin} \longrightarrow \text{depends} \longrightarrow \text{related} \longrightarrow \text{resources} \longrightarrow \text{code} \longrightarrow \text{context}$$
 
 > **Note**: Parsers MUST accept engine keys in any order; only emit/formatting tooling enforces the canonical sequence.
 

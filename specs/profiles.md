@@ -50,7 +50,7 @@ Profile section matching is heading-level agnostic between H2 and H3: an expecte
 
 ## 3. Standard Profiles Catalog
 
-ODS provides 13 built-in standard profiles that cover common software engineering, autonomous agent execution, and organizational documentation:
+ODS 1.1 provides 17 built-in standard profiles that cover software engineering, neuro-symbolic domain modeling, autonomous agent cognition, and verifiable computations:
 
 | Profile | Intent & Usage | Expected H2/H3 Sections (`##` or `###`) |
 | :--- | :--- | :--- |
@@ -67,6 +67,10 @@ ODS provides 13 built-in standard profiles that cover common software engineerin
 | **`checklist`** | Verifiable quality gates, deployment checklists, and release criteria. | `Overview`, `Items`, `Verification`, `Notes` |
 | **`agent`** | Autonomous agent instructions, prompt execution contracts, and agent runbooks (`agent.md`). | `Goal`, `Task`, `Scope`, `Non-Scope`, `Context`, `Inputs`, `Constraints`, `Priority`, `Steps`, `Output`, `Success Criteria`, `Failure Modes`, `Dependencies`, `Assumptions`, `Examples` |
 | **`skill`** | Reusable agent capability packages, tool integrations, and execution runbooks (`SKILL.md`). | `Purpose`, `Capability`, `Activation`, `Scope`, `Non-Scope`, `Inputs`, `Outputs`, `Workflow`, `Rules`, `Priority`, `Validation`, `Eval`, `Resources`, `Tools`, `Lifecycle`, `Traceability` |
+| **`ontology`** | Neuro-symbolic entity class definition, domain invariants, and technical mappings. | `Overview`, `Attributes`, `Relationships`, `Invariants`, `Examples` |
+| **`memory-episode`** | Time-stamped episodic interaction trace, session log, and state delta. | `Interaction Summary`, `Tool Execution Trace`, `State Mutations` |
+| **`memory-profile`** | Distilled living state profile for an entity or user synthesized across episodes. | `Profile Summary`, `Core Preferences`, `Active State`, `Recent Decisions` |
+| **`attested-computation`** | Verifiable computation carrying a sanctioned query/code runner and deterministic attester. | `Computation`, `Parameters`, `Verification Rationale` |
 
 ---
 

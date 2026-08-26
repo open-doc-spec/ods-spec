@@ -42,7 +42,8 @@ The normative rules live in [`specs/`](../specs/README.md). Come back to them wh
 | 4 | [Bind files and code](04-bind-code-and-files.md) | The doc must point at a diagram, schema, or function. |
 | 5 | [Give AI a reading list](05-ai-reading-list.md) | Agents should read a few files, not the whole repo. |
 | 6 | [Run the workspace](06-run-the-workspace.md) | A team will lint, rename, and discover docs in CI. |
-| 7 | [Extend ODS](07-extend-ods.md) | You need custom profiles, packs, or the engine contract. |
+| 7 | [Ontologies & Agent Memory](07-ontologies-and-memory.md) | You are building neuro-symbolic entity models and cognitive memory for AI. |
+| 8 | [Extend ODS](07-extend-ods.md) | You need custom profiles, packs, or the engine contract. |
 
 Pocket references (any time):
 

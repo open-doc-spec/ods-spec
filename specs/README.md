@@ -79,21 +79,22 @@ The specification is structured into 10 focused modules and a terminology refere
 
 ```
 schemas/             # Machine-readable JSON Schemas (Draft 2020-12)
-├── 1.0.0/
-│   ├── document.schema.json  # Frontmatter schema
-│   ├── config.schema.json    # ods.toml schema
+├── 1.1.0/           # Latest ODS 1.1 Schemas (Flat Pareto, Ontologies, Memory & OKF Superset)
+│   ├── document.schema.json  # Frontmatter schema with x-ods-lifecycle metadata
+│   ├── config.schema.json    # ods.toml workspace schema
 │   └── profile.schema.json   # Custom profile schema
+├── 1.0.0/           # Legacy ODS 1.0 Baseline Schemas
 guides/              # Human learning track (start at guides/README.md)
 specs/
 ├── README.md        # Chapter 01 · Specification map (you are here) — not the tutorial
-├── core.md          # Chapter 02 · Format Model, Binary Compliance & Lifecycle Operations
-├── keys.md          # Chapter 03 · Frontmatter Key Dictionary & 3-Tier Placement Rules
-├── profiles.md      # Chapter 04 · Structural Profiles, Expected Headings & Packs
-├── graph.md         # Chapter 05 · Document Graph, Path-Derived IDs & DAG Edges
-├── context.md       # Chapter 06 · Deterministic Bounded AI Context & Token Optimization
-├── assets.md        # Chapter 07 · Non-Markdown Resources & Source Code Bindings
+├── core.md          # Chapter 02 · Format Model, Binary Compliance & OKF Superset
+├── keys.md          # Chapter 03 · Frontmatter Key Dictionary & Flat Pareto Rules
+├── profiles.md      # Chapter 04 · Structural Profiles (17 Standard Shapes) & Packs
+├── graph.md         # Chapter 05 · Dual-Graph (Domain & Lexical) & Bi-Temporal Memory
+├── context.md       # Chapter 06 · Bounded AI Context, Trust Tiers & Token Optimization
+├── assets.md        # Chapter 07 · Non-Markdown Resources, Code Bindings & Attestations
 ├── indexes.md       # Chapter 08 · Workspace Config (ods.toml) & Progressive Discovery
-├── validation.md    # Chapter 09 · Normative Lint Rules, Diagnostics & Tooling Contract
+├── validation.md    # Chapter 09 · Normative Lint Rules (ONT-*, MEM-*, OKF-*, ATT-*)
 ├── scope.md         # Chapter 10 · Boundaries, Non-Goals & Architectural Trade-offs
 └── glossary.md      # Reference · Exhaustive Normative Terminology Dictionary & Disambiguation
 ```

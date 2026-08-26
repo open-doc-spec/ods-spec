@@ -32,15 +32,14 @@ This document provides normative guidance and operational heuristics for AI codi
 When reading, updating, or generating documentation in an ODS workspace, agents MUST follow these mandatory constraints:
 
 1. **Never Invent `title:` in Frontmatter**:
-   - The document title exists **only** as the first `# H1` line in the Markdown body prose.
-   - Frontmatter MUST NOT contain a `title:` key.
+   - In pure ODS authoring, the document title exists **only** as the first `# H1` line in the Markdown body prose.
+   - For Google OKF v0.2 compatibility, top-level `title:` and `type:` are preserved and accepted without error.
 
-2. **Strict 3-Tier Key Placement**:
-   - **Universal keys** (`description`, `tags`, `owner`, `created`, `updated`) MUST be placed at the **top level** of frontmatter.
-   - **ODS engine keys** (`profile`, `status`, `id`, `share`, `depends`, `related`, `resources`, `code`, `context`) MUST be nested under the **`ods:`** block.
-   - Never nest `tags` or `description` under `ods:`.
-   - Never put operational execution keys (`role`, `help`, `qualification_gate`, `context_resolution_priority`, `refusal_guardrails`, `workflow`, `tools`, `eval`, `decision`, `branch`) in frontmatter. Operational contracts belong in standard `##` H2 body headings.
-   - Workspace boundary keys (`spec`, `ignore`, `custom_profiles`, `packs`, `aliases`) belong ONLY in root `ods.toml`.
+2. **Strict 3-Tier Key Placement & Flat Pareto Model**:
+   - **Universal & OKF native keys** (`description`, `tags`, `owner`, `created`, `updated`, `type`, `title`, `resource`, `sources`, `usage_window`, `generated`, `verified`, `status`, `stale_after`, `runtime`, `parameters`, `computation`, `executor`, `attester`) MUST be placed at the **top level** of frontmatter.
+   - **Flat ODS engine keys** (`profile`, `status`, `id`, `share`, `entity`, `domain`, `schema`, `relations`, `invariants`, `tier`, `valid_from`, `valid_to`, `mutations`, `pin`, `depends`, `related`, `resources`, `code`, `context`) MUST be placed directly under the **`ods:`** block with zero unnecessary indentation.
+   - Never nest universal keys (`tags`, `description`, `owner`) under `ods:`.
+   - Workspace boundary keys (`spec`, `ignore`, `custom_profiles`, `packs`, `aliases`, `ontology`, `memory`) belong ONLY in root `ods.toml`.
 
 3. **Maintain Knowledge Graph Purity**:
    - `ods.depends` is strictly for conceptual dependencies to other **Markdown documents**.
@@ -61,8 +60,8 @@ When reading, updating, or generating documentation in an ODS workspace, agents 
    - Hard prerequisites belong in `ods.depends`. Soft references belong in `ods.related`.
    - The `depends` graph MUST NOT contain cyclic loops.
 
-8. **Leverage JSON Schema for Syntactic Validation**:
-   - When generating or updating frontmatter, validate structure against [`schemas/1.0.0/document.schema.json`](./schemas/1.0.0/document.schema.json).
+8. **Leverage JSON Schema 1.1 for Syntactic Validation**:
+   - When generating or updating frontmatter, validate structure against [`schemas/1.1.0/document.schema.json`](./schemas/1.1.0/document.schema.json).
    - Recognize that `$schema` in frontmatter is optional; never reject or alter valid documents that omit `$schema`.
 
 ---
@@ -72,10 +71,11 @@ When reading, updating, or generating documentation in an ODS workspace, agents 
 When answering questions, planning code modifications, or debugging issues, agents SHOULD follow this bounded context expansion routine instead of scanning the entire workspace:
 
 1. **Identify Entrypoint Document**: Identify the primary ODS document relevant to the user request (e.g. via `ods find` or `ods overview`).
-2. **Auto-Expand Hard Dependencies**: Read the documents listed under `ods.depends` recursively up to `ods.context.max-depth` (default: 2 hops). Note: targets in `depends` do not need re-listing in `context.load`.
-3. **Load Auxiliary Resources**: Read any files listed under `ods.context.load` (including non-Markdown JSON schemas, sample CSVs, and fixtures).
-4. **Inspect Code Bindings**: Use `ods.code` to jump directly to the declared entrypoints (`role: entrypoint`), logic implementations (`role: implementation`), and test fixtures (`role: test`).
-5. **Respect Visibility**: If assembling public-facing exports or unprivileged summaries, skip any document or target marked `ods.share: private`.
+2. **Auto-Expand Hard Dependencies**: Read the documents listed under `ods.depends` recursively up to `ods.context.max-depth` (default: 2 hops).
+3. **Evaluate Trust & Staleness**: Check `verified` (infer trust tier) and skip documents where `now >= stale_after` or `now >= valid_to`.
+4. **Load Auxiliary Resources**: Read any files listed under `ods.context.load` and inspect schema shapes in `ods.schema` and `ods.resources`.
+5. **Inspect Code Bindings**: Use `ods.code` to jump directly to declared entrypoints, logic implementations, and test fixtures using AST symbol extraction.
+6. **Respect Visibility**: If assembling public-facing exports or unprivileged summaries, skip any document or target marked `ods.share: private`.
 
 ---
 
@@ -98,6 +98,10 @@ When authoring new documents, pick the profile matching the document's intent an
 | `checklist` | Verifiable deployment or release gates | Overview, Items, Verification, Notes |
 | `agent` | Autonomous agent instructions / prompt execution contracts (`agent.md`) | Goal, Task, Scope, Non-Scope, Context, Inputs, Constraints, Priority, Steps, Output, Success Criteria, Failure Modes, Dependencies, Assumptions, Examples |
 | `skill` | Reusable skill packages and tool contracts (`SKILL.md`) | Purpose, Capability, Activation, Scope, Non-Scope, Inputs, Outputs, Workflow, Rules, Priority, Validation, Eval, Resources, Tools, Lifecycle, Traceability |
+| `ontology` | Neuro-symbolic entity class definition, domain invariants, and technical mappings | Overview, Attributes, Relationships, Invariants, Examples |
+| `memory-episode` | Time-stamped episodic interaction trace, session log, and state delta | Interaction Summary, Tool Execution Trace, State Mutations |
+| `memory-profile` | Distilled living state profile for an entity or user synthesized across episodes | Profile Summary, Core Preferences, Active State, Recent Decisions |
+| `attested-computation` | Verifiable computation carrying a sanctioned query/code runner and deterministic attester | Computation, Parameters, Verification Rationale |
 
 ---
 

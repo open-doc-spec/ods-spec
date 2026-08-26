@@ -1,0 +1,903 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/document.schema.json",
+  "title": "ODS Document Frontmatter Schema (v1.1.0 — Flat Pareto with Key Lifecycle)",
+  "description": "Machine-readable JSON Schema for Open Document Spec (ODS v1.1.0) Markdown YAML frontmatter. Enforces the flat Pareto key model with direct ontology and memory keys under ods:, native Google OKF v0.2 top-level keys, and 'x-ods-lifecycle' metadata tracking key introduction, status, spec chapter, and versioning.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional URI of the ODS document frontmatter schema for editor auto-completion and validation.",
+      "x-ods-lifecycle": {
+        "introduced": "1.0.0",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/core.md#schema-validation"
+      }
+    },
+    "description": {
+      "type": "string",
+      "description": "Tier 1 / OKF: High-level summary of the document or concept purpose (used in search and previews).",
+      "x-ods-lifecycle": {
+        "introduced": "1.0.0",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/keys.md#description"
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "description": "Tier 1 / OKF: Categorical discovery keywords and search facets.",
+      "x-ods-lifecycle": {
+        "introduced": "1.0.0",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/keys.md#tags"
+      }
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^(team|user|role|agent|process):[a-z0-9_.-]+$",
+      "description": "Tier 1: Accountable team, user, role, agent, or process maintainer.",
+      "x-ods-lifecycle": {
+        "introduced": "1.0.0",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/keys.md#owner"
+      }
+    },
+    "created": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
+      "description": "Tier 1: Document creation timestamp (YYYY-MM-DD or ISO-8601).",
+      "x-ods-lifecycle": {
+        "introduced": "1.0.0",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/keys.md#created"
+      }
+    },
+    "updated": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
+      "description": "Tier 1: Document last modified timestamp (YYYY-MM-DD or ISO-8601).",
+      "x-ods-lifecycle": {
+        "introduced": "1.0.0",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/keys.md#updated"
+      }
+    },
+    "type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "OKF v0.2 Native: Short string identifying the kind of concept (e.g., 'BigQuery Table', 'Metric', 'Attested Computation', 'Playbook'). Treated as concept type / profile alias.",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "okf_version": "0.2",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/core.md#okf-type-interoperability"
+      }
+    },
+    "title": {
+      "type": "string",
+      "description": "OKF v0.2 Native / Optional: Display name for concept. In pure ODS, document title is defined by the first # H1 heading.",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "okf_version": "0.2",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/core.md#okf-title-handling"
+      }
+    },
+    "resource": {
+      "type": "string",
+      "description": "OKF v0.2 Native: Canonical URI uniquely identifying the underlying physical asset the concept describes.",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "okf_version": "0.2",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/assets.md#okf-resource-uri"
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/okfSourceEntry"
+      },
+      "description": "OKF v0.2 Native / Provenance: Materials and upstream artifacts this concept derives from, with objective credibility signals.",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "okf_version": "0.2",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/graph.md#provenance-sources"
+      }
+    },
+    "usage_window": {
+      "$ref": "#/$defs/timeWindow",
+      "description": "OKF v0.2 Native: Framing datetime range { from, to } for source usage counts.",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "okf_version": "0.2",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/graph.md#provenance-usage-window"
+      }
+    },
+    "generated": {
+      "$ref": "#/$defs/actorEvent",
+      "description": "OKF v0.2 Native: Records how and when the current content was created: { by, at }.",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "okf_version": "0.2",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/core.md#actor-generated-metadata"
+      }
+    },
+    "verified": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/actorEvent"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/actorEvent"
+          }
+        }
+      ],
+      "description": "OKF v0.2 Native: Records who or what has verified the content against its sources or underlying resource.",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "okf_version": "0.2",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/context.md#trust-tier-verification"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "stable",
+        "deprecated",
+        "archived"
+      ],
+      "default": "stable",
+      "description": "OKF / ODS Lifecycle state: draft | stable | deprecated | archived.",
+      "x-ods-lifecycle": {
+        "introduced": "1.0.0",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/core.md#status-lifecycle"
+      }
+    },
+    "stale_after": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
+      "description": "OKF v0.2 Native / Lifecycle: Absolute ISO 8601 instant on/after which the concept is considered stale.",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "okf_version": "0.2",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/context.md#staleness-gating"
+      }
+    },
+    "runtime": {
+      "type": "string",
+      "description": "OKF Attested Computation: Execution engine runtime (e.g., 'bigquery', 'postgres', 'dbt', 'python', 'looker').",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "okf_version": "0.2",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/assets.md#attested-computation-runtime"
+      }
+    },
+    "parameters": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/computationParameter"
+      },
+      "description": "OKF Attested Computation: Typed, named holes the agent may bind for execution.",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "okf_version": "0.2",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/assets.md#attested-computation-parameters"
+      }
+    },
+    "computation": {
+      "type": "string",
+      "description": "OKF Attested Computation: Path to a file holding the sanctioned computation, if not inline in Markdown body.",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "okf_version": "0.2",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/assets.md#attested-computation-file"
+      }
+    },
+    "executor": {
+      "$ref": "#/$defs/computationExecutor",
+      "description": "OKF Attested Computation: Execution instructions/code resource and expected receipt fields.",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "okf_version": "0.2",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/assets.md#attested-computation-executor"
+      }
+    },
+    "attester": {
+      "$ref": "#/$defs/computationAttester",
+      "description": "OKF Attested Computation: Deterministic check code resource that verifies receipt.",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "okf_version": "0.2",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/assets.md#attested-computation-attester"
+      }
+    },
+    "okf_version": {
+      "type": "string",
+      "description": "OKF bundle root version declaration (permitted in bundle-root index.md).",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "okf_version": "0.2",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/indexes.md#okf-version-declaration"
+      }
+    },
+    "ods": {
+      "$ref": "#/$defs/odsEngine"
+    }
+  },
+  "$defs": {
+    "odsEngine": {
+      "type": "object",
+      "description": "Tier 2: Flat ODS engine metadata with direct Pareto ontology, memory, knowledge graph, and code bindings.",
+      "properties": {
+        "profile": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]+$",
+          "default": "note",
+          "description": "Profile contract defining document shape and expected headings.",
+          "x-ods-lifecycle": {
+            "introduced": "1.0.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/profiles.md"
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "stable",
+            "deprecated",
+            "archived"
+          ],
+          "default": "stable",
+          "description": "Lifecycle readiness state of the document.",
+          "x-ods-lifecycle": {
+            "introduced": "1.0.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/core.md#status-lifecycle"
+          }
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_/-]+$",
+          "description": "Explicit document ID override.",
+          "x-ods-lifecycle": {
+            "introduced": "1.0.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/graph.md#path-derived-document-ids"
+          }
+        },
+        "share": {
+          "type": "string",
+          "enum": [
+            "public",
+            "org",
+            "private"
+          ],
+          "default": "public",
+          "description": "Visibility boundary for exports and AI context assembly.",
+          "x-ods-lifecycle": {
+            "introduced": "1.0.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/context.md#visibility-boundaries"
+          }
+        },
+        "entity": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Direct Pareto Ontology: Canonical class or business entity name (e.g. 'Customer', 'Order', 'PaymentPolicy').",
+          "x-ods-lifecycle": {
+            "introduced": "1.1.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/graph.md#ontology-entity-classes"
+          }
+        },
+        "domain": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Direct Pareto Ontology: High-level business domain boundary (e.g. 'Billing', 'Identity', 'SupplyChain').",
+          "x-ods-lifecycle": {
+            "introduced": "1.1.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/graph.md#ontology-domain-partitions"
+          }
+        },
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Direct Pareto Ontology: Path to disk schema validator file (.schema.json, .py, .ts) for 'paid at the door' input checking.",
+          "x-ods-lifecycle": {
+            "introduced": "1.1.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/validation.md#schema-disk-contracts"
+          }
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/semanticRelation"
+          },
+          "description": "Direct Pareto Ontology: Typed semantic graph edges (is_a, part_of, owns, governed_by, maps_to, derives_from).",
+          "x-ods-lifecycle": {
+            "introduced": "1.1.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/graph.md#typed-semantic-relations"
+          }
+        },
+        "invariants": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Direct Pareto Ontology: Deterministic boolean assertions / guardrails evaluated prior to state mutations.",
+          "x-ods-lifecycle": {
+            "introduced": "1.1.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/validation.md#neuro-symbolic-invariants"
+          }
+        },
+        "tier": {
+          "type": "string",
+          "enum": [
+            "semantic",
+            "procedural",
+            "episodic",
+            "profile"
+          ],
+          "default": "episodic",
+          "description": "Direct Pareto Memory: Cognitive memory tier classification.",
+          "x-ods-lifecycle": {
+            "introduced": "1.1.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/context.md#cognitive-memory-tiers"
+          }
+        },
+        "valid_from": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
+          "description": "Direct Pareto Memory: Timestamp when fact became true in reality.",
+          "x-ods-lifecycle": {
+            "introduced": "1.1.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/graph.md#bi-temporal-valid-windows"
+          }
+        },
+        "valid_to": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
+          "description": "Direct Pareto Memory: Timestamp when fact expired in reality (null if currently active).",
+          "x-ods-lifecycle": {
+            "introduced": "1.1.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/graph.md#bi-temporal-valid-windows"
+          }
+        },
+        "asserted_at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
+          "description": "Direct Pareto Memory: Timestamp when the agent observed/asserted this fact.",
+          "x-ods-lifecycle": {
+            "introduced": "1.1.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/graph.md#bi-temporal-assertion-times"
+          }
+        },
+        "mutations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/memoryMutation"
+          },
+          "description": "Direct Pareto Memory: Graphiti-style structured attribute changes.",
+          "x-ods-lifecycle": {
+            "introduced": "1.1.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/context.md#entity-state-mutations"
+          }
+        },
+        "pin": {
+          "type": "boolean",
+          "default": false,
+          "description": "Direct Pareto Memory: Protects memory node from automated background decay pruning.",
+          "x-ods-lifecycle": {
+            "introduced": "1.1.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/context.md#memory-decay-pinning"
+          }
+        },
+        "depends": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "Hard conceptual Markdown prerequisites auto-traversed in context resolution.",
+          "x-ods-lifecycle": {
+            "introduced": "1.0.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/graph.md#knowledge-graph-depends"
+          }
+        },
+        "related": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "Soft lateral cross-references forming the discovery graph.",
+          "x-ods-lifecycle": {
+            "introduced": "1.0.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/graph.md#discovery-graph-related"
+          }
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/resourceEntry"
+          },
+          "description": "Asset catalog referencing disk-level non-code files (diagrams, schemas, data).",
+          "x-ods-lifecycle": {
+            "introduced": "1.0.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/assets.md#asset-catalog"
+          }
+        },
+        "code": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/codeBinding"
+          },
+          "description": "Bidirectional bindings to source code implementations and test fixtures.",
+          "x-ods-lifecycle": {
+            "introduced": "1.0.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/assets.md#source-code-bindings"
+          }
+        },
+        "context": {
+          "$ref": "#/$defs/contextConfig",
+          "x-ods-lifecycle": {
+            "introduced": "1.0.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/context.md#prompt-budget-configuration"
+          }
+        },
+        "custom_profile": {
+          "$ref": "#/$defs/customProfileDefinition",
+          "x-ods-lifecycle": {
+            "introduced": "1.0.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/profiles.md#custom-profile-contracts"
+          }
+        }
+      },
+      "propertyNames": {
+        "not": {
+          "enum": [
+            "tags",
+            "description",
+            "owner",
+            "created",
+            "updated"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "semanticRelation": {
+      "type": "object",
+      "properties": {
+        "predicate": {
+          "type": "string",
+          "enum": [
+            "is_a",
+            "part_of",
+            "owns",
+            "governed_by",
+            "maps_to",
+            "depends_on",
+            "derives_from",
+            "exercises",
+            "custom"
+          ]
+        },
+        "custom_predicate": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cardinality": {
+          "type": "string",
+          "pattern": "^(1|N|0\\.\\.1|1\\.\\.1|0\\.\\.N|1\\.\\.N)$"
+        },
+        "binding": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "predicate",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "memoryMutation": {
+      "type": "object",
+      "properties": {
+        "entity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "property": {
+          "type": "string",
+          "minLength": 1
+        },
+        "old_value": {},
+        "new_value": {},
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "entity",
+        "id",
+        "property"
+      ],
+      "additionalProperties": false
+    },
+    "actorEvent": {
+      "type": "object",
+      "properties": {
+        "by": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Actor identity: '<producer>/<version>', 'human:<id>', or 'process:<id>'."
+        },
+        "at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
+          "description": "ISO 8601 timestamp with UTC offset."
+        }
+      },
+      "required": [
+        "by"
+      ],
+      "additionalProperties": false
+    },
+    "timeWindow": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "okfSourceEntry": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable key used to attribute claims via markdown footnotes [^id]."
+        },
+        "resource": {
+          "type": "string",
+          "minLength": 1,
+          "description": "URL, relative path, or scope descriptor for the source."
+        },
+        "title": {
+          "type": "string",
+          "description": "Human-readable label for the source."
+        },
+        "author": {
+          "type": "string",
+          "description": "Actor identity who produced the source."
+        },
+        "usage_count": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Liveness/adoption signal: exercise count over usage window."
+        },
+        "last_modified": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
+          "description": "When the upstream source was last changed."
+        },
+        "usage_window": {
+          "$ref": "#/$defs/timeWindow"
+        }
+      },
+      "required": [
+        "resource"
+      ],
+      "additionalProperties": false
+    },
+    "computationParameter": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "string",
+            "integer",
+            "number",
+            "boolean",
+            "date",
+            "timestamp",
+            "array",
+            "object"
+          ]
+        },
+        "required": {
+          "type": "boolean",
+          "default": true
+        },
+        "description": {
+          "type": "string"
+        },
+        "default": {}
+      },
+      "required": [
+        "name",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "computationExecutor": {
+      "type": "object",
+      "properties": {
+        "resource": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path to execution instructions, skill, or runner script."
+        },
+        "receipt": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Required evidence fields emitted by execution run."
+        }
+      },
+      "required": [
+        "resource"
+      ],
+      "additionalProperties": false
+    },
+    "computationAttester": {
+      "type": "object",
+      "properties": {
+        "resource": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path to deterministic (non-LLM) verification code."
+        }
+      },
+      "required": [
+        "resource"
+      ],
+      "additionalProperties": false
+    },
+    "resourceEntry": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Workspace-relative or document-relative path to asset file."
+        },
+        "description": {
+          "type": "string",
+          "description": "Short explanation of the asset."
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "codeBinding": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!.*:[Ll]?\\d+).*$",
+          "description": "Workspace-relative path to source code file. Line numbers (e.g. :L45) are forbidden."
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "entrypoint",
+            "implementation",
+            "interface",
+            "test",
+            "fixture",
+            "schema",
+            "migration",
+            "config"
+          ],
+          "description": "Semantic role of the bound source code artifact."
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Precise symbol identifier in source file."
+        },
+        "description": {
+          "type": "string",
+          "description": "Short explanation of the code binding."
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "contextConfig": {
+      "type": "object",
+      "properties": {
+        "max-depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 2,
+          "description": "Maximum recursive hops for dependency graph traversal in prompt resolution."
+        },
+        "trust-min": {
+          "type": "string",
+          "enum": [
+            "unverified",
+            "machine-confirmed",
+            "human-reviewed"
+          ],
+          "default": "unverified",
+          "description": "Minimum required trust tier for inclusion in bounded context."
+        },
+        "load": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Auxiliary non-markdown text files to load into context budget."
+        },
+        "ignore": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Subtrees to exclude during recursive dependency loading."
+        }
+      },
+      "additionalProperties": false
+    },
+    "customProfileDefinition": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Unique identifier name for the custom profile."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable summary of the custom profile purpose."
+        },
+        "required_sections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Headings (H2/H3) that MUST appear in conforming documents."
+        },
+        "optional_sections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Headings (H2/H3) that MAY appear in conforming documents."
+        },
+        "required_keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Frontmatter keys that MUST be populated for this profile."
+        }
+      },
+      "required": [
+        "name",
+        "description"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

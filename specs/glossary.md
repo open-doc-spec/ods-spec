@@ -146,7 +146,22 @@ graph TD
 
 ---
 
-## 10. Frequently Confused Concepts (Disambiguation Guide)
+## 10. Neuro-Symbolic Ontologies & Agent Memory
+
+| Term | Normative Definition | Chapter Reference |
+| :--- | :--- | :--- |
+| **Dual-Graph** | The bi-layer knowledge representation connecting the high-level semantic Domain Graph with the physical Markdown Lexical Graph. | [Chapter 05 · graph.md](graph.md#3-the-dual-graph-architecture) |
+| **Domain Graph** | The typed entity network capturing real-world business classes (`ods.entity`), domain boundaries (`ods.domain`), semantic relations (`is_a`, `owns`, `governed_by`), and invariants. | [Chapter 05 · graph.md](graph.md#3-the-dual-graph-architecture) |
+| **Lexical Graph** | The physical workspace hierarchy comprising documents, Markdown AST headings (`# H1` $\rightarrow$ `## H2` $\rightarrow$ `### H3`), code bindings (`ods.code`), and DAG dependencies (`ods.depends`). | [Chapter 05 · graph.md](graph.md#3-the-dual-graph-architecture) |
+| **Bi-Temporal Memory** | The dual-clock temporal modeling paradigm tracking when a statement was true in reality (`valid_from` to `valid_to`) separately from when an agent observed it (`asserted_at`). | [Chapter 05 · graph.md](graph.md#5-bi-temporal-memory-traversal) |
+| **Dreaming** | The asynchronous background cognitive reconciliation process that consolidates episodic interaction traces, resolves state conflicts, prunes decayed facts, and synthesizes living profile documents. | [Chapter 06 · context.md](context.md#2-why-bounded-context) |
+| **Attested Computation** | A verifiable computational contract (`type: Attested Computation`) specifying an executable query/script, parameterized inputs, and an automated deterministic attester verifying execution receipts. | [Chapter 07 · assets.md](assets.md#9-okf-attested-computation-contracts) |
+| **Trust Tier** | The 3-tier credibility classification (`unverified`, `machine-confirmed`, `human-reviewed`) computed from source usage signals, verification events, and attestation receipts. | [Chapter 06 · context.md](context.md#6-the-context-resolution-algorithm-normative) |
+| **Paid-at-the-door Schema**| A disk-level schema validator referenced by `ods.schema` that strictly validates input and state mutations before agent execution or state persistence. | [Chapter 09 · validation.md](validation.md#4-normative-lint-rules-matrix) |
+
+---
+
+## 11. Frequently Confused Concepts (Disambiguation Guide)
 
 ### 10.1 `depends` vs `related` vs `context.load` vs `resources`
 

@@ -70,31 +70,75 @@ ods:
 
 ---
 
-## 3. The Two Graph Edge Types
+## 3. The Dual-Graph Architecture
 
-ODS standardizes exactly **two** explicit relationship types under the `ods:` mapping:
+ODS 1.1 explicitly formalizes and connects two complementary graph topologies across the workspace:
 
 ```text
-       ┌──────────────────────────────┐
-       │   Current Document (Node)    │
-       └──────────────┬───────────────┘
-                      │
-        ┌─────────────┴─────────────┐
-        │                           │
-  [ ods.depends ]             [ ods.related ]
-  Hard Prerequisite           Soft Reference
-  Directional DAG             Associative Link
-        │                           │
-        ▼                           ▼
-┌───────────────┐           ┌───────────────┐
-│ Target Doc A  │           │ Target Doc B  │
-└───────────────┘           └───────────────┘
+                     ┌────────────────────────────────┐
+                     │          DOMAIN GRAPH          │
+                     │  (Entities & Conceptual Links) │
+                     │   [Customer] --buys--> [Plan]  │
+                     └───────────────┬────────────────┘
+                                     │
+                             grounded_in / cites
+                                     │
+                     ┌───────────────▼────────────────┐
+                     │         LEXICAL GRAPH          │
+                     │  (Documents, AST & Embeddings) │
+                     │   [Doc.md] -> [H2 Chunk: AST]  │
+                     └────────────────────────────────┘
 ```
 
-| Edge Type | Subsystem Role | AI Context Expansion | Cyclic Loops Allowed? |
-| :--- | :--- | :--- | :---: |
-| **`ods.depends`** | **Knowledge Graph** | Auto-traversed transitively up to `max-depth` (default: 2 hops). | **NO (Strict DAG)** |
-| **`ods.related`** | **Discovery Graph** | Skipped by default in AI context (opt-in via `--include-related`). | **YES** |
+1. **Domain Graph**: Captures the real-world business and system semantics:
+   - Entities (`ods.entity`, `ods.domain`).
+   - Typed semantic relations (`ods.relations`: `is_a`, `part_of`, `owns`, `governed_by`, `maps_to`, `derives_from`).
+   - Provenance sources (`sources` / `usage_window`).
+2. **Lexical Graph**: Captures the physical documentation AST hierarchy:
+   - Hard structural prerequisites (`ods.depends` — strict DAG).
+   - Soft lateral discovery references (`ods.related` — cyclic allowed).
+   - Non-markdown asset catalogs (`ods.resources`) and source code bindings (`ods.code`).
+
+---
+
+## 4. Typed Semantic Relations (`ods.relations`)
+
+To enable rich neuro-symbolic reasoning beyond simple document links, documents MAY declare typed semantic relations under `ods.relations`:
+
+```yaml
+ods:
+  entity: Customer
+  domain: Billing
+  relations:
+    - predicate: owns
+      target: entities/subscription.md
+    - predicate: governed_by
+      target: policies/refund-sla.md
+    - predicate: maps_to
+      target: datasets/bq-customers.md
+```
+
+| Predicate | Semantic Meaning | Graph Direction |
+| :--- | :--- | :--- |
+| `is_a` | Inheritance / sub-class classification. | Subclass $\rightarrow$ Superclass |
+| `part_of` | Composition / structural component. | Child $\rightarrow$ Parent Container |
+| `owns` | Domain ownership / lifecycle containment. | Owner $\rightarrow$ Owned Resource |
+| `governed_by` | Policy, SLA, or compliance rule enforcement. | Entity $\rightarrow$ Governing Policy |
+| `maps_to` | Semantic mapping to physical technical asset. | Business Concept $\rightarrow$ Database/API |
+| `derives_from` | Data lineage or calculation dependency. | Derived Asset $\rightarrow$ Origin Source |
+
+---
+
+## 5. Bi-Temporal Memory Traversal
+
+When traversing agent memory nodes (`ods.tier: episodic`), the graph engine applies bi-temporal filtering:
+- **`valid_from` / `valid_to`**: The real-world validity window. Facts where `now >= valid_to` are excluded from active context queries unless an explicit historical timestamp is requested (`ods memory query --at <iso-time>`).
+- **`asserted_at`**: The instant the recording agent observed the fact.
+- **`pin`**: Nodes marked `pin: true` are immune to automated decay and pruning.
+
+---
+
+## 6. Structural Edge Types (`depends` & `related`)
 
 ---
 

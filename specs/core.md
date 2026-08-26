@@ -54,19 +54,27 @@ An ODS Document is a Markdown file (`.md`) containing optional YAML frontmatter.
 ┌─────────────────────────────────────────────────────────────────────────┐
 │ YAML Frontmatter (Optional)                                             │
 │ ---                                                                     │
-│ # Tier 1: Universal Keys (Visible to all YAML/SSG tools)                │
+│ # Tier 1: Universal & OKF Native Keys (Visible to all YAML/OKF tools)   │
 │ description: Universal summary for previews and search                  │
 │ tags: [auth, security]                                                  │
+│ type: BigQuery Table                                                    │
+│ sources: [{ id: bq-src, resource: datasets/auth.sql }]                  │
+│ verified: [{ by: "human:ahormati", at: "2026-08-20T00:00:00Z" }]        │
 │                                                                         │
-│ # Tier 2: ODS Engine Keys (Scoped to prevent keyword collisions)         │
+│ # Tier 2: Flat ODS Engine Keys (Direct under ods:, zero extra nesting!) │
 │ ods:                                                                    │
 │   profile: guide                                                        │
 │   status: stable                                                        │
+│   entity: UserSession                                                   │
+│   domain: Identity                                                      │
+│   schema: schemas/session.schema.json                                   │
+│   relations: [{ predicate: is_a, target: entities/session.md }]        │
+│   invariants: ["mrr >= 0", "email is required"]                         │
 │   depends: [../crypto/tokens.md]                                        │
 │ ---                                                                     │
 ├─────────────────────────────────────────────────────────────────────────┤
 │ Body Prose (Markdown)                                                   │
-│ # Document Title (Sole Title Definition)                                │
+│ # Document Title (Sole Title Definition in pure ODS)                    │
 │                                                                         │
 │ ## Overview                                                             │
 │ Human-readable explanation, decisions, and usage.                       │
@@ -77,21 +85,26 @@ An ODS Document is a Markdown file (`.md`) containing optional YAML frontmatter.
 - Frontmatter MUST be a single YAML document delimited by `---` on the first line of the file and closed by `---` on its own line.
 - Frontmatter is **optional**. All fields within frontmatter are **optional**.
 - Frontmatter contains machine-readable metadata intended for developer tooling, search indexers, and AI agent runtimes.
-- Frontmatter MUST NOT contain a `title:` key. The document title is declared exclusively by the first `# H1` heading in the body.
-- Parsers and tools MUST preserve unknown frontmatter keys to guarantee zero-friction interoperability with Static Site Generators (SSGs) like Hugo, Astro, Jekyll, Docusaurus, Next.js, and Obsidian.
+- In pure ODS authoring, frontmatter SHOULD NOT contain a `title:` key (the document title is defined by the first `# H1` heading). However, for Google OKF v0.2 compatibility, parsers MUST accept top-level `title:` and `type:` without error.
+- Parsers and tools MUST preserve unknown frontmatter keys to guarantee zero-friction interoperability with Static Site Generators (SSGs) and external tools.
 
-### 3.2 Body Prose
+### 3.2 Native Google OKF v0.2 Superset Interoperability
+ODS 1.1 operates as a strict superset of Google's Open Knowledge Format (OKF v0.2):
+- Any valid OKF bundle (`index.md`, `log.md`, `references/`, `computations/`) is automatically a 100% compliant ODS workspace without configuration or file conversions.
+- Top-level OKF keys (`type`, `title`, `description`, `resource`, `tags`, `sources`, `usage_window`, `generated`, `verified`, `status`, `stale_after`, `runtime`, `parameters`, `computation`, `executor`, `attester`, `okf_version`) are first-class native primitives.
+
+### 3.3 Body Prose
 - The body contains human-readable Markdown prose (purpose, architectural rationale, workflows, diagrams, and code snippets).
 - The body MUST NOT re-declare metadata already declared in frontmatter (such as `owner`, `status`, or edge lists).
-- The document's primary title MUST be defined as the first `# H1` heading in the body.
+- In standard ODS documents, the document's primary title MUST be defined as the first `# H1` heading in the body.
 
-### 3.3 Machine-Readable JSON Schemas
+### 3.4 Machine-Readable JSON Schemas
 The normative data structures of ODS are formally defined using **JSON Schema Draft 2020-12**:
-- **Frontmatter Schema**: [`schemas/1.0.0/document.schema.json`](../schemas/1.0.0/document.schema.json) (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.0.0/document.schema.json`)
-- **Workspace Config Schema**: [`schemas/1.0.0/config.schema.json`](../schemas/1.0.0/config.schema.json) (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.0.0/config.schema.json`)
-- **Custom Profile Schema**: [`schemas/1.0.0/profile.schema.json`](../schemas/1.0.0/profile.schema.json) (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.0.0/profile.schema.json`)
+- **Frontmatter Schema (v1.1.0)**: [`schemas/1.1.0/document.schema.json`](../schemas/1.1.0/document.schema.json) (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/document.schema.json`)
+- **Workspace Config Schema (v1.1.0)**: [`schemas/1.1.0/config.schema.json`](../schemas/1.1.0/config.schema.json) (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/config.schema.json`)
+- **Custom Profile Schema (v1.1.0)**: [`schemas/1.1.0/profile.schema.json`](../schemas/1.1.0/profile.schema.json) (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/profile.schema.json`)
 
-Tooling, linters, and language servers SHOULD use these schemas for Stage 1 structural validation and editor autocompletion.
+Tooling, linters, and language servers SHOULD use these schemas for Stage 1 structural validation, key lifecycle verification (`x-ods-lifecycle`), and editor autocompletion.
 
 ---
 
