@@ -69,10 +69,11 @@ graph TD
 | :--- | :--- | :--- |
 | **Workspace** | A directory tree declared by the presence of a root `ods.toml` manifest containing a `spec` version. The workspace defines the boundary for document discovery, identity resolution, graph traversal, and CI validation. | [Chapter 08 · indexes.md](indexes.md#2-workspace-marker-odstoml) |
 | **Document** | Any standard Markdown (`.md`) file located within an ODS workspace. ODS documents maintain 100% Markdown compatibility without requiring proprietary file extensions. Frontmatter is optional. | [Chapter 02 · core.md](core.md#3-format-model) |
-| **Frontmatter** | A YAML metadata block delimited by opening and closing `---` markers at the top of a document. Contains machine-readable metadata partitioned strictly into 3 tiers. | [Chapter 02 · core.md](core.md#31-frontmatter) |
+| **Frontmatter** | A YAML metadata block delimited by opening and closing `---` markers at the top of a document. Contains machine-readable metadata partitioned strictly into 3 layers. | [Chapter 02 · core.md](core.md#31-frontmatter) |
 | **Body Prose** | The human-readable Markdown text following the frontmatter. Contains narrative explanations, workflows, headings, and code snippets. The document's title is declared exclusively by the first `# H1` heading in the body. | [Chapter 02 · core.md](core.md#32-body-prose) |
-| **3-Tier Key Placement** | The strict architectural partitioning of metadata: **Tier 1 (Universal)** top-level keys (`description`, `tags`, `owner`, `created`, `updated`); **Tier 2 (Engine)** keys scoped under `ods:` (`profile`, `status`, `depends`, `related`, `resources`, `code`, `context`); and **Tier 3 (Operational)** prose contracts placed in `##` H2 body sections. | [Chapter 03 · keys.md](keys.md#3-the-3-tier-metadata-architecture) |
-| **Single Source of Truth (SSOT)** | The core design invariant dictating that every piece of information has exactly one canonical location. Specifically, the document title lives solely in the first `# H1` body header (forbidding `title:` in frontmatter), and prose body text MUST NOT re-declare frontmatter metadata. | [Chapter 02 · core.md](core.md#2-design-principles-priority-order) |
+| **3-Layer Key Placement** | The strict architectural partitioning of metadata: **Layer 1 (Universal & OKF)** top-level keys (`description`, `tags`, `owner`, `author`, `created_at`, `type`, `title`, `sources`); **Layer 2 (Engine)** keys scoped under `ods:` (`profile`, `status`, `depends`, `related`, `resources`, `code`, `context`, `entity`, `memory`); and **Layer 3 (Workspace Boundary)** keys placed in root `ods.toml`. | [Chapter 03 · keys.md](keys.md#3-the-3-layer-key-placement-architecture) |
+| **Bidirectional Aliases** | Pairs of frontmatter keys that are 100% interchangeable and resolve symmetrically in parsers: `created` $\longleftrightarrow$ `created_at`, `updated` $\longleftrightarrow$ `updated_at`. | [Chapter 03 · keys.md](keys.md#64-created--created_at-and-updated--updated_at) |
+| **Single Source of Truth (SSOT)** | The core design invariant dictating that every piece of information has exactly one canonical location. Specifically, the document title lives solely in the first `# H1` body header, and prose body text MUST NOT re-declare frontmatter metadata. | [Chapter 02 · core.md](core.md#2-design-principles-priority-order) |
 | **Unknown Key Preservation** | The mandatory parser and tooling invariant requiring all third-party and unrecognized YAML frontmatter keys (e.g. Astro `hero_image`, Hugo `layout`, Jekyll `permalink`) to be preserved verbatim during formatting, migration, or refactoring. | [Chapter 09 · validation.md](validation.md#5-unknown-content-behavior) |
 
 ---
@@ -83,10 +84,10 @@ graph TD
 | :--- | :--- | :--- |
 | **Path-Derived Document ID** | The default, deterministic identifier of a document, defined as its workspace-relative file path without the `.md` extension, normalized to lowercase with forward slashes `/` (e.g. `guides/auth.md` → `guides/auth`). | [Chapter 05 · graph.md](graph.md#21-default-path-derived-id) |
 | **Explicit Document ID (`ods.id`)** | An optional frontmatter override used primarily during document renaming to preserve existing inbound references without requiring immediate cascading link rewrites. | [Chapter 05 · graph.md](graph.md#22-explicit-override-odsid) |
-| **Knowledge Graph (`ods.depends`)** | Explicit, directional frontmatter edges declaring **hard conceptual prerequisites**. Auto-traversed during AI context resolution up to `max-depth`. MUST form a strict Directed Acyclic Graph (DAG). | [Chapter 05 · graph.md](graph.md#3-graph-edge-types-depends-vs-related) |
-| **Discovery Graph (`ods.related`)** | Explicit frontmatter edges declaring **soft associative relationships** for human cross-referencing. Bidirectional and cyclic edges are permitted. Skipped by default during AI context resolution. | [Chapter 05 · graph.md](graph.md#32-discovery-graph-odsrelated) |
-| **DAG Acyclicity** | The mathematical constraint that `ods.depends` edges MUST NOT contain circular reference loops (e.g. `A → B → C → A`). Enforced deterministically by `ods lint` via topological sorting. | [Chapter 05 · graph.md](graph.md#4-dag-cycle-prevention) |
-| **Knowledge Graph Purity** | The rule restricting `ods.depends` strictly to other **Markdown documents**. Non-Markdown fixtures, schemas, and binary assets MUST NOT be placed in `depends`. | [Chapter 05 · graph.md](graph.md#5-knowledge-graph-purity) |
+| **Knowledge Graph (`ods.depends`)** | Explicit, directional frontmatter edges declaring **hard conceptual prerequisites**. Auto-traversed during AI context resolution up to `max-depth`. MUST form a strict Directed Acyclic Graph (DAG). | [Chapter 05 · graph.md](graph.md#3-the-dual-graph-architecture) |
+| **Discovery Graph & Relations (`ods.related`)** | Unified frontmatter property declaring **soft associative relationships** for lateral reading and **typed semantic domain graph edges** (`is_a`, `owns`, `governed_by`, `maps_to`, `derives_from`). | [Chapter 05 · graph.md](graph.md#4-typed-semantic-relations-odsrelations) |
+| **DAG Acyclicity** | The mathematical constraint that `ods.depends` edges MUST NOT contain circular reference loops (e.g. `A → B → C → A`). Enforced deterministically by `ods lint` via topological sorting. | [Chapter 05 · graph.md](graph.md#8-dag-validation--cycle-prevention) |
+| **Knowledge Graph Purity** | The rule restricting `ods.depends` strictly to other **Markdown documents**. Non-Markdown fixtures, schemas, and binary assets MUST NOT be placed in `depends`. | [Chapter 05 · graph.md](graph.md#7-knowledge-graph-purity-normative) |
 
 ---
 
@@ -94,7 +95,7 @@ graph TD
 
 | Term | Normative Definition | Chapter Reference |
 | :--- | :--- | :--- |
-| **Bounded AI Context** | A deterministic, token-optimized context bundle assembled on demand by the `ods context` engine for LLM prompt windows, eliminating prompt bloat, token exhaustion, and context hallucination. | [Chapter 06 · context.md](context.md#2-the-4-distinct-subsystems-under-ods) |
+| **Bounded AI Context** | A deterministic, token-optimized context bundle assembled on demand by the `ods context` engine for LLM prompt windows, eliminating prompt bloat, token exhaustion, and context hallucination. | [Chapter 06 · context.md](context.md#2-the-6-engine-subsystems-under-ods) |
 | **Context Expansion Algorithm** | The recursive resolution routine that traverses `ods.depends` edges up to `max-depth`, injects `context.load` text fixtures, and prunes paths matched by `context.ignore`. | [Chapter 06 · context.md](context.md#3-context-expansion-algorithm) |
 | **Context Max Depth (`context.max-depth`)** | An integer (default: `2`, maximum: `5`) specifying the maximum recursion depth for transitive dependency resolution along `ods.depends` edges. | [Chapter 06 · context.md](context.md#4-traversal-scoping-max-depth-and-ignore) |
 | **Prompt Fixtures (`ods.context.load`)** | An array of relative paths to auxiliary non-Markdown text files (JSON schemas, sample CSVs, mock payloads) that are explicitly injected into the AI prompt window. | [Chapter 06 · context.md](context.md#5-auxiliary-prompt-fixtures-contextload) |
@@ -106,10 +107,10 @@ graph TD
 
 | Term | Normative Definition | Chapter Reference |
 | :--- | :--- | :--- |
-| **Asset Catalog (`ods.resources`)** | An array of attached non-Markdown files (PDF architecture documents, PNG diagrams, OpenAPI specifications) verified by `ods lint` for disk existence but **never** dumped into AI prompt windows. | [Chapter 07 · assets.md](assets.md#4-the-asset-catalog-odsresources) |
-| **Code Bindings (`ods.code`)** | Structured metadata declarations connecting Markdown documentation to concrete source code files and AST symbols across the repository. | [Chapter 07 · assets.md](assets.md#5-code-bindings-odscode) |
-| **Code Role (`role`)** | One of 8 standardized architectural classifications assigned to a code binding: `entrypoint`, `implementation`, `test`, `schema`, `migration`, `config`, `infrastructure`, or `pipeline`. | [Chapter 07 · assets.md](assets.md#52-the-8-standard-code-roles) |
-| **Symbol-Based Binding (`symbol`)** | Linking documentation to specific programming language constructs (functions, structs, classes, interfaces, constants) rather than fragile, commit-volatile line numbers (`:L45`). | [Chapter 07 · assets.md](assets.md#53-symbol-based-bindings-why-line-numbers-are-forbidden) |
+| **Asset Catalog (`ods.resources`)** | An array of attached non-Markdown files (PDF architecture documents, PNG diagrams, OpenAPI specifications) or external URLs (Figma, Miro, RFCs) verified by `ods lint` for disk existence. | [Chapter 07 · assets.md](assets.md#4-the-asset-catalog-odsresources) |
+| **Code Bindings (`ods.code`)** | Structured metadata declarations connecting Markdown documentation to concrete source code files and AST symbols across the repository via string shorthand or detailed objects. | [Chapter 07 · assets.md](assets.md#5-code-bindings-odscode) |
+| **Code Role (`role`)** | Architectural classification assigned to a code binding: `entrypoint`, `implementation` (default), `interface`, `test`, `fixture`, `schema`, `migration`, `config`, `infrastructure`, or `pipeline`. | [Chapter 07 · assets.md](assets.md#52-the-8-standard-code-roles) |
+| **Symbol-Based Binding (`symbol`)** | Linking documentation to specific programming language constructs (functions, structs, classes, interfaces, constants) via single string or list of strings. | [Chapter 07 · assets.md](assets.md#53-symbol-based-bindings-why-line-numbers-are-forbidden) |
 
 ---
 
@@ -146,7 +147,7 @@ graph TD
 
 ---
 
-## 10. Neuro-Symbolic Ontologies & Agent Memory
+## 10. Domain Modeling & Agent Memory
 
 | Term | Normative Definition | Chapter Reference |
 | :--- | :--- | :--- |

@@ -16,36 +16,35 @@ This directory contains the official, versioned machine-readable **JSON Schemas 
 
 ---
 
-## Spec-to-Schema Traceability Matrix (`x-ods-spec`)
+## Spec-to-Schema Traceability Matrix (`x-ods-lifecycle`)
 
-To ensure seamless maintenance, every key in `document.schema.json` carries an `x-ods-spec` annotation pointing directly to its normative governing chapter in `specs/`:
+To ensure seamless maintenance, every key in `document.schema.json` carries an `x-ods-lifecycle` annotation pointing directly to its normative governing chapter in `specs/`:
 
-| Frontmatter Key | Tier / Namespace | Governing Specification Chapter | Normative Section Anchor |
+| Frontmatter Key | Placement Layer | Governing Specification Chapter | Normative Section Anchor |
 | :--- | :--- | :--- | :--- |
-| `description` | Tier 1 / OKF | [`specs/keys.md`](../specs/keys.md) | `#description` |
-| `tags` | Tier 1 / OKF | [`specs/keys.md`](../specs/keys.md) | `#tags` |
-| `owner` | Tier 1 | [`specs/keys.md`](../specs/keys.md) | `#owner` |
-| `created` / `updated` | Tier 1 | [`specs/keys.md`](../specs/keys.md) | `#created`, `#updated` |
-| `type` | Tier 1 (OKF Native) | [`specs/core.md`](../specs/core.md) | `#okf-type-interoperability` |
-| `title` | Tier 1 (OKF Native) | [`specs/core.md`](../specs/core.md) | `#okf-title-handling` |
-| `resource` | Tier 1 (OKF Native) | [`specs/assets.md`](../specs/assets.md) | `#okf-resource-uri` |
-| `sources` / `usage_window`| Tier 1 (OKF Native) | [`specs/graph.md`](../specs/graph.md) | `#provenance-sources` |
-| `generated` | Tier 1 (OKF Native) | [`specs/core.md`](../specs/core.md) | `#actor-generated-metadata` |
-| `verified` | Tier 1 (OKF Native) | [`specs/context.md`](../specs/context.md) | `#trust-tier-verification` |
-| `status` / `stale_after` | Tier 1 (OKF Native) | [`specs/core.md`](../specs/core.md), [`specs/context.md`](../specs/context.md) | `#status-lifecycle`, `#staleness-gating` |
-| `runtime`, `parameters`, `executor`, `attester` | Tier 1 (OKF Attested Computation) | [`specs/assets.md`](../specs/assets.md) | `#attested-computation-contracts` |
-| `ods.profile` | Tier 2 (`ods:`) | [`specs/profiles.md`](../specs/profiles.md) | `#profile-contracts` |
-| `ods.status`, `ods.id`, `ods.share` | Tier 2 (`ods:`) | [`specs/core.md`](../specs/core.md), [`specs/context.md`](../specs/context.md) | `#status-lifecycle`, `#visibility-boundaries` |
-| `ods.entity`, `ods.domain` | Tier 2 (Pareto Ontology) | [`specs/graph.md`](../specs/graph.md) | `#ontology-entity-classes` |
-| `ods.schema` | Tier 2 (Pareto Ontology) | [`specs/validation.md`](../specs/validation.md) | `#schema-disk-contracts` |
-| `ods.relations` | Tier 2 (Pareto Ontology) | [`specs/graph.md`](../specs/graph.md) | `#typed-semantic-relations` |
-| `ods.invariants` | Tier 2 (Pareto Ontology) | [`specs/validation.md`](../specs/validation.md) | `#neuro-symbolic-invariants` |
-| `ods.tier` | Tier 2 (Pareto Memory) | [`specs/context.md`](../specs/context.md) | `#cognitive-memory-tiers` |
-| `ods.valid_from`, `ods.valid_to` | Tier 2 (Pareto Memory) | [`specs/graph.md`](../specs/graph.md) | `#bi-temporal-valid-windows` |
-| `ods.mutations`, `ods.pin` | Tier 2 (Pareto Memory) | [`specs/context.md`](../specs/context.md) | `#entity-state-mutations`, `#memory-decay-pinning` |
-| `ods.depends`, `ods.related` | Tier 2 (`ods:`) | [`specs/graph.md`](../specs/graph.md) | `#knowledge-graph-depends`, `#discovery-graph-related` |
-| `ods.resources`, `ods.code` | Tier 2 (`ods:`) | [`specs/assets.md`](../specs/assets.md) | `#asset-catalog`, `#source-code-bindings` |
-| `ods.context` | Tier 2 (`ods:`) | [`specs/context.md`](../specs/context.md) | `#prompt-budget-configuration` |
+| `description` | Layer 1 / OKF | [`specs/keys.md`](../specs/keys.md) | `#description` |
+| `tags` | Layer 1 / OKF | [`specs/keys.md`](../specs/keys.md) | `#tags` |
+| `owner`, `author` | Layer 1 | [`specs/keys.md`](../specs/keys.md) | `#owner-and-author` |
+| `created` / `created_at`, `updated` / `updated_at` | Layer 1 | [`specs/keys.md`](../specs/keys.md) | `#created-and-created_at`, `#updated-and-updated_at` |
+| `type` | Layer 1 (OKF Native) | [`specs/core.md`](../specs/core.md) | `#okf-type-interoperability` |
+| `title` | Layer 1 (OKF Native) | [`specs/core.md`](../specs/core.md) | `#okf-title-handling` |
+| `resource` | Layer 1 (OKF Native) | [`specs/assets.md`](../specs/assets.md) | `#okf-resource-uri` |
+| `sources` / `usage_window`| Layer 1 (OKF Native) | [`specs/graph.md`](../specs/graph.md) | `#provenance-sources` |
+| `generated` | Layer 1 (OKF Native) | [`specs/core.md`](../specs/core.md) | `#actor-generated-metadata` |
+| `verified` | Layer 1 (OKF Native) | [`specs/context.md`](../specs/context.md) | `#trust-tier-verification` |
+| `status` / `stale_after` | Layer 1 (OKF Native) | [`specs/core.md`](../specs/core.md), [`specs/context.md`](../specs/context.md) | `#status-lifecycle`, `#staleness-gating` |
+| `runtime`, `parameters`, `executor`, `attester` | Layer 1 (OKF Attested Computation) | [`specs/assets.md`](../specs/assets.md) | `#attested-computation-contracts` |
+| `memory` (`tier`, `valid_from`, `valid_to`, `asserted_at`, `mutations`, `pin`) | Layer 1 / Layer 2 | [`specs/context.md`](../specs/context.md), [`specs/graph.md`](../specs/graph.md) | `#cognitive-memory-block` |
+| `ods.profile` | Layer 2 (`ods:`) | [`specs/profiles.md`](../specs/profiles.md) | `#profile-contracts` |
+| `ods.status`, `ods.id`, `ods.share` | Layer 2 (`ods:`) | [`specs/core.md`](../specs/core.md), [`specs/context.md`](../specs/context.md) | `#status-lifecycle`, `#visibility-boundaries` |
+| `ods.entity`, `ods.domain` | Layer 2 (Domain Modeling) | [`specs/graph.md`](../specs/graph.md) | `#domain-entity-classes` |
+| `ods.schema` | Layer 2 (Domain Modeling) | [`specs/validation.md`](../specs/validation.md) | `#schema-disk-contracts` |
+| `ods.invariants` | Layer 2 (Domain Modeling) | [`specs/validation.md`](../specs/validation.md) | `#neuro-symbolic-invariants` |
+| `ods.depends` | Layer 2 (`ods:`) | [`specs/graph.md`](../specs/graph.md) | `#knowledge-graph-depends` |
+| `ods.related` | Layer 2 (`ods:`) | [`specs/graph.md`](../specs/graph.md) | `#discovery-graph-and-semantic-relations` |
+| `ods.resources` | Layer 2 (`ods:`) | [`specs/assets.md`](../specs/assets.md) | `#asset-catalog` |
+| `ods.code` | Layer 2 (`ods:`) | [`specs/assets.md`](../specs/assets.md) | `#source-code-bindings` |
+| `ods.context` | Layer 2 (`ods:`) | [`specs/context.md`](../specs/context.md) | `#prompt-budget-configuration` |
 
 ---
 

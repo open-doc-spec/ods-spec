@@ -99,7 +99,7 @@ Copy it as-is. You will grow this file in later pages; you will not replace it.
 These three rules stop most first-week errors. The full dictionary is in [`specs/keys.md`](../specs/keys.md).
 
 1. **No `title:` in frontmatter.** The first `# H1` in the body is the title.
-2. **Universal keys stay on top:** `description`, `tags`, `owner`, `created`, `updated`.
+2. **Universal keys stay on top:** `description`, `tags`, `owner`, `author`, `created` (or `created_at`), `updated` (or `updated_at`).
 3. **Engine keys nest under `ods:`:** `profile`, `status`, and (later) `depends`, `related`, `resources`, `code`, `context`.
 
 Valid shape:
@@ -109,6 +109,8 @@ Valid shape:
 description: One sentence.
 tags:
   - billing
+owner: team:billing
+author: Alice Smith
 ods:
   profile: guide
   status: draft

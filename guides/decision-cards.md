@@ -84,27 +84,20 @@ Never: `tags` under `ods:`. Never: `profile` at top-level. Never: nested namespa
 
 ---
 
-## 5. Minimum keys vs later keys
+## 5. The 5 Canonical Document Recipes
 
-**Write these on day 1**
-
-`description`, `tags`, `ods.profile`, `ods.status`
-
-**Add when building domain ontologies**
-
-`ods.entity`, `ods.domain`, `ods.schema`, `ods.relations`, `ods.invariants`
-
-**Add when recording agent memory**
-
-`ods.tier`, `ods.valid_from`, `ods.valid_to`, `ods.mutations`, `ods.pin`
-
-**Add when two docs relate**
-
-`ods.depends`, `ods.related`
-
-**Add when the doc points at the world**
-
-`ods.resources`, `ods.code`, `ods.context`
+```text
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    THE 5 CANONICAL ODS 1.1 RECIPES                      │
+├───────────────────┬─────────────────────────────────────────────────────┤
+│ 1. DAILY DOC      │ description + tags + ods.profile + ods.status       │
+│ 2. LINKED DOC     │ Recipe 1 + ods.depends / ods.related                │
+│ 3. CODE BINDING   │ Recipe 2 + ods.code (shorthand or symbol list)      │
+│ 4. DOMAIN ENTITY  │ Recipe 1 + ods.entity + ods.related (typed)         │
+│ 5. AGENT MEMORY   │ Recipe 1 + memory: { tier, mutations }              │
+│ 6. ATTESTED COMP  │ type: Attested Computation + runtime + executor     │
+└───────────────────┴─────────────────────────────────────────────────────┘
+```
 
 Dictionary: [`specs/keys.md`](../specs/keys.md).
 

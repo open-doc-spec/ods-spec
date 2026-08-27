@@ -54,23 +54,29 @@ An ODS Document is a Markdown file (`.md`) containing optional YAML frontmatter.
 ┌─────────────────────────────────────────────────────────────────────────┐
 │ YAML Frontmatter (Optional)                                             │
 │ ---                                                                     │
-│ # Tier 1: Universal & OKF Native Keys (Visible to all YAML/OKF tools)   │
+│ # Layer 1: Universal & OKF Native Keys (Visible to all YAML/OKF tools)  │
 │ description: Universal summary for previews and search                  │
 │ tags: [auth, security]                                                  │
+│ owner: team:security                                                    │
+│ author: Alice Smith                                                     │
+│ created_at: 2026-08-26                                                  │
 │ type: BigQuery Table                                                    │
 │ sources: [{ id: bq-src, resource: datasets/auth.sql }]                  │
 │ verified: [{ by: "human:ahormati", at: "2026-08-20T00:00:00Z" }]        │
 │                                                                         │
-│ # Tier 2: Flat ODS Engine Keys (Direct under ods:, zero extra nesting!) │
+│ # Layer 2: Scoped ODS Engine Keys (Direct under ods:)                   │
 │ ods:                                                                    │
 │   profile: guide                                                        │
 │   status: stable                                                        │
 │   entity: UserSession                                                   │
 │   domain: Identity                                                      │
 │   schema: schemas/session.schema.json                                   │
-│   relations: [{ predicate: is_a, target: entities/session.md }]        │
 │   invariants: ["mrr >= 0", "email is required"]                         │
 │   depends: [../crypto/tokens.md]                                        │
+│   related:                                                              │
+│     - is_a: SessionModel                                                │
+│     - owns: [Token, RefreshSession]                                     │
+│     - ../policy/data-retention.md                                       │
 │ ---                                                                     │
 ├─────────────────────────────────────────────────────────────────────────┤
 │ Body Prose (Markdown)                                                   │

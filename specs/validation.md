@@ -99,9 +99,15 @@ All conformant ODS linters MUST enforce the following validation rules:
 | | `GRAPH-002` | **Tier 2 (Semantic)** | `ods.depends` targets MUST resolve to existing documents. | **Error** | Fix or remove dangling dependency path. |
 | | `GRAPH-003` | **Tier 2 (Semantic)** | `ods.related` targets MUST resolve to existing documents. | **Error** | Fix or remove dangling related path. |
 | | `GRAPH-004` | **Tier 2 (Semantic)** | `ods.depends` graph MUST NOT contain cyclic dependency loops. | **Error** | Break circular dependency loop using `ods.related`. |
-| **Assets** | `ASSET-001` | **Tier 2 (Semantic)** | `ods.resources[].path` MUST resolve to an existing file. | **Error** | Fix path or verify file existence on disk. |
+| **Entities & Symbols** | `ENT-001` | **Tier 2 (Semantic)** | Symbolic entity targets in `ods.related` MUST resolve to an entity declared in the workspace. | **Error** | Check entity symbol spelling or declare `ods.entity: Name` in target document. |
+| | `ENT-002` | **Tier 2 (Semantic)** | Entity class names declared in `ods.entity` MUST be unique across the workspace. | **Error** | Rename duplicate entity class or disambiguate with `ods.domain`. |
+| | `SYM-001` | **Tier 2 (Semantic)** | `@` symbolic file or entity handle MUST resolve to a unique target in the workspace. | **Error** | Check `@handle` spelling or create missing target file/entity. |
+| | `SYM-002` | **Tier 2 (Semantic)** | Ambiguous `@` handle matching multiple files MUST be disambiguated with parent folder prefix. | **Error** | Add folder prefix (e.g. `@billing/index.md`). |
+| | `SYM-003` | **Tier 2 (Semantic)** | Relative path traverses $>2$ directory levels when a clean `@handle` is available. | **Warning** | Replace brittle `../../` path with clean `@handle`. |
+| **Assets & Code** | `ASSET-001` | **Tier 2 (Semantic)** | `ods.resources[].path` MUST resolve to an existing file. | **Error** | Fix path or verify file existence on disk. |
 | | `ASSET-002` | **Tier 2 (Semantic)** | `ods.code[].path` MUST resolve to an existing file. | **Error** | Fix path or verify source code file on disk. |
-| | `ASSET-003` | **Tier 1 (Schema)** | `ods.code[].path` MUST NOT contain line number suffixes (e.g. `:L45`). | **Error** | Remove `:L45`; use `symbol` field instead. |
+| | `ASSET-003` / `CODE-001` | **Tier 1 (Schema)** | `ods.code[].path` MUST NOT contain line number suffixes (e.g. `:L45`). | **Error** | Remove `:L45`; use `symbol` field instead. |
+| | `CODE-002` | **Tier 1 (Schema)** | In `ods.code`, `path`, `role`, and `description` MUST be singular; only `symbol` MAY be an array. | **Error** | Make `path`/`role` singular string/enum. |
 | | `ASSET-004` | **Tier 2 (Semantic)** | `ods.context.load` paths MUST resolve to existing files. | **Error** | Fix or remove dangling context load path. |
 | **Profiles** | `PROF-001` | **Tier 1 (Schema)** | `ods.profile` MUST resolve to a known standard or registered custom profile. | **Error** | Fix the profile name or define and register the profile at the path declared in `ods.toml`. |
 | | `PROF-002` | **Tier 2 (Semantic)** | Document SHOULD contain expected H2 or H3 sections (`##` or `###`) for its declared profile. | **Warning** | Add missing section heading or registered alias. |

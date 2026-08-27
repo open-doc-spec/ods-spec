@@ -8,7 +8,7 @@
     "name": {
       "type": "string",
       "pattern": "^[a-z0-9-]+$",
-      "description": "Unique lowercase identifier for the profile (e.g. 'okf', 'rfc', 'ontology', 'memory-episode')."
+      "description": "Unique lowercase identifier for the profile (e.g. 'okf', 'rfc', 'incident', 'benchmark')."
     },
     "description": {
       "type": "string",

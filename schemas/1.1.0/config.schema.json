@@ -76,6 +76,33 @@
       "additionalProperties": false,
       "description": "Paths or configuration table for ignored directories."
     },
+    "schemas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Root-level schema registry: paths to external JSON Schema / Pydantic / Zod entity definitions."
+    },
+    "default_domain": {
+      "type": "string",
+      "description": "Root-level default business domain partition if omitted on entities."
+    },
+    "strict_invariants": {
+      "type": "boolean",
+      "default": true,
+      "description": "Root-level toggle: whether to fail CI when invariant expressions evaluate to false."
+    },
+    "export_format": {
+      "type": "string",
+      "enum": [
+        "cypher",
+        "owl",
+        "rdf",
+        "json-schema"
+      ],
+      "default": "cypher",
+      "description": "Knowledge graph export format."
+    },
     "ontology": {
       "type": "object",
       "properties": {

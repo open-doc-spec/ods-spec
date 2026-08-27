@@ -35,32 +35,37 @@ When reading, updating, or generating documentation in an ODS workspace, agents 
    - In pure ODS authoring, the document title exists **only** as the first `# H1` line in the Markdown body prose.
    - For Google OKF v0.2 compatibility, top-level `title:` and `type:` are preserved and accepted without error.
 
-2. **Strict 3-Tier Key Placement & Flat Pareto Model**:
-   - **Universal & OKF native keys** (`description`, `tags`, `owner`, `created`, `updated`, `type`, `title`, `resource`, `sources`, `usage_window`, `generated`, `verified`, `status`, `stale_after`, `runtime`, `parameters`, `computation`, `executor`, `attester`) MUST be placed at the **top level** of frontmatter.
-   - **Flat ODS engine keys** (`profile`, `status`, `id`, `share`, `entity`, `domain`, `schema`, `relations`, `invariants`, `tier`, `valid_from`, `valid_to`, `mutations`, `pin`, `depends`, `related`, `resources`, `code`, `context`) MUST be placed directly under the **`ods:`** block with zero unnecessary indentation.
-   - Never nest universal keys (`tags`, `description`, `owner`) under `ods:`.
-   - Workspace boundary keys (`spec`, `ignore`, `custom_profiles`, `packs`, `aliases`, `ontology`, `memory`) belong ONLY in root `ods.toml`.
+2. **Strict 3-Layer Key Placement & Universal Metadata**:
+   - **Layer 1: Universal & OKF native keys** (`description`, `tags`, `owner`, `author`, `created`, `created_at`, `updated`, `updated_at`, `type`, `title`, `resource`, `sources`, `usage_window`, `generated`, `verified`, `status`, `stale_after`, `runtime`, `parameters`, `computation`, `executor`, `attester`, `memory`) MUST be placed at the **top level** of frontmatter.
+   - **Layer 2: Scoped ODS engine keys** (`profile`, `status`, `id`, `share`, `entity`, `domain`, `schema`, `invariants`, `tier`, `valid_from`, `valid_to`, `asserted_at`, `mutations`, `pin`, `depends`, `related`, `resources`, `code`, `context`, `memory`) MUST be placed directly under the **`ods:`** block.
+   - **Layer 3: Workspace boundary keys** (`spec`, `ignore`, `custom_profiles`, `packs`, `aliases`, `ontology`, `memory`, `service`) belong ONLY in root `ods.toml`.
+   - Never nest universal keys (`tags`, `description`, `owner`, `author`, `created_at`) under `ods:`.
 
 3. **Maintain Knowledge Graph Purity**:
    - `ods.depends` is strictly for conceptual dependencies to other **Markdown documents**.
    - Do NOT place non-document fixtures (JSON schemas, sample CSVs, mock payloads) in `depends`. Put auxiliary prompt files in **`ods.context.load`**.
 
-4. **No Line Numbers in Code Bindings**:
+4. **Refactor-Resilient Code Bindings & Resources**:
    - In `ods.code`, file paths MUST NOT include line numbers (e.g. `:L45` is forbidden).
-   - Use the `symbol` field (function, struct, class, or constant name) for precise symbol-level linking.
+   - Support simple string shorthand (`code: ["src/main.rs"]`), targeted symbol strings or lists (`symbol: [TestA, TestB]`), and optional descriptions.
+   - In `ods.resources`, use string paths, external URLs (`https://figma.com/...`), or detailed maps with `title` and `description`.
 
-5. **Preserve Third-Party and Unknown Frontmatter**:
+5. **Unified Related & Pareto Directed Relations**:
+   - Use `ods.related` for both simple lateral reading links (`- @faq.md`) and Pareto directed semantic relation edges (`- is_a: Account`, `- owns: [@Subscription, @Invoice]`, `- governed_by: @RefundPolicy`).
+   - Use Universal `@` handles (`@Subscription`, `@tokens.md`) instead of brittle relative file paths (`../../path/to/file.md`). Legacy `{ predicate: owns, target: ... }` objects are accepted for backward compatibility.
+
+6. **Preserve Third-Party and Unknown Frontmatter**:
    - If a document contains metadata for SSGs (e.g. Hugo `layout`, Astro `hero_image`, Jekyll `permalink`), agents MUST preserve those keys verbatim when editing the file.
 
-6. **Path-Derived Document IDs**:
+7. **Path-Derived Document IDs**:
    - By default, a document's ID is its workspace-relative path without the `.md` extension (e.g., `guides/checkout.md` → `guides/checkout`).
    - Only specify an explicit `ods.id` when renaming a file where you need to preserve existing inbound links without cascading rewrites.
 
-7. **Graph Integrity & Acyclicity**:
+8. **Graph Integrity & Acyclicity**:
    - Hard prerequisites belong in `ods.depends`. Soft references belong in `ods.related`.
    - The `depends` graph MUST NOT contain cyclic loops.
 
-8. **Leverage JSON Schema 1.1 for Syntactic Validation**:
+9. **Leverage JSON Schema 1.1 for Syntactic Validation**:
    - When generating or updating frontmatter, validate structure against [`schemas/1.1.0/document.schema.json`](./schemas/1.1.0/document.schema.json).
    - Recognize that `$schema` in frontmatter is optional; never reject or alter valid documents that omit `$schema`.
 

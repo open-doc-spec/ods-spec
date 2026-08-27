@@ -20,9 +20,9 @@ ods:
     - ../specs/context.md
 ---
 
-# Ontologies & Agent Memory
+# Domain Modeling & Agent Memory
 
-This guide teaches you how to use **Neuro-Symbolic Ontologies** and **Cognitive Memory** in Open Document Spec (ODS). By the end of this tutorial, you will know how to ground AI coding agents in unambiguous business concepts, enforce hard validation guardrails, and track state changes over time.
+This guide teaches you how to use **Domain Modeling** and **Cognitive Agent Memory** in Open Document Spec (ODS). By the end of this tutorial, you will know how to ground AI coding agents in unambiguous business concepts, enforce hard validation guardrails, and track state changes over time.
 
 ---
 
@@ -30,8 +30,8 @@ This guide teaches you how to use **Neuro-Symbolic Ontologies** and **Cognitive 
 
 Traditional documentation stores unstructured paragraphs of text. While humans can parse nuance, AI agents frequently misunderstand implicit business rules, invent invalid relationships, and hallucinate outdated facts.
 
-ODS solves this by introducing **Flat Pareto Keys** for:
-1. **Ontologies**: Defining clear business entity classes, domain boundaries, typed relationships, and deterministic invariants.
+ODS solves this by introducing **Structured Engine Keys** for:
+1. **Domain Modeling**: Defining clear business entity classes, domain boundaries, typed relationships, and deterministic invariants.
 2. **Cognitive Memory**: Tracking real-world validity windows, agent assertions, and structured state mutations over time.
 
 ```text
@@ -52,13 +52,13 @@ ODS solves this by introducing **Flat Pareto Keys** for:
 
 ---
 
-## Part 1: Neuro-Symbolic Ontologies
+## Part 1: Domain Modeling & Entities
 
-An **Ontology** in ODS gives AI agents a shared, machine-verifiable vocabulary. Instead of guessing how "Customers" relate to "Subscriptions" and "Refunds", you state the rules explicitly in YAML frontmatter.
+**Domain Modeling** in ODS gives AI agents a shared, machine-verifiable vocabulary. Instead of guessing how "Customers" relate to "Subscriptions" and "Refunds", you state the rules explicitly in YAML frontmatter.
 
-### The Direct Pareto Ontology Keys
+### The Direct Pareto Domain Keys
 
-All ontology keys live directly under `ods:` with zero unnecessary nesting:
+All domain modeling keys live directly under `ods:` with zero unnecessary nesting:
 
 ```yaml
 ods:
@@ -69,13 +69,12 @@ ods:
   domain: Billing                             # Business domain partition
   schema: schemas/customer.schema.json        # "Paid at the door" disk validator
 
-  relations:
-    - predicate: owns
-      target: entities/subscription.md
-    - predicate: governed_by
-      target: policies/refund-sla.md
-    - predicate: maps_to
-      target: datasets/bq-customers.md
+  # Unified Discovery & Semantic Relations (Pareto Shorthand)
+  related:
+    - policies/refund-sla.md
+    - owns: @Subscription
+    - governed_by: @RefundPolicy
+    - maps_to: datasets/bq-customers.md
 
   invariants:
     - "mrr >= 0"
@@ -107,21 +106,18 @@ When connecting entities in `ods.relations`, use these standard predicates:
 
 As AI agents execute tasks, they observe events and make decisions. **Cognitive Memory** enables agents to record what happened, when it became true, and how entity state mutated.
 
-### The Direct Pareto Memory Keys
+### The Cognitive Memory Block (`memory:`)
 
-Memory keys also sit directly under `ods:` on a standard profile:
+Memory properties can be neatly encapsulated in a top-level **`memory:`** block (or placed directly under `ods:`):
 
 ```yaml
-ods:
-  profile: note                               # Standard universal profile (or sop / meeting)
-  status: stable
-
-  tier: episodic                              # semantic | procedural | episodic | profile
-  valid_from: 2026-08-26T10:00:00Z            # When the fact became true in reality
+# Encapsulated Cognitive Memory Block
+memory:
+  tier: episodic                              # episodic | semantic | procedural | state
+  valid_from: "2026-08-26T10:00:00Z"          # When the fact became true in reality
   valid_to: null                              # null = currently active fact
-  asserted_at: 2026-08-26T10:05:00Z           # When the agent observed the event
+  asserted_at: "2026-08-26T10:05:00Z"         # When the agent observed the event
   pin: true                                   # Protects from automated decay pruning
-
   mutations:
     - entity: Customer
       id: cust-4048
@@ -129,11 +125,15 @@ ods:
       old_value: "starter"
       new_value: "enterprise"
       confidence: 1.0
+
+ods:
+  profile: note                               # Standard universal profile (or sop / meeting)
+  status: stable
 ```
 
 | Key | What it Does | Why AI Needs It |
 | :--- | :--- | :--- |
-| **`tier`** | Classifies memory: `episodic` (events), `profile` (distilled entity state), `procedural` (how-to). | Helps agents retrieve the right level of memory abstraction. |
+| **`tier`** | Classifies memory: `episodic` (events), `state` (distilled entity state), `procedural` (how-to), `semantic` (facts). | Helps agents retrieve the right level of memory abstraction. |
 | **`valid_from`** / **`valid_to`** | Real-world validity time window. | Prevents agents from acting on expired or obsolete information. |
 | **`asserted_at`** | The timestamp when the recording agent logged the fact. | Supports bi-temporal audits and multi-agent event sequencing. |
 | **`mutations`** | Structured state transition record (`entity`, `id`, `property`, `old_value`, `new_value`). | Enables Graphiti-style temporal attribute diffing without parsing raw prose. |

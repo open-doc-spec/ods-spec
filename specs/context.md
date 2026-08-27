@@ -35,9 +35,9 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 
 ---
 
-## 2. The 5 Engine Subsystems under `ods:`
+## 2. The 6 Engine Subsystems under `ods:`
 
-Canonical matrix: [keys.md §4](keys.md#4-subsystem-matrix-of-engine-keys). Context resolution treats those **5 engine subsystems** as follows (`code` is opt-in):
+Canonical matrix: [keys.md §4](keys.md#4-subsystem-matrix-of-engine-keys). Context resolution treats those **6 engine subsystems** as follows (`code` is opt-in):
 
 ```yaml
 ---

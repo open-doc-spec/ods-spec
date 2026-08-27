@@ -54,8 +54,7 @@
     },
     "owner": {
       "type": "string",
-      "pattern": "^(team|user|role|agent|process):[a-z0-9_.-]+$",
-      "description": "Tier 1: Accountable team, user, role, agent, or process maintainer.",
+      "description": "Layer 1: Accountable team, user, role, agent, or process maintainer.",
       "x-ods-lifecycle": {
         "introduced": "1.0.0",
         "spec_version": "1.1",
@@ -63,10 +62,20 @@
         "spec": "specs/keys.md#owner"
       }
     },
+    "author": {
+      "type": "string",
+      "description": "Layer 1 / OKF: Individual author, creator, or agent who wrote this document or revision.",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/keys.md#author"
+      }
+    },
     "created": {
       "type": "string",
       "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
-      "description": "Tier 1: Document creation timestamp (YYYY-MM-DD or ISO-8601).",
+      "description": "Layer 1: Document creation timestamp (YYYY-MM-DD or ISO-8601).",
       "x-ods-lifecycle": {
         "introduced": "1.0.0",
         "spec_version": "1.1",
@@ -74,15 +83,37 @@
         "spec": "specs/keys.md#created"
       }
     },
+    "created_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
+      "description": "Layer 1: Bidirectional alias for created (document creation timestamp).",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/keys.md#created-and-created_at"
+      }
+    },
     "updated": {
       "type": "string",
       "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
-      "description": "Tier 1: Document last modified timestamp (YYYY-MM-DD or ISO-8601).",
+      "description": "Layer 1: Document last modified timestamp (YYYY-MM-DD or ISO-8601).",
       "x-ods-lifecycle": {
         "introduced": "1.0.0",
         "spec_version": "1.1",
         "status": "stable",
         "spec": "specs/keys.md#updated"
+      }
+    },
+    "updated_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
+      "description": "Layer 1: Bidirectional alias for updated (document last modified timestamp).",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/keys.md#updated-and-updated_at"
       }
     },
     "type": {
@@ -274,6 +305,16 @@
         "spec": "specs/indexes.md#okf-version-declaration"
       }
     },
+    "memory": {
+      "$ref": "#/$defs/memoryBlock",
+      "description": "Encapsulated Cognitive Memory Block for AI agent interaction traces and living entity state.",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/graph.md#cognitive-memory"
+      }
+    },
     "ods": {
       "$ref": "#/$defs/odsEngine"
     }
@@ -281,8 +322,18 @@
   "$defs": {
     "odsEngine": {
       "type": "object",
-      "description": "Tier 2: Flat ODS engine metadata with direct Pareto ontology, memory, knowledge graph, and code bindings.",
+      "description": "Layer 2: Flat ODS engine metadata with direct Pareto ontology, memory, knowledge graph, and code bindings.",
       "properties": {
+        "memory": {
+          "$ref": "#/$defs/memoryBlock",
+          "description": "Optional encapsulated cognitive memory block under ods:.",
+          "x-ods-lifecycle": {
+            "introduced": "1.1.0",
+            "spec_version": "1.1",
+            "status": "stable",
+            "spec": "specs/graph.md#cognitive-memory"
+          }
+        },
         "profile": {
           "type": "string",
           "pattern": "^[a-z0-9_-]+$",
@@ -401,13 +452,14 @@
         "tier": {
           "type": "string",
           "enum": [
+            "episodic",
             "semantic",
             "procedural",
-            "episodic",
+            "state",
             "profile"
           ],
           "default": "episodic",
-          "description": "Direct Pareto Memory: Cognitive memory tier classification.",
+          "description": "Direct Pareto Memory: Cognitive memory tier classification (episodic, semantic, procedural, state).",
           "x-ods-lifecycle": {
             "introduced": "1.1.0",
             "spec_version": "1.1",
@@ -478,11 +530,17 @@
         "depends": {
           "type": "array",
           "items": {
-            "type": "string",
-            "minLength": 1
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "$ref": "#/$defs/dependencyRelation"
+              }
+            ]
           },
-          "uniqueItems": true,
-          "description": "Hard conceptual Markdown prerequisites auto-traversed in context resolution.",
+          "description": "Hard conceptual Markdown prerequisites auto-traversed in context resolution (strict DAG).",
           "x-ods-lifecycle": {
             "introduced": "1.0.0",
             "spec_version": "1.1",
@@ -493,11 +551,17 @@
         "related": {
           "type": "array",
           "items": {
-            "type": "string",
-            "minLength": 1
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "$ref": "#/$defs/semanticRelation"
+              }
+            ]
           },
-          "uniqueItems": true,
-          "description": "Soft lateral cross-references forming the discovery graph.",
+          "description": "Soft lateral cross-references or typed semantic domain relations.",
           "x-ods-lifecycle": {
             "introduced": "1.0.0",
             "spec_version": "1.1",
@@ -508,9 +572,17 @@
         "resources": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/resourceEntry"
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "$ref": "#/$defs/resourceEntry"
+              }
+            ]
           },
-          "description": "Asset catalog referencing disk-level non-code files (diagrams, schemas, data).",
+          "description": "Asset catalog referencing disk files, schemas, diagrams, or external URLs.",
           "x-ods-lifecycle": {
             "introduced": "1.0.0",
             "spec_version": "1.1",
@@ -521,9 +593,18 @@
         "code": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/codeBinding"
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^(?!.*:[Ll]?\\d+).*$"
+              },
+              {
+                "$ref": "#/$defs/codeBinding"
+              }
+            ]
           },
-          "description": "Bidirectional bindings to source code implementations and test fixtures.",
+          "description": "Bidirectional bindings to source code implementations and test fixtures (string shorthand or detailed object).",
           "x-ods-lifecycle": {
             "introduced": "1.0.0",
             "spec_version": "1.1",
@@ -556,50 +637,257 @@
             "tags",
             "description",
             "owner",
+            "author",
             "created",
-            "updated"
+            "created_at",
+            "updated",
+            "updated_at"
           ]
         }
       },
       "additionalProperties": false
     },
-    "semanticRelation": {
-      "type": "object",
-      "properties": {
-        "predicate": {
-          "type": "string",
-          "enum": [
-            "is_a",
-            "part_of",
-            "owns",
-            "governed_by",
-            "maps_to",
-            "depends_on",
-            "derives_from",
-            "exercises",
-            "custom"
-          ]
+    "dependencyRelation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "requires": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ],
+              "description": "Hard conceptual prerequisite document that must be loaded/read first."
+            },
+            "extends": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ],
+              "description": "Base foundational specification extended by this document."
+            },
+            "imports": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ],
+              "description": "Shared contract, ontology types, or schema dependency."
+            }
+          },
+          "minProperties": 1,
+          "maxProperties": 1,
+          "additionalProperties": false
         },
-        "custom_predicate": {
-          "type": "string"
-        },
-        "target": {
-          "type": "string",
-          "minLength": 1
-        },
-        "cardinality": {
-          "type": "string",
-          "pattern": "^(1|N|0\\.\\.1|1\\.\\.1|0\\.\\.N|1\\.\\.N)$"
-        },
-        "binding": {
-          "type": "object"
+        {
+          "type": "object",
+          "properties": {
+            "predicate": {
+              "type": "string",
+              "enum": [
+                "requires",
+                "extends",
+                "imports"
+              ]
+            },
+            "target": {
+              "type": "string",
+              "minLength": 1
+            },
+            "optional": {
+              "type": "boolean",
+              "default": false
+            },
+            "scope": {
+              "type": "string",
+              "enum": [
+                "compile",
+                "runtime",
+                "test"
+              ]
+            },
+            "description": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "predicate",
+            "target"
+          ],
+          "additionalProperties": false
         }
-      },
-      "required": [
-        "predicate",
-        "target"
-      ],
-      "additionalProperties": false
+      ]
+    },
+    "semanticRelation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "is_a": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "extends": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "part_of": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "owns": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "contains": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "governed_by": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "policy": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "rule": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "maps_to": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "table": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "implements": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "depends_on": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "derives_from": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "exercises": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "see_also": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "see": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            },
+            "custom": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              ]
+            }
+          },
+          "minProperties": 1,
+          "maxProperties": 1,
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "predicate": {
+              "type": "string",
+              "enum": [
+                "is_a",
+                "part_of",
+                "owns",
+                "governed_by",
+                "maps_to",
+                "depends_on",
+                "derives_from",
+                "exercises",
+                "see_also",
+                "custom"
+              ]
+            },
+            "custom_predicate": {
+              "type": "string"
+            },
+            "target": {
+              "type": "string",
+              "minLength": 1
+            },
+            "role": {
+              "type": "string"
+            },
+            "confidence": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "since": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+            },
+            "until": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+            },
+            "cardinality": {
+              "type": "string",
+              "pattern": "^(1|N|\\*|0\\.\\.1|1\\.\\.1|0\\.\\.N|1\\.\\.N|0\\.\\.\\*|1\\.\\.\\*|\\*\\.\\.\\*)$"
+            },
+            "description": {
+              "type": "string"
+            },
+            "binding": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "predicate",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      ]
     },
     "memoryMutation": {
       "type": "object",
@@ -785,13 +1073,31 @@
           "minLength": 1,
           "description": "Workspace-relative or document-relative path to asset file."
         },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "External resource URL (e.g. Figma, Miro, Notion, RFC)."
+        },
+        "title": {
+          "type": "string",
+          "description": "Display title or label for the resource."
+        },
         "description": {
           "type": "string",
           "description": "Short explanation of the asset."
         }
       },
-      "required": [
-        "path"
+      "anyOf": [
+        {
+          "required": [
+            "path"
+          ]
+        },
+        {
+          "required": [
+            "url"
+          ]
+        }
       ],
       "additionalProperties": false
     },
@@ -814,14 +1120,29 @@
             "fixture",
             "schema",
             "migration",
-            "config"
+            "config",
+            "infrastructure",
+            "pipeline"
           ],
-          "description": "Semantic role of the bound source code artifact."
+          "default": "implementation",
+          "description": "Semantic role of the bound source code artifact (defaults to implementation)."
         },
         "symbol": {
-          "type": "string",
-          "minLength": 1,
-          "description": "Precise symbol identifier in source file."
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            }
+          ],
+          "description": "Precise symbol identifier or list of symbol identifiers in source file."
         },
         "description": {
           "type": "string",
@@ -923,6 +1244,55 @@
       "required": [
         "name"
       ],
+      "additionalProperties": false
+    },
+    "memoryBlock": {
+      "type": "object",
+      "description": "Encapsulated Cognitive Memory Block for AI agent interaction traces, state mutations, and entity profiles.",
+      "properties": {
+        "tier": {
+          "type": "string",
+          "enum": [
+            "episodic",
+            "semantic",
+            "procedural",
+            "state",
+            "profile"
+          ],
+          "default": "episodic",
+          "description": "Cognitive memory tier: episodic (traces), semantic (domain facts), procedural (heuristics), state (living profiles)."
+        },
+        "valid_from": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
+          "description": "Timestamp when fact became valid in reality."
+        },
+        "valid_to": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
+          "description": "Timestamp when fact expired in reality (null if currently active)."
+        },
+        "asserted_at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
+          "description": "Timestamp when the agent observed/asserted this fact."
+        },
+        "mutations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/memoryMutation"
+          },
+          "description": "Structured state transition records."
+        },
+        "pin": {
+          "type": "boolean",
+          "default": false,
+          "description": "Protects memory node from automated decay and dreaming pruning."
+        }
+      },
       "additionalProperties": false
     }
   }

@@ -105,13 +105,14 @@ ods:
   depends:
     - ../auth/sessions.md
   related:
-    - ../policy/refund-sla.md
+    - ../policy/refund-sla.md         # Simple lateral link
     - ../decisions/004-stripe.md
+    - governed_by: @refund-sla.md     # Pareto single-key relation
 ```
 
-`related` may point both ways. `depends` may not.
+`related` may point both ways and supports simple document paths or Pareto single-key relations (e.g. `governed_by`, `owns`, `is_a`, `part_of`, `see_also`). `depends` is strictly for hard prerequisites.
 
-**Test:** if an agent cannot do the job without that file, it is `depends`. If a human might want it later, it is `related`.
+**Test:** if an agent cannot do the job without that file, it is `depends`. If a human or agent might want it for context or domain lookup, it is `related`.
 
 ### 4. Let IDs come from paths
 

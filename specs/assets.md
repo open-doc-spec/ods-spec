@@ -245,7 +245,7 @@ verified:
   - by: "human:ahormati"
     at: "2026-08-20T00:00:00Z"
 ods:
-  profile: attested-computation
+  profile: note
   status: stable
 ---
 

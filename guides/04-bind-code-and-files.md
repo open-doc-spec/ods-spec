@@ -53,37 +53,43 @@ ods:
   depends:
     - ../auth/sessions.md
   resources:
-    - path: ../diagrams/refund-flow.png
+    - ../diagrams/refund-flow.png # Local file shorthand
+    - https://figma.com/file/refund-mockup # External design URL
+    - path: ../contracts/refund.yaml
+      title: "Refund OpenAPI Contract"
 ```
 
-`ods lint` fails if the PNG is missing. An AI context build ignores it. That is intentional: a 4 MB image is not a paragraph of instructions.
+`ods lint` verifies local files exist on disk. An AI context build ignores them. That is intentional: a 4 MB image is not a paragraph of instructions.
 
 Never put `.ts` / `.rs` / `.py` here. Source uses `code`.
 
-### 2. Bind implementation with `code`, not line numbers
+### 2. Bind implementation with `code` (Shorthand or Symbol Lists)
+
+You can write zero-boilerplate string shorthand, or specify exact symbols:
 
 ```yaml
 ods:
   code:
-    - path: apps/billing/src/refund.ts
-      role: implementation
-      symbol: processRefund
+    - apps/billing/src/refund.ts # Simple string shorthand (defaults role: implementation)
     - path: apps/billing/tests/refund.test.ts
       role: test
-      symbol: TestProcessRefund
+      symbol:
+        - TestProcessRefund
+        - TestRefundTaxCalculation
+      description: "Verifies refund calculations."
 ```
 
 **Path + symbol**, never `apps/billing/src/refund.ts:L45`. The next import you add shifts every line and the doc goes stale. A function name survives that edit.
 
-Start with two roles:
+Start with three common roles:
 
 | Role | Use when the file is… |
 | :--- | :--- |
 | `entrypoint` | Where work starts (HTTP route, CLI, UI view). |
-| `implementation` | The domain logic the prose describes. |
+| `implementation` | The domain logic the prose describes (default). |
 | `test` | The test that proves the doc's claims. |
 
-The other five (`schema`, `migration`, `config`, `infrastructure`, `pipeline`) are listed in [`specs/assets.md`](../specs/assets.md). You do not need them for the refunds guide.
+The other roles (`interface`, `fixture`, `schema`, `migration`, `config`, `infrastructure`, `pipeline`) are listed in [`specs/assets.md`](../specs/assets.md).
 
 Source files are **not** ODS documents. Do not put frontmatter in `refund.ts`.
 

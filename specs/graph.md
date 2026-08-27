@@ -101,31 +101,74 @@ ODS 1.1 explicitly formalizes and connects two complementary graph topologies ac
 
 ---
 
-## 4. Typed Semantic Relations (`ods.relations`)
+## 4. Directed Semantic Relations (Pareto 80/20: `ods.related`)
 
-To enable rich neuro-symbolic reasoning beyond simple document links, documents MAY declare typed semantic relations under `ods.relations`:
+To enable rich neuro-symbolic reasoning without syntax overhead, documents declare directed relations using the **Pareto Rule** (`- <predicate>: <target>`) directly under `ods.related` (or `ods.relations`):
 
 ```yaml
 ods:
   entity: Customer
   domain: Billing
-  relations:
-    - predicate: owns
-      target: entities/subscription.md
-    - predicate: governed_by
-      target: policies/refund-sla.md
-    - predicate: maps_to
-      target: datasets/bq-customers.md
+  related:
+    # Bare string (Implicit see_also lateral reference)
+    - ../guides/billing-overview.md
+
+    # Pareto Core Single-Key Shorthand
+    - is_a: Account
+    - owns: [Subscription, Invoice] # Multi-target array & Symbolic Entity resolution
+    - part_of: PaymentGateway
+    - governed_by: RefundPolicy
+    - maps_to: datasets/bq-customers.sql
+    - see_also: @faq.md
+
+    # Attributed Relation Object (Only when edge metadata is needed)
+    - predicate: manages
+      target: @SupportTeam
+      role: "Tier 1 Support"
+      confidence: 0.98
+      since: 2026-01-01
 ```
 
-| Predicate | Semantic Meaning | Graph Direction |
-| :--- | :--- | :--- |
-| `is_a` | Inheritance / sub-class classification. | Subclass $\rightarrow$ Superclass |
-| `part_of` | Composition / structural component. | Child $\rightarrow$ Parent Container |
-| `owns` | Domain ownership / lifecycle containment. | Owner $\rightarrow$ Owned Resource |
-| `governed_by` | Policy, SLA, or compliance rule enforcement. | Entity $\rightarrow$ Governing Policy |
-| `maps_to` | Semantic mapping to physical technical asset. | Business Concept $\rightarrow$ Database/API |
-| `derives_from` | Data lineage or calculation dependency. | Derived Asset $\rightarrow$ Origin Source |
+### 4.1 The 5 Pareto Core Verbs
+
+| Predicate | Semantic Meaning | Graph Direction | Auto-Inferred Inverse | Example |
+| :--- | :--- | :--- | :--- | :--- |
+| `is_a` | Classification / Inheritance / Typing. | Subclass $\rightarrow$ Superclass | `superclass_of` | `- is_a: Account` |
+| `part_of` | Structural composition / Modular component. | Child $\rightarrow$ Parent Container | `has_part` | `- part_of: PaymentGateway` |
+| `owns` | Domain ownership / Lifecycle containment. | Owner $\rightarrow$ Owned Resource | `owned_by` | `- owns: [Subscription, Invoice]` |
+| `governed_by` | Policy, SLA, or compliance rule enforcement. | Entity $\rightarrow$ Governing Policy | `governs` | `- governed_by: RefundPolicy` |
+| `see_also` | Lateral discovery / associative reference. | Source $\rightarrow$ Target Reference | `see_also` (Symmetric) | `- see_also: @faq.md` |
+
+*(Technical bindings like `maps_to`, `derives_from`, and `implements`, as well as custom domain `snake_case` verbs, are also supported).*
+
+### 4.2 Auto-Inverse Edge Materialization
+Authors ONLY write the natural forward relation. The ODS compiler automatically synthesizes reverse inbound edges in memory during workspace indexing:
+- When Document A declares `owns: @DocB`, the graph index automatically records `DocB owned_by DocA`.
+- When Document A declares `part_of: @DocB`, the graph index automatically records `DocB has_part DocA`.
+- When Document A declares `governed_by: @DocB`, the graph index automatically records `DocB governs DocA`.
+
+### 4.3 Attributed Edge Metadata
+When relationships require machine-extracted scores or temporal bounds, use the expanded object shape:
+- **`role`**: Semantic role or association title (e.g. `role: "Lead Maintainer"`).
+- **`confidence`**: Machine extraction certainty score between `0.0` and `1.0`.
+- **`since` / `until`**: ISO 8601 temporal activation window.
+- **`cardinality`**: Edge constraint (`1`, `N`, `*`, `0..1`, `1..1`, `0..N`, `1..N`, `0..*`, `1..*`, `*..*`).
+
+### 4.4 Symbolic Entity & Handle Resolution (`@handle`)
+Authors can reference target entities and files directly using **`@` handles** instead of brittle relative paths (`../../billing/entities/subscription.md`):
+- **Entity Handles**: `@Subscription` or `Subscription` auto-resolves to the document declaring `ods.entity: Subscription`.
+- **File Handles**: `@tokens.md`, `@server.ts`, `@customer.schema.json` auto-resolve to unique files in the workspace.
+- **Disambiguated Handles**: `@billing/index.md` disambiguates duplicate basenames using folder prefixes.
+
+### 4.5 Workspace Symbol & Basename Indexing Algorithm
+The ODS compiler indexes workspace symbols in two passes during discovery:
+1. **Pass 1 (Entity & Basename Discovery)**: Scans all documents and builds memory-mapped lookup tables:
+   - `entities: Map<Symbol, FilePath>` mapping PascalCase identifiers (`Subscription` $\rightarrow$ `entities/subscription.md`).
+   - `basenames: Map<Basename, Set<FilePath>>` mapping unique file names (`server.ts` $\rightarrow$ `apps/api/src/server.ts`).
+2. **Pass 2 (O(1) Resolution & Collision Detection)**:
+   - If a handle has exactly one match, it resolves in $\mathcal{O}(1)$ time.
+   - If zero matches exist, the linter emits `SYM-001: Unresolved @ handle`.
+   - If multiple files share the basename without disambiguation, the linter emits `SYM-002: Ambiguous @ handle`.
 
 ---
 
@@ -140,9 +183,33 @@ When traversing agent memory nodes (`ods.tier: episodic`), the graph engine appl
 
 ## 6. Structural Edge Types (`depends` & `related`)
 
+The Lexical Graph standardizes two directional edge types:
+- **`ods.depends`**: Strict structural and conceptual prerequisites forming a **strict DAG** (participates in auto-expanded AI context).
+- **`ods.related`**: Associative domain and discovery links (discovery graph, cycle-tolerant).
+
+### 6.1 Pareto Prerequisite Verbs for `ods.depends`
+
+```yaml
+ods:
+  depends:
+    # Bare string (Default: Hard prerequisite)
+    - @jwt-auth.md
+
+    # Typed Prerequisite Child Verbs
+    - requires: @database-setup.md       # Must be read/executed first
+    - extends: @base-service-spec.md     # Base architectural specification
+    - imports: @common-types.schema.json # Shared contract/type dependency
+
+    # Attributed Dependency Object
+    - predicate: requires
+      target: @redis-cluster.md
+      optional: false
+      scope: runtime                     # compile | runtime | test
+```
+
 ---
 
-## 4. Knowledge Graph Purity (Normative)
+## 7. Knowledge Graph Purity (Normative)
 
 A critical principle of ODS is **Knowledge Graph Purity**:
 
@@ -180,7 +247,7 @@ ods:
 
 ---
 
-## 5. DAG Validation & Cycle Prevention
+## 8. DAG Validation & Cycle Prevention
 
 The dependency graph formed by `ods.depends` edges MUST be a **Directed Acyclic Graph (DAG)**.
 
@@ -198,25 +265,25 @@ graph TD
     end
 ```
 
-### 5.1 Cycle Detection Algorithm
+### 8.1 Cycle Detection Algorithm
 1. Tooling performs a topological sort or Depth-First Search (DFS) traversal of all `ods.depends` edges across the workspace.
 2. If any node path encounters a back-edge to an ancestor node in the active traversal stack, a cycle error is reported (`GRAPH-004`).
 3. If two documents are mutually interdependent, one relationship MUST be changed to `ods.related` or refactored into a shared prerequisite document.
 
 ---
 
-## 6. Single Source of Truth & Dynamic Backlinks
+## 9. Single Source of Truth & Dynamic Backlinks
 
-1. **Title Lives Once**: The document title is the first `# H1` in the body. Frontmatter MUST NOT contain `title:`. Rationale: [core.md](core.md#why-prohibit-title-in-frontmatter).
+1. **Title Single Source of Truth**: In pure ODS, the document title exists as the first `# H1` in the prose body. Top-level `title:` is supported for Google OKF v0.2 interoperability.
 2. **Relationships Live in Frontmatter**: Machine-readable dependencies live exclusively in `ods.depends` and `ods.related`.
 3. **No Hand-Written Backlinks**: Authors MUST declare graph edges only on the dependent document. Inbound backlinks MUST be computed dynamically by tooling (`ods graph --backlinks`) and NEVER hand-maintained in frontmatter.
 
 ---
 
-## 7. Design Decisions
+## 10. Design Decisions
 
-### Why only two edge types (`depends` and `related`) instead of rich ontologies?
-Complex relationship ontologies (`implements`, `extends`, `replaces`, `conflicts-with`) create immense cognitive friction for human authors without delivering actionable automation benefit. For automated AI prompt assembly, the only critical distinction is binary: **Is this required context (`depends`) or optional background (`related`)?**
+### Why separate the Domain Graph from the Lexical Graph?
+Document dependencies (`depends` / `related`) model how humans and agents read documents sequentially. Business relationships (`is_a`, `owns`, `maps_to`) model how data and domain entities interact. Separating the two into a **Dual-Graph** provides full neuro-symbolic expressiveness without adding friction to basic document authoring.
 
 ### Why forbid hand-written backlinks?
 Maintaining bidirectional links manually (e.g. Doc A listing Doc B as child, and Doc B listing Doc A as parent) results in link rot whenever a file is renamed or moved. Computing backlinks on demand in tooling ensures 100% synchronization accuracy.
