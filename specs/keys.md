@@ -34,22 +34,22 @@ This document is the normative reference for **every frontmatter key** in the Op
 
 ## 1. Conformance Language
 
-The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14 ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.txt), [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174.txt)) when, and only when, they appear in all capitals.
+The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14, exactly as stated in [README.md §1](README.md#1-conformance-language). That is the canonical statement; do not maintain a second copy here.
 
 ---
 
-## 1.1 Novice Quick Start: The 5 Canonical Document Recipes
+## 1.1 Novice Quick Start: The 6 Canonical Document Recipes
 
-Novice authors do NOT need to memorize 42 keys. ODS standardizes **5 Plug-and-Play Recipes** covering 100% of day-to-day use cases:
+Novice authors do NOT need to memorize the full key dictionary — or any of it. A plain Markdown file is already conformant ([core.md §3.0](core.md#30-minimal-conformant-document)). Beyond that floor, ODS standardizes **6 Plug-and-Play Recipes** covering day-to-day use:
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    THE 5 CANONICAL ODS 1.1 RECIPES                      │
+│                    THE 6 CANONICAL ODS 1.1 RECIPES                      │
 ├───────────────────┬─────────────────────────────────────────────────────┤
 │ 1. DAILY DOC      │ description + tags + ods.profile + ods.status       │
 │ 2. LINKED DOC     │ Recipe 1 + ods.depends / ods.related                │
 │ 3. CODE BINDING   │ Recipe 2 + ods.code (shorthand or symbol list)      │
-│ 4. DOMAIN ENTITY  │ Recipe 1 + ods.entity + ods.related (typed)         │
+│ 4. DOMAIN ENTITY  │ Recipe 1 + ods.entity + ods.domain + ods.related     │
 │ 5. AGENT MEMORY   │ Recipe 1 + memory: { tier, mutations }              │
 │ 6. ATTESTED COMP  │ type: Attested Computation + runtime + executor     │
 └───────────────────┴─────────────────────────────────────────────────────┘
@@ -62,7 +62,7 @@ Novice authors do NOT need to memorize 42 keys. ODS standardizes **5 Plug-and-Pl
 | **Write a setup guide or tutorial** | `profile: guide` | `description`, `tags`, `ods.status` | `ods.depends`, `ods.related` |
 | **Record an architectural decision** | `profile: decision` | `description`, `tags`, `ods.status` | `ods.depends` |
 | **Link docs to real source code** | Any profile | `ods.code: ["src/file.ts"]` | `symbol`, `role`, `description` |
-| **Define a business domain entity** | `profile: note` (or `feature`) | `ods.entity`, `ods.domain` | `ods.schema`, `ods.related` (typed), `invariants` |
+| **Define a business domain entity** | `profile: note` (or `feature`) | `ods.entity`, `ods.domain` | `ods.schema`, `ods.related` (typed), `ods.invariants` |
 | **Save an agent interaction trace** | `profile: note` | `memory: { tier: episodic, mutations }` | `memory.valid_from`, `memory.pin` |
 | **Run a verifiable SQL computation** | `profile: note` | `type: Attested Computation`, `runtime` | `parameters`, `executor`, `attester` |
 
@@ -72,28 +72,21 @@ Teaching path: [Your first document](../guides/01-first-document.md). Pocket for
 
 ## 1.2 Universal `@` Symbolic Handle Resolution
 
-To eliminate brittle relative filesystem paths (e.g. `../../billing/entities/subscription.md`), ODS supports **Universal `@` Symbolic Handles** across all path-bearing keys:
-
-| Handle Type | Syntax Example | Resolution Target |
-| :--- | :--- | :--- |
-| **Symbolic Entity** | `@Subscription` or `Subscription` | Auto-resolves to document with `ods.entity: Subscription`. |
-| **File Basename** | `@tokens.md`, `@server.ts`, `@customer.schema.json` | Auto-resolves to unique filename in workspace. |
-| **Disambiguated Suffix** | `@billing/index.md` | Resolves collision when multiple files share a basename. |
+Every path-bearing key (`depends`, `related`, `schema`, `code[].path`, `resources`) accepts **`@` handles** in place of brittle relative paths: `@Subscription` resolves to the document declaring that entity, `@tokens.md` to the uniquely-named file, `@billing/index.md` to a disambiguated one.
 
 ```yaml
 ods:
-  schema: "@customer.schema.json"       # Disk schema contract
+  schema: "@customer.schema.json"
   depends:
-    - "@tokens.md"                      # Document dependency
+    - "@tokens.md"
   related:
-    - owns: "@Subscription"             # Symbolic entity target (or unquoted Subscription)
-    - governed_by: "@refund-sla.md"     # Document handle
+    - owns: "@Subscription"
   code:
-    - path: "@refund.ts"                # Source code file handle
+    - path: "@refund.ts"
       symbol: processRefund
-  resources:
-    - "@refund-flow.pdf"                # Asset catalog file handle
 ```
+
+Canonical resolution rules, the two-pass indexing algorithm, and the `SYM-001`/`SYM-002` collision cases: [graph.md §4.4–4.5](graph.md#44-symbolic-entity--handle-resolution-handle). Do not maintain a second copy here.
 
 ---
 
@@ -222,14 +215,17 @@ ods:
 │ -> Visible to all YAML consumers (Hugo, Astro, Docusaurus, OKF tools)   │
 ├─────────────────────────────────────────────────────────────────────────┤
 │ LAYER 2: Flat ODS Engine Keys (Scoped under ods:)                       │
-│ profile, status, id, share, entity, domain, schema, relations,          │
-│ invariants, tier, valid_from, valid_to, asserted_at, mutations, pin,    │
-│ depends, related, resources, code, context, memory                      │
+│ profile, status, id, share, entity, domain, schema, invariants,         │
+│ depends, related, resources, code, context, custom_profile              │
+│ deprecated: relations, memory, tier, valid_from, valid_to,              │
+│             asserted_at, mutations, pin                                 │
 │ -> Flat engine metadata with zero unnecessary indentation wrappers      │
 ├─────────────────────────────────────────────────────────────────────────┤
 │ LAYER 3: Workspace Manifest Keys (In root ods.toml only)                │
-│ spec, ignore, custom_profiles, packs, aliases, ontology, memory, service│
+│ spec, dialect, ignore, custom_profiles, packs, schemas, [aliases],      │
+│ [ontology], [memory], [okf], [attestation], [service]                   │
 │ -> Repository-wide boundary and discovery configuration                 │
+│ -> Full key reference: indexes.md §3                                    │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -242,21 +238,24 @@ ods:
 | **`ods.entity`**            | Ontology Subsystem |   **Yes** (Identity header)   |          **Yes** (valid identifier)          | Class/concept name in Domain Graph.              |
 | **`ods.domain`**            | Ontology Subsystem |    **Yes** (Domain header)    |          **Yes** (valid identifier)          | Business domain boundary partition.              |
 | **`ods.schema`**            | Ontology Subsystem |    **Yes** (Schema shapes)    |        **Yes** (path exists on disk)         | "Paid at the door" disk schema contract.         |
-| **`ods.relations`**         | Ontology Subsystem |    **Yes** (Typed closure)    |     **Yes** (targets exist, valid enum)      | Directed typed semantic graph edges.             |
+| **`ods.relations`** *(deprecated)* | Ontology Subsystem |  Merged into `related`  |     **Yes** (targets exist, valid enum) + `DEPR-001`     | Superseded by `ods.related`. See [scope.md §7.2](scope.md#72-deprecated-in-11--scheduled-for-removal-in-20). |
 | **`ods.invariants`**        | Ontology Subsystem |   **Yes** (Guardrail list)    |        **Yes** (parseable expression)        | Deterministic boolean refusal rules.             |
-| **`ods.tier`** / `memory.tier` | Memory Subsystem|    **Yes** (Memory filter)    |          **Yes** (valid tier enum)           | Cognitive memory classification.                 |
-| **`ods.valid_from`**        | Memory Subsystem   |   **Yes** (Temporal filter)   |              **Yes** (ISO-8601)              | Real-world validity start instant.               |
-| **`ods.valid_to`**          | Memory Subsystem   |   **Yes** (Staleness gate)    |     **Yes** (valid_to $\ge$ valid_from)      | Real-world expiration instant (`null` = active). |
-| **`ods.asserted_at`**       | Memory Subsystem   |   **Yes** (Assertion time)    |              **Yes** (ISO-8601)              | Timestamp when the agent recorded the fact.      |
-| **`ods.mutations`**         | Memory Subsystem   |     **Yes** (State delta)     |     **Yes** (entity/id/property present)     | Graphiti-style structured attribute changes.     |
-| **`ods.pin`**               | Memory Subsystem   |     **No** (Pruning flag)     |              **Yes** (boolean)               | Protects from automated decay pruning.           |
+| **`memory.tier`**           | Memory Subsystem   |    **Yes** (Memory filter)    |          **Yes** (valid tier enum)           | Cognitive memory classification (5 tiers).       |
+| **`memory.valid_from`**     | Memory Subsystem   |   **Yes** (Temporal filter)   |              **Yes** (ISO-8601)              | Real-world validity start instant.               |
+| **`memory.valid_to`**       | Memory Subsystem   |   **Yes** (Staleness gate)    |     **Yes** (valid_to $\ge$ valid_from)      | Real-world expiration instant (`null` = active). |
+| **`memory.asserted_at`**    | Memory Subsystem   |   **Yes** (Assertion time)    |              **Yes** (ISO-8601)              | Timestamp when the agent recorded the fact.      |
+| **`memory.mutations`**      | Memory Subsystem   |     **Yes** (State delta)     |     **Yes** (entity/id/property present)     | Graphiti-style structured attribute changes.     |
+| **`memory.pin`**            | Memory Subsystem   |     **No** (Pruning flag)     |              **Yes** (boolean)               | Protects from automated decay pruning.           |
 | **`ods.depends`**           | Knowledge Graph    |  **Yes** (up to `max-depth`)  |       **Yes** (strict DAG, no cycles)        | Hard structural prerequisites.                   |
-| **`ods.related`**           | Discovery Graph    |    **Yes** (1-line index)     |          **Yes** (path must exist)           | Soft associative reading.                        |
-| **`ods.resources`**         | Asset Inventory    |   **Yes** (Schema metadata)   |      **Yes** (file must exist on disk)       | Physical non-Markdown attachments (PDF, CSV).    |
-| **`ods.code`**              | Code Bindings      | **Optional** (`--with-code`)  | **Yes** (path exists, valid role, no `:L45`) | Links to implementation, tests, and infra.       |
+| **`ods.related`**           | Discovery Graph    | **Titles only** (1-line index; bodies are opt-in) |    **Yes** (see `GRAPH-003` / `ENT-001`)     | Soft associative reading and typed domain edges. |
+| **`ods.resources`**         | Asset Inventory    |  **No** (catalog metadata only) |     **Yes** (local files must exist; URLs syntax-only)      | Physical non-Markdown attachments (PDF, CSV).    |
+| **`ods.code`**              | Code Bindings      | **Opt-in** (caller requests code) | **Yes** (path exists, valid role, no `:L45`) | Links to implementation, tests, and infra.       |
 | **`ods.context.load`**      | AI Prompt Scoping  |  **Yes** (injected directly)  |      **Yes** (file must exist on disk)       | Auxiliary JSON schemas, CSVs, and fixtures.      |
-| **`ods.context.max-depth`** | Traversal Bound    |    Governs recursion limit    |          **Yes** (integer $\ge 0$)           | Max graph distance to follow `depends`.          |
+| **`ods.context.max-depth`** | Traversal Bound    |    Governs recursion limit    |        **Yes** (integer `0`–`10`)            | Max graph distance to follow `depends`.          |
+| **`ods.context.trust-min`** | Trust Gate         |    Filters by trust tier      |          **Yes** (valid tier enum)           | Minimum verification level for inclusion.        |
 | **`ods.context.ignore`**    | Scoping Boundary   |    Filters expansion queue    |          **Yes** (list of prefixes)          | Path prefixes pruned during traversal.           |
+
+> This matrix is the canonical statement of auto-load and lint behavior per key. [context.md §3](context.md#3-subsystem-summary-matrix) defers to it; do not maintain a second copy there.
 
 ---
 
@@ -264,9 +263,17 @@ ods:
 
 When scaffolding (`ods new`), adopting (`ods adopt`), or formatting (`ods fmt`), tools MUST emit keys inside the `ods:` map in this exact sequence:
 
-$$\text{profile} \longrightarrow \text{status} \longrightarrow \text{id} \longrightarrow \text{share} \longrightarrow \text{entity} \longrightarrow \text{domain} \longrightarrow \text{schema} \longrightarrow \text{relations} \longrightarrow \text{invariants} \longrightarrow \text{tier} \longrightarrow \text{valid\_from} \longrightarrow \text{valid\_to} \longrightarrow \text{asserted\_at} \longrightarrow \text{mutations} \longrightarrow \text{pin} \longrightarrow \text{depends} \longrightarrow \text{related} \longrightarrow \text{resources} \longrightarrow \text{code} \longrightarrow \text{context}$$
+**Top-level keys**, in order:
+
+`$schema` → `description` → `tags` → `owner` → `author` → `created_at` → `updated_at` → OKF keys (`type`, `title`, `resource`, `sources`, `usage_window`, `generated`, `verified`, `status`, `stale_after`, `runtime`, `parameters`, `computation`, `executor`, `attester`, `okf_version`) → `memory` → `ods`
+
+**Keys inside the `ods:` map**, in order:
+
+`profile` → `status` → `id` → `share` → `entity` → `domain` → `schema` → `invariants` → `depends` → `related` → `resources` → `code` → `context` → `custom_profile`
 
 > **Note**: Parsers MUST accept engine keys in any order; only emit/formatting tooling enforces the canonical sequence.
+>
+> Deprecated keys (`ods.relations`, `ods.memory`, and the flat `ods.tier` / `valid_from` / `valid_to` / `asserted_at` / `mutations` / `pin`) are **not** part of the canonical order. A formatter MUST preserve them where it finds them rather than reordering them into the sequence above, and SHOULD attach the matching `DEPR-*` diagnostic.
 
 ---
 
@@ -465,7 +472,7 @@ ods:
   - **The 5 Pareto Core Verbs**: `- is_a: @Account`, `- part_of: @BillingEngine`, `- owns: [@Subscription, @Invoice]`, `- governed_by: @RefundPolicy`, `- see_also: @faq.md`.
   - **Bare String (Implicit `see_also`)**: Path to related document (`- ../policies/refund-sla.md`) or Symbolic Handle (`- @billing-faq.md`).
   - **Attributed Relation Object**: `{ predicate: string, target: string, role?: string, confidence?: float, since?: string, until?: string, cardinality?: string }`.
-- **Allowed Standard Predicates**: `is_a`, `part_of`, `owns`, `governed_by`, `maps_to`, `depends_on`, `derives_from`, `implements`, `exercises`, `see_also`, plus dynamic `snake_case` verbs.
+- **Allowed Predicates**: a **closed set** — `is_a`, `part_of`, `owns`, `governed_by`, `maps_to`, `depends_on`, `derives_from`, `implements`, `exercises`, `see_also`, plus the aliases `extends`, `contains`, `policy`, `rule`, `table`, `see`. A bare verb outside this set is rejected (`ENUM-006`); domain-specific verbs use `{ predicate: custom, custom_predicate: <verb> }`. Canonical vocabulary with inverses: [graph.md §4.1](graph.md#41-the-complete-predicate-vocabulary).
 - **Normative Rules**:
   - Inbound inverse relations (`owned_by`, `has_part`, `governs`) are materialized automatically by compiler tooling.
   - Cycles in `related` are permitted.
@@ -492,10 +499,11 @@ ods:
 - **Purpose**: Attachments associated with the document (diagrams, PDFs, CSVs, OpenAPI specs, Figma/Miro URLs).
 - **Entry Formats**:
   - **Simple String**: Relative file path (`- ../diagrams/flow.png`) or external URL (`- https://figma.com/...`).
-  - **Detailed Map**: `{ path?: string, url?: string, title?: string, description?: string }`.
+  - **Detailed Map**: `{ path?: string, url?: string, title?: string, description?: string }` — exactly one of `path` or `url` (`ASSET-005`).
 - **Normative Rules**:
-  - Local paths MUST resolve to real files on disk.
-  - **Token Protection Rule**: Resources are NOT automatically loaded into LLM prompts by default. To inject a specific text/JSON resource into the prompt, declare it in `context.load`.
+  - Local paths MUST resolve to real files on disk (`ASSET-001`). URL entries are syntax-checked only and MUST NOT be network-fetched — a lint run MUST succeed offline.
+  - **Token Protection Rule**: Resources are NEVER automatically loaded into LLM prompts. To inject a specific text/JSON resource into the prompt, declare it in `context.load`.
+  - Full entry-shape contract: [assets.md §5.1](assets.md#51-entry-shapes-normative).
 
 ```yaml
 # VALID: Resource shorthand and detailed objects
@@ -513,7 +521,7 @@ ods:
 - **Type**: `list of (strings OR code binding maps)`
 - **Subsystem**: **Code Bindings (Implementation & Tests)**
 - **Purpose**: Binds the document to source code implementations, test suites, infrastructure definitions, and CI pipelines.
-- **Allowed Roles**: `entrypoint`, `implementation` (default), `interface`, `test`, `fixture`, `schema`, `migration`, `config`, `infrastructure`, `pipeline`.
+- **Allowed Roles** (10, closed set): `entrypoint`, `implementation` (default), `interface`, `test`, `fixture`, `schema`, `migration`, `config`, `infrastructure`, `pipeline`. Semantics for each: [assets.md §7](assets.md#7-the-10-standard-code-roles-reference).
 - **Symbol Types**: `symbol` MAY be a single string (`symbol: startServer`) or a list of strings (`symbol: [TestA, TestB]`).
 - **Normative Rules**:
   - `path` MUST NOT contain line numbers (e.g. `:L42` is prohibited).
@@ -551,19 +559,35 @@ ods:
 
 ### 7.9 `ods.context`
 
-- **Type**: `map` containing optional `max-depth` (`integer`), `load` (`list of strings`), and `ignore` (`list of strings`).
+- **Type**: `map`
 - **Subsystem**: **AI Prompt Bounds & Inclusions**
 - **Purpose**: Declares a deterministic bounded reading list for AI agent prompt assembly.
-- **Normative Rules**:
-  - `load`: Injects auxiliary JSON schemas, CSVs, or specific documents directly into the prompt.
-  - `max-depth`: Governs graph recursion depth (default: 2).
-  - `ignore`: Prunes path prefixes during traversal.
+
+| Field | Type | Default | Meaning |
+| :--- | :--- | :--- | :--- |
+| `max-depth` | integer `0`–`10` | `2` | Hops to follow along `ods.depends`. `0` loads this document alone. Values above `10` are rejected (`ENUM-005`). |
+| `trust-min` | enum | `unverified` | Minimum trust tier a document must reach to enter the payload. |
+| `load` | list of strings | — | Auxiliary non-Markdown files (JSON schemas, CSVs, fixtures) injected directly into the prompt. |
+| `ignore` | list of strings | — | Path prefixes pruned during traversal. |
+
+#### Trust tiers (`trust-min`)
+
+A document's trust tier is **derived from its `verified` entries**, not declared directly:
+
+| Tier | Derived when | Meaning |
+| :--- | :--- | :--- |
+| `unverified` | No `verified` entries. | Nobody and nothing has confirmed this. |
+| `machine-confirmed` | Every `verified[].by` names a process or agent (e.g. `agent:ci-linter`, `process:attester`). | A deterministic check passed. |
+| `human-reviewed` | At least one `verified[].by` begins with `human:`. | A person signed off. |
+
+Tiers are ordered `unverified` < `machine-confirmed` < `human-reviewed`. Setting `trust-min` filters out every document below that bar during context resolution — used when an agent is about to act on documentation rather than merely summarize it. Filtering is reported, not silent: a conformant engine MUST tell the caller which documents were dropped and why.
 
 ```yaml
 # VALID: Bounded AI context scope
 ods:
   context:
     max-depth: 2
+    trust-min: human-reviewed   # do not act on unreviewed docs
     load:
       - ../schemas/sample-payload.json
     ignore:
@@ -618,30 +642,26 @@ ods:
   schema: ../schemas/customer.schema.json
 ```
 
-### 7.13 `ods.relations`
+### 7.13 `ods.relations` *(Deprecated)*
 
-- **Type**: `list of maps` with `predicate` (`enum`, required) and `target` (`string`, required).
-- **Subsystem**: **Domain Ontology (Typed Semantic Graph)**
-- **Purpose**: Connects entities via typed, directional domain relations.
-- **Allowed Predicates**:
-  - `is_a`: Subclass inheritance (e.g. `EnterpriseCustomer` $\rightarrow$ `Customer`).
-  - `part_of`: Composition/containment (e.g. `LineItem` $\rightarrow$ `Invoice`).
-  - `owns`: Domain ownership lifecycle (e.g. `Account` $\rightarrow$ `Subscription`).
-  - `governed_by`: Compliance, SLA, or policy rule (e.g. `Refund` $\rightarrow$ `RefundPolicy`).
-  - `maps_to`: Semantic mapping to physical tables/APIs (e.g. `Customer` $\rightarrow$ `bq-customers.sql`).
-  - `derives_from`: Data lineage calculation dependency (e.g. `MRR` $\rightarrow$ `ActiveSubscriptions`).
+- **Status**: **Deprecated in 1.1** (`DEPR-001`). Removal targeted at 2.0.
+- **Replacement**: [`ods.related`](#76-odsrelated), which accepts the same attributed-object entries plus the shorthand and bare-string forms.
+- **Parser behavior**: Tools MUST still read `ods.relations`. Its entries are appended to `ods.related` and de-duplicated by `(predicate, target)`. Tools emit a `DEPR-001` warning and preserve the key on write unless the author runs a migration.
 
 ```yaml
-# VALID: Directed typed relations
+# DEPRECATED: works, warns
 ods:
-  entity: Customer
-  domain: Billing
   relations:
     - predicate: owns
       target: entities/subscription.md
-    - predicate: governed_by
-      target: policies/refund-sla.md
+
+# CANONICAL
+ods:
+  related:
+    - owns: "@Subscription"
 ```
+
+Rationale and the full deprecation schedule: [scope.md §7](scope.md#7-deprecations--versioning-policy).
 
 ### 7.14 `ods.invariants`
 
@@ -661,62 +681,27 @@ ods:
     - "email is required and valid"
 ```
 
-### 7.15 `ods.tier` / `memory.tier`
+### 7.15 The `memory:` Block
 
-- **Type**: `enum` (`episodic`, `semantic`, `procedural`, `state`)
-- **Subsystem**: **Cognitive Agent Memory**
-- **Purpose**: Classifies the memory abstraction level so AI agents can query and synthesize knowledge.
-- **Allowed Values**:
-  - `episodic`: Raw time-stamped agent session traces and event logs.
-  - `semantic`: Canonical domain knowledge and facts.
-  - `procedural`: Operational heuristics and learned workflows.
-  - `state`: Distilled living entity or user state profile synthesized across episodes.
-- **Placement**: Allowed directly as `ods.tier` or inside the top-level `memory:` block.
+Cognitive memory fields live in the **top-level `memory:` block**. `ods.memory:` and the flat `ods.tier` / `ods.valid_from` / `ods.valid_to` / `ods.asserted_at` / `ods.mutations` / `ods.pin` keys are deprecated (`DEPR-002`); parsers MUST still read them, with precedence `memory:` > `ods.memory:` > flat `ods.*`.
+
+| Field | Type | Purpose |
+| :--- | :--- | :--- |
+| `tier` | enum: `episodic`, `semantic`, `procedural`, `state`, `profile` | Cognitive classification of the memory node. |
+| `valid_from` | RFC 3339 timestamp | Instant the fact became true in the world. |
+| `valid_to` | RFC 3339 timestamp or `null` | Instant it stopped being true. `null` (or absent) means still true. MUST NOT precede `valid_from` (`MEM-001`). |
+| `asserted_at` | RFC 3339 timestamp | Instant the agent observed and recorded the fact. |
+| `pin` | boolean (default `false`) | Protects the node from automated decay pruning. |
+| `mutations` | list of maps | Structured attribute transitions: `entity`, `id`, `property` (all required), plus optional `old_value`, `new_value`, `confidence`. |
 
 ```yaml
-# VALID: Cognitive memory tier
+# VALID: canonical memory block
 memory:
   tier: episodic
-```
-
-### 7.16 `ods.valid_from` & `ods.valid_to` / `memory.valid_from` & `memory.valid_to`
-
-- **Type**: `string` (RFC 3339 timestamp) or `null` for `valid_to`
-- **Subsystem**: **Cognitive Agent Memory (Bi-Temporal Validity)**
-- **Purpose**: Real-world time interval during which a fact was true in reality.
-- **Normative Rules**:
-  - `valid_from`: Start instant.
-  - `valid_to`: Expiration instant. `null` indicates currently active reality.
-  - Facts where `now >= valid_to` are excluded from active context queries unless an explicit historical query is made (`ods memory query --at <timestamp>`).
-
-```yaml
-# VALID: Bi-temporal validity window
-memory:
   valid_from: "2026-08-26T10:00:00Z"
   valid_to: null
-```
-
-### 7.17 `ods.asserted_at` / `memory.asserted_at`
-
-- **Type**: `string` (RFC 3339 timestamp)
-- **Subsystem**: **Cognitive Agent Memory (Assertion Time)**
-- **Purpose**: Timestamp when the agent or system observed and recorded this fact.
-
-```yaml
-# VALID: Assertion timestamp
-memory:
   asserted_at: "2026-08-26T10:05:00Z"
-```
-
-### 7.18 `ods.mutations` / `memory.mutations`
-
-- **Type**: `list of maps` with `entity` (`string`), `id` (`string`), `property` (`string`), `old_value` (`any`), `new_value` (`any`), and optional `confidence` (`number`).
-- **Subsystem**: **Cognitive Agent Memory (State Transitions)**
-- **Purpose**: Graphiti-style structured attribute transitions recorded during agent execution.
-
-```yaml
-# VALID: Structured state transition mutations
-memory:
+  pin: true
   mutations:
     - entity: Customer
       id: cust-4048
@@ -726,17 +711,7 @@ memory:
       confidence: 1.0
 ```
 
-### 7.19 `ods.pin` / `memory.pin`
-
-- **Type**: `boolean` (default: `false`)
-- **Subsystem**: **Cognitive Agent Memory (Decay Protection)**
-- **Purpose**: Protects a memory node from automated background decay and dreaming distillation pruning.
-
-```yaml
-# VALID: Memory decay protection
-memory:
-  pin: true
-```
+What each tier means, how bi-temporal filtering works during traversal, and why `state` and `profile` are distinct: [graph.md §5](graph.md#5-cognitive-memory--bi-temporal-traversal). That is the canonical definition; this table is the type reference only.
 
 ---
 
@@ -744,12 +719,17 @@ memory:
 
 The following keys are allowed under `ods.custom_profile` in a registered custom profile-definition Markdown file. They describe the profile schema; they are not ordinary document engine keys.
 
-| Key              | Placement                           | Type                      | Purpose                                                                   |
-| :--------------- | :---------------------------------- | :------------------------ | :------------------------------------------------------------------------ |
-| `name`           | `ods.custom_profile.name`           | string, optional          | Profile identifier. If omitted, the profile file stem is used.            |
-| `required_keys`  | `ods.custom_profile.required_keys`  | list of strings, optional | Names of top-level document keys required when the profile is selected.   |
-| `optional_keys`  | `ods.custom_profile.optional_keys`  | list of strings, optional | Names of useful top-level document keys that are not required.            |
-| `forbidden_keys` | `ods.custom_profile.forbidden_keys` | list of strings, optional | Names of top-level document keys that should not appear with the profile. |
+| Key                 | Placement                              | Type                      | Purpose                                                                   |
+| :------------------ | :------------------------------------- | :------------------------ | :------------------------------------------------------------------------ |
+| `name`              | `ods.custom_profile.name`              | string, optional          | Profile identifier. If omitted, the profile file stem is used.            |
+| `description`       | `ods.custom_profile.description`       | string, optional          | One-line summary of what the profile is for, shown in tooling.            |
+| `required_sections` | `ods.custom_profile.required_sections` | list of strings, optional | Canonical H2/H3 section names a document using the profile is expected to carry. Missing sections are a `PROF-002` warning. |
+| `optional_sections` | `ods.custom_profile.optional_sections` | list of strings, optional | Sections recognized for the profile but never required.                   |
+| `required_keys`     | `ods.custom_profile.required_keys`     | list of strings, optional | Names of top-level document keys required when the profile is selected.   |
+| `optional_keys`     | `ods.custom_profile.optional_keys`     | list of strings, optional | Names of useful top-level document keys that are not required.            |
+| `forbidden_keys`    | `ods.custom_profile.forbidden_keys`    | list of strings, optional | Names of top-level document keys that should not appear with the profile. |
+
+Section names may also be declared as `##` headings in the profile-definition file's body, with `|` separating acceptable alternatives (see [profiles.md §7.1](profiles.md#71-custom-profile-definition-file-docsprofilesrfcmd)). The two forms are equivalent; a profile SHOULD use one or the other, not both. Where both are present, `required_sections` wins and tools SHOULD warn.
 
 `ods.custom_profile` is valid only in a registered profile-definition file selected by `custom_profiles` (or a registered pack). It is not copied into documents using the profile and does not make third-party metadata globally required. Tools MUST reject the block in any other document. See [profiles.md](profiles.md#711-profile-definition-metadata) for the complete contract.
 

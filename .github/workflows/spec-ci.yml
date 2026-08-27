@@ -1,0 +1,38 @@
+name: Spec Conformance
+
+# This workflow verifies the specification repository itself: that the JSON
+# Schemas compile, that the fixtures behave as documented, that every internal
+# link resolves, and that the prose and the schemas still agree on every closed
+# vocabulary. It is not a user-facing lint action — the ODS engine lives in the
+# separate open-doc-spec/ods repository.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  conformance:
+    name: Conformance suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry and build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            .artifacts/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Run conformance suite
+        run: cargo test --locked
+
+      - name: Conformance report
+        run: cargo run --locked -p ods-spec-conformance

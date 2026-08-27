@@ -1,0 +1,4 @@
+# x-ods-expect: PROF-005
+# custom_profiles paths must exist at the exact configured location.
+spec = "1.1"
+custom_profiles = ["docs/profiles/does-not-exist.md"]

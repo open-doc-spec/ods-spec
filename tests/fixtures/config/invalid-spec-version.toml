@@ -1,0 +1,2 @@
+# spec must match MAJOR.MINOR or MAJOR.MINOR.PATCH.
+spec = "eleven"

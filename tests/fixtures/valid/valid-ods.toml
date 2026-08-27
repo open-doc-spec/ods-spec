@@ -6,8 +6,8 @@ custom_profiles = { paths = ["tests/fixtures/valid/valid-custom-profile.md"] }
 
 packs = { load = ["core", "security"] }
 
-[aliases]
-"auth-spec" = "guides/auth.md"
+[aliases.paths]
+auth-spec = "guides/auth.md"
 
 [service]
 mode = "poll"

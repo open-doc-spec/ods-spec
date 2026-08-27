@@ -11,7 +11,7 @@ ods:
     - validation.md
     - indexes.md
     - ../guides/02-pick-a-shape.md
-    - ../guides/07-extend-ods.md
+    - ../guides/08-extend-ods.md
 ---
 
 # ODS · Document Profiles & Shapes
@@ -31,7 +31,7 @@ This document specifies **Document Profiles** in Open Document Spec (ODS): their
 
 ## 1. Conformance Language
 
-The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14 ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.txt), [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174.txt)) when, and only when, they appear in all capitals.
+The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14, exactly as stated in [README.md §1](README.md#1-conformance-language). That is the canonical statement; do not maintain a second copy here.
 
 ---
 
@@ -563,17 +563,29 @@ Human and AI authors frequently use natural variations of heading titles. ODS va
 | **`Lifecycle`** | `Phases`, `State Machine`, `Hooks`, `Execution Lifecycle` |
 | **`Traceability`** | `Auditing`, `Provenance`, `Logging`, `Telemetry` |
 
-### 6.2 Workspace Section Aliases (`ods.toml`)
+### 6.2 Alias Resolution (Normative)
 
-Workspaces MAY define custom section aliases in `ods.toml` under the `[aliases]` table:
+The alias table above is intentionally overlapping: `Requirements` is both a canonical section of `feature` and an accepted synonym for `Prerequisites`; `Success Criteria` is canonical for `agent` and a synonym for `Acceptance Criteria`; `FAQ` and `Failure Modes` are both canonical elsewhere and synonyms for `Troubleshooting`. Matching therefore MUST follow a fixed order:
+
+1. **Exact canonical match wins.** If a heading exactly matches a canonical section name expected by the document's profile, it satisfies that section and is not considered as an alias for any other.
+2. **Alias match second.** A remaining unmatched expected section is satisfied by any heading listed among its synonyms.
+3. **One heading satisfies at most one section.** Once a heading is consumed by a section, it is not reused. Where two unmatched sections both accept the same heading, the one declared earlier in the profile's section list takes it.
+4. **Matching is case-insensitive** and ignores surrounding punctuation and numbering (`## 3. Steps` matches `Steps`).
+5. **Workspace aliases extend, never replace**, the built-in table. A workspace alias that collides with a built-in canonical name is ignored and reported as a warning.
+
+### 6.3 Workspace Section Aliases (`ods.toml`)
+
+Workspaces MAY define additional section synonyms under the `[aliases.sections]` table:
 
 ```toml
 # ods.toml
-[aliases]
+[aliases.sections]
 Goal = ["Target", "Business Objective"]
 Validation = ["Sanity Checks", "Smoke Tests"]
 Eval = ["Benchmark Suite", "Model Evals"]
 ```
+
+A bare `[aliases]` table is accepted as a legacy spelling of `[aliases.sections]`. See [indexes.md §3.3](indexes.md#33-aliases).
 
 ---
 
@@ -617,9 +629,14 @@ The `ods.custom_profile` block of a registered profile-definition file MAY conta
 | Key | Placement | Meaning |
 | :--- | :--- | :--- |
 | `name` | `ods.custom_profile.name` | Optional profile identifier. When absent, the file stem is used. |
+| `description` | `ods.custom_profile.description` | Optional one-line summary shown in tooling. |
+| `required_sections` | `ods.custom_profile.required_sections` | Canonical H2/H3 sections expected in documents using the profile. Missing sections are a `PROF-002` warning. |
+| `optional_sections` | `ods.custom_profile.optional_sections` | Sections recognized for the profile but never required. |
 | `required_keys` | `ods.custom_profile.required_keys` | Keys that documents using the profile SHOULD contain. |
 | `optional_keys` | `ods.custom_profile.optional_keys` | Useful keys that are documented for the profile but are not required. |
 | `forbidden_keys` | `ods.custom_profile.forbidden_keys` | Keys that documents using the profile SHOULD NOT contain. |
+
+**Two ways to declare sections.** A profile may list its sections either as `required_sections` / `optional_sections` in frontmatter, or as `##` headings in the definition file's body with `|` separating acceptable alternatives (as in §7.1 above). The two forms are equivalent. A profile SHOULD use one or the other; where both are present, `required_sections` wins and tools SHOULD warn about the ambiguity.
 
 These keys describe the profile definition; they are not copied into documents using the profile. Each `required_keys` entry is matched against a top-level frontmatter key in the target document. Profile-specific document keys MUST NOT be nested under `ods:`. The standard engine keys (`profile`, `status`, `id`, `share`, `depends`, `related`, `resources`, `code`, and `context`) remain separate from profile-definition metadata.
 

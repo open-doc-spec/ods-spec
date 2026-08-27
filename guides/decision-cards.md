@@ -53,11 +53,14 @@ Teach-through: [Pick a shape](02-pick-a-shape.md). Templates: [`specs/profiles.m
 | :--- | :--- |
 | Document title | First `# H1` in the body (or top-level `title:` for OKF compatibility) |
 | Summary, tags, owner, dates, OKF keys (`type`, `sources`, `verified`, `runtime`, `parameters`) | Top-level frontmatter |
-| Profile, status, share, entity, domain, schema, relations, invariants, tier, valid_from, valid_to, mutations, pin, depends, related, resources, code, context | Directly under `ods:` |
+| Profile, status, share, entity, domain, schema, invariants, depends, related, resources, code, context | Directly under `ods:` |
+| Memory: tier, valid_from, valid_to, asserted_at, mutations, pin | Top-level `memory:` block |
 | Procedure, decision text, guardrails, workflow, tools, eval | `##` body headings |
-| Spec version, ignore paths, custom profiles, packs, aliases, ontology, memory | Root `ods.toml` only |
+| Spec version, dialect, ignore paths, custom profiles, packs, schemas, aliases, ontology, memory, okf, attestation, service | Root `ods.toml` only |
 
-Never: `tags` under `ods:`. Never: `profile` at top-level. Never: nested namespace wrappers (`ods.ontology:` or `ods.memory:`).
+Never: `tags` under `ods:`. Never: `profile` at top-level. Never: a nested `ods.ontology:` wrapper.
+
+Deprecated but still parsing until 2.0: `ods.relations` (use `ods.related`), `ods.memory:` and the flat `ods.tier` / `valid_from` / … keys (use the top-level `memory:` block). Full list: [`specs/scope.md` §7.2](../specs/scope.md#72-deprecated-in-11--scheduled-for-removal-in-20).
 
 ---
 
@@ -69,6 +72,8 @@ Never: `tags` under `ods:`. Never: `profile` at top-level. Never: nested namespa
 | Optional "see also" **Markdown doc** | `ods.related` |
 | Human diagram / PDF (do not prompt-dump) | `ods.resources` |
 | Named symbol in source | `ods.code` + `symbol` |
+| A file more than a folder or two away | Any path key + an `@handle` |
+| Docs an agent may only *act* on once reviewed | `ods.context.trust-min` |
 | Small JSON/CSV/text the model must read | `ods.context.load` |
 | Business class schema validator | `ods.schema` |
 
@@ -84,16 +89,16 @@ Never: `tags` under `ods:`. Never: `profile` at top-level. Never: nested namespa
 
 ---
 
-## 5. The 5 Canonical Document Recipes
+## 5. The 6 Canonical Document Recipes
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    THE 5 CANONICAL ODS 1.1 RECIPES                      │
+│                    THE 6 CANONICAL ODS 1.1 RECIPES                      │
 ├───────────────────┬─────────────────────────────────────────────────────┤
 │ 1. DAILY DOC      │ description + tags + ods.profile + ods.status       │
 │ 2. LINKED DOC     │ Recipe 1 + ods.depends / ods.related                │
 │ 3. CODE BINDING   │ Recipe 2 + ods.code (shorthand or symbol list)      │
-│ 4. DOMAIN ENTITY  │ Recipe 1 + ods.entity + ods.related (typed)         │
+│ 4. DOMAIN ENTITY  │ Recipe 1 + ods.entity + ods.domain + ods.related     │
 │ 5. AGENT MEMORY   │ Recipe 1 + memory: { tier, mutations }              │
 │ 6. ATTESTED COMP  │ type: Attested Computation + runtime + executor     │
 └───────────────────┴─────────────────────────────────────────────────────┘

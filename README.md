@@ -33,9 +33,46 @@ ods:
 
 ---
 
-## Why ODS?
+## Start here (2 minutes)
 
-Plain markdown files with structured 3-layer frontmatter unlock capabilities that proprietary databases and metadata silos cannot provide:
+**A plain Markdown file with no frontmatter at all is already a conformant ODS document.** Adoption is additive: you never rewrite what you have.
+
+The recommended floor is three keys:
+
+```markdown
+---
+description: "How JWT session tokens are signed, verified, and revoked."
+ods:
+  profile: guide
+  status: stable
+---
+
+# User Authentication Guide
+
+## Overview
+...
+```
+
+That is a complete, lintable ODS document. Add a `ods.toml` at the repo root (`spec = "1.1"`) and you have a workspace.
+
+Everything below is **progressive enhancement** — reach for it when you have the problem it solves, not before. The gentle path is [Learn ODS](./guides/README.md); the full normative rules are in [`specs/`](./specs/README.md).
+
+| Stage | You have | You add | Learn it in |
+| :---: | :--- | :--- | :--- |
+| 0 | Plain Markdown | *(nothing — already valid)* | [00 · Why ODS](./guides/00-why-ods.md) |
+| 1 | One trustworthy doc | `description`, `ods.profile`, `ods.status` | [01 · Your first document](./guides/01-first-document.md) |
+| 2 | A workspace | root `ods.toml` | [06 · Run the workspace](./guides/06-run-the-workspace.md) |
+| 3 | A linked set | `ods.depends`, `ods.related` | [03 · Link documents](./guides/03-link-documents.md) |
+| 4 | Agent-ready docs | `ods.code`, `ods.context` | [04](./guides/04-bind-code-and-files.md) · [05](./guides/05-ai-reading-list.md) |
+| 5 | Domain & memory | `ods.entity`, `memory:`, attestations | [07 · Ontologies & memory](./guides/07-ontologies-and-memory.md) |
+
+Normative definition of the minimum: [`specs/core.md` §3.0](./specs/core.md#30-minimal-conformant-document).
+
+---
+
+## What you can grow into
+
+Plain Markdown files with structured 3-layer frontmatter unlock capabilities that proprietary databases and metadata silos cannot provide:
 
 - **Human- and Agent-Centric**: Plain `.md` text files. An engineer can `cat` a document; an AI agent can ingest it directly into prompt context.
 - **Dual-Graph Architecture**: Seamlessly integrates a **Domain Graph** (`ods.entity`, `ods.domain`, `invariants`) with a **Lexical Graph** (`ods.depends`, `ods.related`).
@@ -47,9 +84,9 @@ Plain markdown files with structured 3-layer frontmatter unlock capabilities tha
 
 ---
 
-## Quick Start (The Canonical Document)
+## A fully-loaded document
 
-Every ODS document is plain Markdown with clean, 3-layer frontmatter:
+Every key below is optional. This is what a document looks like once it has grown into all five subsystems — not what you must write on day one:
 
 ```markdown
 ---
@@ -106,38 +143,19 @@ This guide explains how JWT session tokens are signed, verified, and revoked.
 
 ---
 
-## The 5 Canonical Document Recipes
+## The 6 Canonical Document Recipes
 
-Novice authors do not need to memorize 42 keys. ODS standardizes 5 plug-and-play recipes:
+Novice authors do not need to memorize the full key dictionary. ODS standardizes six plug-and-play recipes — *Daily Doc*, *Linked Doc*, *Code-Linked Doc*, *Domain Entity*, *Agent Memory*, and *Attested Computation* — each layering a handful of keys on the one before it.
 
-| Recipe | Common Use Case | Required Keys |
-| :--- | :--- | :--- |
-| **1. Daily Doc** | How-to guide, SOP, or tech note | `description` + `tags` + `ods.profile` + `ods.status` |
-| **2. Linked Doc** | Multi-page architecture or design | Recipe 1 + `ods.depends` / `ods.related` |
-| **3. Code-Linked Doc** | Implementation & unit test bindings | Recipe 2 + `ods.code: ["src/main.rs"]` |
-| **4. Domain Entity** | Business class & refusal guardrails | Recipe 1 + `ods.entity` + `ods.domain` + `invariants` |
-| **5. Agent Memory** | Session traces & state mutations | Recipe 1 + `memory: { tier: episodic, mutations }` |
-| **6. Attested Computation** | Verifiable SQL/Python execution | `type: Attested Computation` + `runtime` + `executor` |
+Canonical, normative list: [`specs/keys.md` §1.1](./specs/keys.md#11-novice-quick-start-the-6-canonical-document-recipes). Pocket form: [`guides/decision-cards.md`](./guides/decision-cards.md). Do not maintain a second copy here.
 
 ---
 
 ## Standard Profile Shapes (13 Universal Profiles)
 
-| Profile | Primary Intent | Expected Prose Sections |
-| :--- | :--- | :--- |
-| `note` | Free-form knowledge, entities, memory, and scratchpads | *(none required)* |
-| `guide` | Step-by-step how-to tutorial | Overview, Prerequisites, Steps, Troubleshooting |
-| `feature` | Product capability / PRD specification | Goal, Scope, Requirements, Acceptance Criteria, Risks |
-| `decision` | Architecture Decision Record (ADR) | Context, Decision, Alternatives, Consequences |
-| `sop` | Standard operating procedure / runbook | Purpose, Prerequisites, Steps, Validation, Rollback |
-| `api` | Endpoint / RPC contract | Overview, Request, Response, Errors, Examples |
-| `architecture` | System design and data flow | Overview, Components, Data Flow, Trade-offs |
-| `policy` | Governance / team rules | Purpose, Scope, Rules, Exceptions |
-| `meeting` | Meeting minutes and team sync notes | Attendees, Agenda, Decisions, Action Items |
-| `faq` | Frequently Asked Questions | *(Question/Answer pairs)* |
-| `checklist` | Verifiable deployment or release gates | Overview, Items, Verification, Notes |
-| `agent` | Autonomous agent execution contracts (`agent.md`) | Goal, Task, Scope, Steps, Success Criteria |
-| `skill` | Reusable skill packages and tool contracts (`SKILL.md`) | Purpose, Capability, Activation, Workflow, Rules |
+A **profile** declares a document's *shape* — the H2/H3 sections a conformant document of that kind is expected to carry. ODS ships 13: `note`, `guide`, `feature`, `decision`, `sop`, `api`, `architecture`, `policy`, `meeting`, `faq`, `checklist`, `agent`, and `skill`.
+
+Canonical catalog with the expected section list for each: [`specs/profiles.md` §3](./specs/profiles.md#3-standard-profiles-catalog). Copy-paste templates: [`specs/profiles.md` §4](./specs/profiles.md#4-complete-profile-templates-copy-paste-ready). Which one to pick: [`guides/02-pick-a-shape.md`](./guides/02-pick-a-shape.md).
 
 ---
 
@@ -161,10 +179,17 @@ Novice authors do not need to memorize 42 keys. ODS standardizes 5 plug-and-play
 
 ## Machine-Readable JSON Schemas (Draft 2020-12)
 
-Published in [`schemas/1.1.0/`](./schemas/README.md) for IDE validation (VS Code, Cursor, JetBrains, Zed):
+Published in [`schemas/1.1.0/`](./schemas/README.md) for IDE validation (VS Code, Cursor, JetBrains, Zed).
+
+**Normative (part of the ODS 1.1 contract):**
 - **Document Frontmatter**: [`schemas/1.1.0/document.schema.json`](./schemas/1.1.0/document.schema.json)
 - **Workspace Config**: [`schemas/1.1.0/config.schema.json`](./schemas/1.1.0/config.schema.json)
 - **Custom Profile**: [`schemas/1.1.0/profile.schema.json`](./schemas/1.1.0/profile.schema.json)
+
+**Experimental (published for review; not required for conformance):**
+- **Domain Ontology**: [`schemas/1.1.0/ontology.schema.json`](./schemas/1.1.0/ontology.schema.json)
+- **Agent Memory**: [`schemas/1.1.0/memory.schema.json`](./schemas/1.1.0/memory.schema.json)
+- **Attestation**: [`schemas/1.1.0/attestation.schema.json`](./schemas/1.1.0/attestation.schema.json)
 
 ---
 
@@ -173,12 +198,24 @@ Published in [`schemas/1.1.0/`](./schemas/README.md) for IDE validation (VS Code
 The ODS specification repository includes an automated native Rust test runner:
 
 ```bash
-# Run all integration tests
 cargo test
+```
 
-# Run rich colored CLI conformance report
+Fourteen tests verify the specification against itself: the schemas compile, the fixtures behave as documented, every internal link and anchor resolves, and the prose and the schemas agree on every closed vocabulary (code roles, memory tiers, predicates, enums, traversal bounds). Change "10 roles" to "8" in one chapter and two tests fail.
+
+```bash
 cargo run -p ods-spec-conformance
 ```
+
+---
+
+## Contributing
+
+This repository holds the **specification only**. Tooling — the `ods` CLI, language server, and editor extensions — lives in [`open-doc-spec/ods`](https://github.com/open-doc-spec/ods).
+
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — how to propose a key, a lint rule, or a deprecation
+- [CHANGELOG.md](./CHANGELOG.md) — what each release added, deprecated, and clarified
+- [`specs/scope.md` §7](./specs/scope.md#7-deprecations--versioning-policy) — versioning policy and the 2.0 deprecation schedule
 
 ---
 

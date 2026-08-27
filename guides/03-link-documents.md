@@ -110,7 +110,7 @@ ods:
     - governed_by: @refund-sla.md     # Pareto single-key relation
 ```
 
-`related` may point both ways and supports simple document paths or Pareto single-key relations (e.g. `governed_by`, `owns`, `is_a`, `part_of`, `see_also`). `depends` is strictly for hard prerequisites.
+`related` may point both ways and supports simple document paths or Pareto single-key relations (e.g. `governed_by`, `owns`, `is_a`, `part_of`, `see_also`). The predicate list is closed — see [`specs/graph.md` §4.1](../specs/graph.md#41-the-complete-predicate-vocabulary). `depends` is strictly for hard prerequisites.
 
 **Test:** if an agent cannot do the job without that file, it is `depends`. If a human or agent might want it for context or domain lookup, it is `related`.
 
@@ -161,11 +161,47 @@ The JSON goes in `ods.context.load` when an agent must read it. That is the next
 
 Do not hand-write backlinks. If refunds depends on sessions, you do not also list refunds on sessions. Tools compute inbound links.
 
+### 7. Stop counting `../` — use `@` handles
+
+Relative paths break the moment somebody reorganizes a folder. Once a workspace exists, you can name a target instead of pathing to it:
+
+```yaml
+# Brittle: breaks if either file moves
+ods:
+  depends:
+    - ../../../auth/sessions.md
+
+# Durable: resolves by name, wherever the file lives
+ods:
+  depends:
+    - "@sessions.md"
+```
+
+Three kinds of handle, all written with a leading `@`:
+
+| You write | It resolves to |
+| :--- | :--- |
+| `@sessions.md` | The file named `sessions.md`, anywhere in the workspace. |
+| `@Subscription` | The document that declares `ods.entity: Subscription`. |
+| `@billing/index.md` | A specific `index.md`, when several share the basename. |
+
+Handles work anywhere a path does — `depends`, `related`, `resources`, `schema`, and `code[].path`.
+
+Two things to know:
+
+- **A handle must be unique.** If two files are called `config.md`, lint reports an ambiguous handle and you add a folder prefix (`@billing/config.md`). This is a feature: it surfaces the ambiguity instead of silently picking one.
+- **A typo is an error, not a guess.** `@sesions.md` fails lint rather than resolving to something nearby.
+
+Quote handles in YAML (`"@sessions.md"`). A bare `@` at the start of a scalar is reserved in YAML and some parsers will reject it.
+
+Full resolution rules: [`specs/graph.md` §4.4](../specs/graph.md#44-symbolic-entity--handle-resolution-handle).
+
 ## Troubleshooting
 
 - **"Lint reports a dangling reference."** The relative path is wrong, or the file was moved by hand. Use `ods mv` (see [Run the workspace](06-run-the-workspace.md)) so inbound edges update together.
 - **"Do Markdown `[links](../auth/sessions.md)` still count?"** They are for readers. The machine graph is `depends` / `related`. Prefer both: a prose link *and* a frontmatter edge when it is a real prerequisite.
-- **"How deep can depends go?"** As deep as the subject needs. AI expansion stops at `max-depth` (default 2) so a long chain does not explode a prompt. Humans can still walk the whole graph.
+- **"How deep can depends go?"** As deep as the subject needs. AI expansion stops at `max-depth` (default 2, ceiling 10) so a long chain does not explode a prompt. Humans can still walk the whole graph.
+- **"Path or handle?"** Either is valid. Use a relative path for a close neighbour (`./auth.md`), a handle once you are reaching across more than a folder or two.
 
 **You can stop here** if your docs only need "read this first" and "see also."
 

@@ -159,8 +159,8 @@ YAML is for facts a linter and an indexer should enforce. Prompts, guardrails, a
 
 - **"Which profile if it is a bit of everything?"** Use `note` until the job is clear. Do not invent a hybrid.
 - **"Can I add extra headings?"** Yes. Expected headings are a minimum, not a maximum.
-- **"Can I invent `profile: rfc`?"** Yes, as a custom profile — that is [level 7](07-extend-ods.md). Until then, `feature` or `decision` is enough.
-- **"Lint says unknown profile."** Typo, or a custom profile not listed in `ods.toml`. Unknown profiles warn and behave like `note`.
+- **"Can I invent `profile: rfc`?"** Yes, as a custom profile — that is [level 8](08-extend-ods.md). Until then, `feature` or `decision` is enough.
+- **"Lint says unknown profile."** Typo, or a custom profile not listed in `ods.toml`. Unrecognized profiles produce a fatal `PROF-001` error and do not fall back to `note`.
 
 **You can stop here** if you can pick `note` / `guide` / `decision` / `feature` / `sop` and fill the headings.
 

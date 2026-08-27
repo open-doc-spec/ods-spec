@@ -1,0 +1,10 @@
+# Deprecated nested form (DEPR-003). Must still parse until 2.0.
+spec = { version = "1.1.0", dialect = "okf-superset" }
+ignore = { paths = ["target", "node_modules"] }
+custom_profiles = { paths = ["tests/fixtures/valid/valid-custom-profile.md"] }
+packs = { load = ["core", "security"] }
+
+[service]
+mode = "watch"
+poll_secs = 2
+max_rss_mb = 10

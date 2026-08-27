@@ -30,7 +30,7 @@ This document specifies the **ODS Document Graph**: document identity, path-deri
 
 ## 1. Conformance Language
 
-The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14 ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.txt), [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174.txt)) when, and only when, they appear in all capitals.
+The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14, exactly as stated in [README.md §1](README.md#1-conformance-language). That is the canonical statement; do not maintain a second copy here.
 
 ---
 
@@ -103,7 +103,9 @@ ODS 1.1 explicitly formalizes and connects two complementary graph topologies ac
 
 ## 4. Directed Semantic Relations (Pareto 80/20: `ods.related`)
 
-To enable rich neuro-symbolic reasoning without syntax overhead, documents declare directed relations using the **Pareto Rule** (`- <predicate>: <target>`) directly under `ods.related` (or `ods.relations`):
+To enable rich neuro-symbolic reasoning without syntax overhead, documents declare directed relations using the **Pareto Rule** (`- <predicate>: <target>`) directly under `ods.related`:
+
+> **`ods.relations` is deprecated** (`DEPR-001`, removal targeted at 2.0). It accepts the attributed-object form only and does exactly what `ods.related` already does. Where both are present, `relations` entries are appended to `related` and de-duplicated by `(predicate, target)`. See [scope.md §7.2](scope.md#72-deprecated-in-11--scheduled-for-removal-in-20).
 
 ```yaml
 ods:
@@ -129,7 +131,11 @@ ods:
       since: 2026-01-01
 ```
 
-### 4.1 The 5 Pareto Core Verbs
+### 4.1 The Complete Predicate Vocabulary
+
+The predicate vocabulary is a **closed set**. An unrecognized key in the shorthand form is rejected (`ENUM-006`) — this is what makes the graph mechanically traversable by tools that have never seen your domain.
+
+**The 5 Pareto core verbs** cover the large majority of real edges:
 
 | Predicate | Semantic Meaning | Graph Direction | Auto-Inferred Inverse | Example |
 | :--- | :--- | :--- | :--- | :--- |
@@ -139,7 +145,41 @@ ods:
 | `governed_by` | Policy, SLA, or compliance rule enforcement. | Entity $\rightarrow$ Governing Policy | `governs` | `- governed_by: RefundPolicy` |
 | `see_also` | Lateral discovery / associative reference. | Source $\rightarrow$ Target Reference | `see_also` (Symmetric) | `- see_also: @faq.md` |
 
-*(Technical bindings like `maps_to`, `derives_from`, and `implements`, as well as custom domain `snake_case` verbs, are also supported).*
+**Technical binding verbs** connect the domain graph to code, data, and tests:
+
+| Predicate | Semantic Meaning | Auto-Inferred Inverse | Example |
+| :--- | :--- | :--- | :--- |
+| `maps_to` | Semantic mapping to a physical table, dataset, or API. | `mapped_from` | `- maps_to: datasets/bq-customers.sql` |
+| `derives_from` | Data lineage: this value is computed from that one. | `derives` | `- derives_from: ActiveSubscriptions` |
+| `implements` | This document or entity realizes that contract or spec. | `implemented_by` | `- implements: @PaymentProvider` |
+| `depends_on` | Non-structural runtime or conceptual dependence. Use `ods.depends` for hard, DAG-checked prerequisites. | `depended_on_by` | `- depends_on: @BillingEngine` |
+| `exercises` | This test, scenario, or checklist verifies that capability. | `exercised_by` | `- exercises: @RefundFlow` |
+
+**Accepted aliases.** These are shorthand spellings that normalize to a core verb during indexing. They exist so an author can write the word their domain uses; tools MUST record the canonical predicate, not the alias.
+
+| Alias | Normalizes to |
+| :--- | :--- |
+| `extends` | `is_a` |
+| `contains` | `owns` |
+| `policy`, `rule` | `governed_by` |
+| `table` | `maps_to` |
+| `see` | `see_also` |
+
+**Domain-specific verbs.** ODS does **not** accept arbitrary bare `snake_case` keys — an unknown key is indistinguishable from a typo, and silently absorbing typos is how a graph rots. Use the explicit escape hatch instead:
+
+```yaml
+ods:
+  related:
+    # WRONG: bare custom verb is rejected by the schema (ENUM-006)
+    # - reconciles_with: @Ledger
+
+    # RIGHT: explicit custom predicate
+    - predicate: custom
+      custom_predicate: reconciles_with
+      target: "@Ledger"
+```
+
+Custom edges are stored and traversed like any other edge, but tools MUST NOT infer an inverse for them.
 
 ### 4.2 Auto-Inverse Edge Materialization
 Authors ONLY write the natural forward relation. The ODS compiler automatically synthesizes reverse inbound edges in memory during workspace indexing:
@@ -148,11 +188,19 @@ Authors ONLY write the natural forward relation. The ODS compiler automatically 
 - When Document A declares `governed_by: @DocB`, the graph index automatically records `DocB governs DocA`.
 
 ### 4.3 Attributed Edge Metadata
-When relationships require machine-extracted scores or temporal bounds, use the expanded object shape:
-- **`role`**: Semantic role or association title (e.g. `role: "Lead Maintainer"`).
-- **`confidence`**: Machine extraction certainty score between `0.0` and `1.0`.
-- **`since` / `until`**: ISO 8601 temporal activation window.
-- **`cardinality`**: Edge constraint (`1`, `N`, `*`, `0..1`, `1..1`, `0..N`, `1..N`, `0..*`, `1..*`, `*..*`).
+When relationships require machine-extracted scores, temporal bounds, or a custom verb, use the expanded object shape. `predicate` and `target` are required; every other field is optional.
+
+| Field | Type | Meaning |
+| :--- | :--- | :--- |
+| `predicate` | enum | One of the standard predicates above, or `custom`. **Required.** |
+| `target` | string | Path, `@` file handle, or entity handle. **Required.** |
+| `custom_predicate` | string | The domain verb, when `predicate: custom`. Ignored otherwise. |
+| `role` | string | Semantic role or association title (e.g. `role: "Lead Maintainer"`). |
+| `confidence` | number `0.0`–`1.0` | Machine-extraction certainty. Absent means asserted by a human. |
+| `since` / `until` | ISO 8601 | Temporal activation window for the edge itself. |
+| `cardinality` | string | Edge constraint: `1`, `N`, `*`, `0..1`, `1..1`, `0..N`, `1..N`, `0..*`, `1..*`, `*..*`. |
+| `description` | string | Free-text note explaining the edge, for human readers. |
+| `binding` | string | Physical binding for `maps_to` edges: the column, endpoint, or field the edge resolves to. |
 
 ### 4.4 Symbolic Entity & Handle Resolution (`@handle`)
 Authors can reference target entities and files directly using **`@` handles** instead of brittle relative paths (`../../billing/entities/subscription.md`):
@@ -172,12 +220,47 @@ The ODS compiler indexes workspace symbols in two passes during discovery:
 
 ---
 
-## 5. Bi-Temporal Memory Traversal
+## 5. Cognitive Memory & Bi-Temporal Traversal
 
-When traversing agent memory nodes (`ods.tier: episodic`), the graph engine applies bi-temporal filtering:
-- **`valid_from` / `valid_to`**: The real-world validity window. Facts where `now >= valid_to` are excluded from active context queries unless an explicit historical timestamp is requested (`ods memory query --at <iso-time>`).
-- **`asserted_at`**: The instant the recording agent observed the fact.
+This section is the canonical definition of memory semantics. [keys.md §7.15–7.19](keys.md#715-the-memory-block) gives the per-key type reference and defers here for meaning.
+
+### 5.1 Canonical Placement
+
+Memory fields live in the **top-level `memory:` block**:
+
+```yaml
+memory:
+  tier: episodic
+  valid_from: "2026-08-26T10:00:00Z"
+  valid_to: null
+  asserted_at: "2026-08-26T10:05:00Z"
+  pin: true
+  mutations:
+    - { entity: Customer, id: cust-4048, property: plan, old_value: starter, new_value: enterprise }
+```
+
+`ods.memory:` and the flat `ods.tier` / `ods.valid_from` / `ods.valid_to` / `ods.asserted_at` / `ods.mutations` / `ods.pin` keys are **deprecated** (`DEPR-002`). Parsers MUST still read them. Precedence, when the same field appears more than once: `memory:` > `ods.memory:` > flat `ods.*`. Conflicting values for one field are a `MEM-004` error rather than a silent pick.
+
+### 5.2 The 5 Memory Tiers
+
+| Tier | Holds | Typical lifetime |
+| :--- | :--- | :--- |
+| `episodic` | Raw time-stamped agent session traces and event logs. | Short; subject to decay pruning unless pinned. |
+| `semantic` | Canonical domain knowledge and settled facts. | Long. |
+| `procedural` | Operational heuristics and learned workflows. | Long. |
+| `state` | The current value of a living entity or user attribute, synthesized across episodes. | Superseded rather than expired. |
+| `profile` | A distilled, stable characterization of an actor — preferences, constraints, working style — accumulated from many episodes. | Longest; effectively permanent until contradicted. |
+
+`state` answers "what is true right now"; `profile` answers "what is persistently true about this actor". Keeping them apart lets an engine expire a stale `state` node without discarding the `profile` built from it.
+
+### 5.3 Bi-Temporal Filtering
+
+When traversing agent memory nodes, the graph engine applies bi-temporal filtering:
+- **`valid_from` / `valid_to`**: The real-world validity window — when the fact was true *in the world*. Facts where `now >= valid_to` are excluded from active context queries unless an explicit historical timestamp is requested.
+- **`asserted_at`**: The instant the recording agent observed the fact — when it became true *in the record*. The two axes differ whenever an agent learns about a past change after the fact.
 - **`pin`**: Nodes marked `pin: true` are immune to automated decay and pruning.
+- `valid_to: null` means "still true". An absent `valid_to` is equivalent to `null`.
+- `valid_to` earlier than `valid_from` is a `MEM-001` error.
 
 ---
 

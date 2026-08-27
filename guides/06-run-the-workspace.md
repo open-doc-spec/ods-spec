@@ -12,7 +12,7 @@ ods:
   depends:
     - 05-ai-reading-list.md
   related:
-    - 07-extend-ods.md
+    - 08-extend-ods.md
     - ../specs/indexes.md
     - ../specs/validation.md
     - ../specs/core.md
@@ -62,8 +62,8 @@ ods lint .
 | Exit `0`, zero errors | **Compliant.** Warnings are allowed. |
 | Exit `1`, one or more errors | **Non-compliant.** Fix, then re-run. |
 
-Warnings: missing profile headings, missing profile-required metadata keys, unknown profile name, unknown key under `ods:`.
-Errors: bad YAML, `title:` in frontmatter, engine keys at the top level, cycles in `depends`, missing paths, line numbers on `code` paths, illegal enums.
+Warnings: missing profile headings, missing profile-required metadata keys, unknown key under `ods:`.
+Errors: bad YAML, `title:` in frontmatter, unknown profile name (`PROF-001`), engine keys at the top level, cycles in `depends`, missing paths, line numbers on `code` paths, illegal enums.
 
 Rule IDs and remediations: [`specs/validation.md`](../specs/validation.md).
 
@@ -92,7 +92,7 @@ ignore = [
 
 `src` in `ignore` means "do not scan application source as if it were docs." It does **not** stop `ods.code` from pointing into `src`. Bindings still work; those files are just not treated as documents.
 
-Leave `custom_profiles`, `packs`, and `[aliases]` until [Extend ODS](07-extend-ods.md).
+Leave `custom_profiles`, `packs`, and `[aliases]` until [Extend ODS](08-extend-ods.md).
 
 ### 4. Use lifecycle commands so the graph stays true
 
@@ -123,4 +123,4 @@ The tool infers a profile from headings when it can (`## Context` + `## Decision
 
 **You can stop here** if the team can lint in CI and rename a file without breaking links.
 
-**Next only if** you need custom profiles, heading aliases, packs, or the implementer map: [07 · Extend ODS](07-extend-ods.md).
+**Next only if** you need custom profiles, heading aliases, packs, or the implementer map: [08 · Extend ODS](08-extend-ods.md).

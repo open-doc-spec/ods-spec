@@ -31,13 +31,13 @@ This document specifies the **Bounded AI Context** mechanism in Open Document Sp
 
 ## 1. Conformance Language
 
-The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14 ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.txt), [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174.txt)) when, and only when, they appear in all capitals.
+The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14, exactly as stated in [README.md §1](README.md#1-conformance-language). That is the canonical statement; do not maintain a second copy here.
 
 ---
 
-## 2. The 6 Engine Subsystems under `ods:`
+## 2. The 5 Engine Subsystems Seen by Context Resolution
 
-Canonical matrix: [keys.md §4](keys.md#4-subsystem-matrix-of-engine-keys). Context resolution treats those **6 engine subsystems** as follows (`code` is opt-in):
+Canonical matrix: [keys.md §4](keys.md#4-subsystem-matrix-of-engine-keys). Context resolution treats the five path-bearing subsystems as follows (`code` is opt-in):
 
 ```yaml
 ---
@@ -57,17 +57,17 @@ ods:
     - ../billing/payment-gateway.md
 
   # ─────────────────────────────────────────────────────────────────
-  # 2. DISCOVERY GRAPH (Human Associative Links)
-  # • Skipped by default in 'ods context' (opt-in via --include-related)
+  # 2. DISCOVERY GRAPH (Human Associative Links & Typed Domain Edges)
+  # • Titles/descriptions only — bodies are never auto-loaded
   # • Cycles allowed (e.g. Doc A related to Doc B, Doc B related to Doc A)
   # ─────────────────────────────────────────────────────────────────
   related:
     - ../marketing/promotions.md
 
   # ─────────────────────────────────────────────────────────────────
-  # 3. ASSET CATALOG (Disk-level Non-Markdown Files)
-  # • Verified for disk existence by 'ods lint'
-  # • NOT loaded into LLM prompts by default (protects token limits)
+  # 3. ASSET CATALOG (Disk-level Non-Markdown Files & URLs)
+  # • Local files verified for disk existence by 'ods lint'; URLs syntax-checked only
+  # • NEVER loaded into LLM prompts (protects token limits)
   # ─────────────────────────────────────────────────────────────────
   resources:
     - path: ../diagrams/checkout-flow.pdf      # 15MB binary PDF (do not load into prompt)
@@ -75,7 +75,7 @@ ods:
 
   # ─────────────────────────────────────────────────────────────────
   # 4. CODE BINDINGS (Implementation & Tests)
-  # • Included only when the caller passes --with-code
+  # • Opt-in: included only when the caller asks for code
   # • Not a graph node; path + symbol, never :L45
   # ─────────────────────────────────────────────────────────────────
   code:
@@ -89,7 +89,7 @@ ods:
   # • Governs recursion bounds and path pruning
   # ─────────────────────────────────────────────────────────────────
   context:
-    max-depth: 2                              # Follow 'depends' up to 2 hops deep
+    max-depth: 2                              # Follow 'depends' up to 2 hops deep (range 0-10)
     load:
       - ../schemas/order-payload.json         # Surgically inject JSON schema into prompt
       # NOTE: Do NOT list '../auth/sessions.md' here; it is already auto-loaded via 'depends'!
@@ -103,17 +103,15 @@ ods:
 
 ## 3. Subsystem Summary Matrix
 
-The following matrix contrasts how the engine treats each key across both phases of the document lifecycle:
+Canonical matrix of auto-load and lint behavior per key: [keys.md §4](keys.md#4-subsystem-matrix-of-engine-keys). Do not maintain a second copy here.
 
-| Key | Domain Subsystem | Auto-loaded in `ods context`? | Verified by `ods lint`? | Primary Purpose |
-| :--- | :--- | :---: | :---: | :--- |
-| **`ods.depends`** | Knowledge Graph | **Yes** (up to `max-depth`) | **Yes** (strict DAG, no cycles, path must exist) | Hard structural prerequisites required to understand this document. |
-| **`ods.related`** | Discovery Graph | **No** (opt-in via `--include-related`) | **Yes** (target path must exist) | Soft associative reading for humans and background browsing. |
-| **`ods.resources`** | Asset Inventory | **No** (static metadata only) | **Yes** (file must exist on disk) | Disk-level catalog of attachments (PDFs, images, CSVs, OpenAPI). |
-| **`ods.context.load`** | AI Prompt Scoping | **Yes** (injected directly) | **Yes** (file must exist on disk) | Explicit non-Markdown data, schemas, or fixtures needed in the LLM prompt. |
-| **`ods.context.max-depth`**| Traversal Bound | Governs recursion limit | **Yes** (integer $\ge 0$) | Maximum graph distance to follow `depends` chains (default: 2). |
-| **`ods.code`** | Code Bindings | **Optional** (`--with-code`) | **Yes** (path exists, valid role, no `:L45`) | Implementation, tests, and infra the document describes. |
-| **`ods.context.ignore`** | Scoping Boundary | Filters expansion queue | **Yes** (list of prefixes) | Path prefixes and directories to strictly prune during context resolution. |
+What matters for context resolution specifically:
+
+- **`ods.depends`** is the only edge type traversed for **document bodies**, and only up to `max-depth`.
+- **`ods.related`** contributes **titles and descriptions only** — a one-line "Related Context Index" so the agent knows what exists without paying for it. Bodies are never pulled in automatically; a caller must ask for them explicitly.
+- **`ods.resources`** contributes **nothing** to the payload. It is a disk catalog for humans, verified by lint. This is deliberate: see §5 Q2.
+- **`ods.context.load`** is the only key that injects arbitrary file contents.
+- **`ods.code`** is opt-in, and contributes sliced symbols rather than whole files.
 
 ---
 
@@ -137,8 +135,8 @@ ODS clearly decouples the **Authoring/Verification Phase** from the **AI Context
 │ 2. Auto-traverse 'depends' up to 'max-depth' hops (default: 2)          │
 │ 3. Ingest files explicitly listed in 'context.load' (schemas/fixtures)  │
 │ 4. Prune branches matching 'context.ignore' or 'share: private'         │
-│ 5. Include declared 'ods.code' files (when --with-code is enabled)      │
-│ 6. Emit unified bounded prompt payload formatted within --max-tokens    │
+│ 5. Include declared 'ods.code' symbols (only when code is requested)    │
+│ 6. Emit unified bounded prompt payload within the caller's token budget │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -202,7 +200,7 @@ flowchart TD
 
     SkipDep --> LoadAux
     EnqueueDep --> LoadAux
-    LoadAux --> InjectCode["Include declared ods.code files (if --with-code)"]
+    LoadAux --> InjectCode["Include declared ods.code symbols (if code requested)"]
     InjectCode --> Finalize["Assemble Ordered Bounded Payload within Token Budget"]
 ```
 
@@ -213,20 +211,18 @@ flowchart TD
    - If $D_0$ has `stale_after` and $\text{now} \ge \text{stale_after}$, flag as stale or refuse if `--strict-freshness` is enabled.
    - If $D_0$ has `valid_to` and $\text{now} \ge \text{valid_to}$, filter out as superseded historical state unless historical querying is enabled.
 3. **Trust Tier Evaluation**:
-   - Compute trust tier for $D_0$ from `verified`: `unverified`, `machine-confirmed` (process/agent), or `human-reviewed` (`human:<id>`).
-   - If trust tier is below `--trust-min` (or `context.trust-min`), emit warning or filter.
+   - Compute the trust tier for $D_0$ from its `verified` entries. Derivation rules and tier ordering: [keys.md §7.9](keys.md#79-odscontext).
+   - If the tier is below `ods.context.trust-min` (or a caller-supplied override), exclude the document and **report the exclusion**. Silent filtering is prohibited: an agent that receives a smaller payload than expected must be able to learn why.
 4. **Adaptive Token-Budget Allocation (4-Tier Payload)**:
    - **Tier 1 (50% Budget - Primary Focus)**: Target document $D_0$ body + H2 headings.
-   - **Tier 2 (35% Budget - Prerequisites)**: Recurse along `ods.depends` up to `max-depth` (default 2 hops). Frontmatter is stripped to minimize token overhead.
+   - **Tier 2 (35% Budget - Prerequisites)**: Recurse along `ods.depends` up to `max-depth` (default 2 hops, maximum 10). Frontmatter is stripped to minimize token overhead.
    - **Tier 3 (10% Budget - Asset & Schema Signatures)**: Load `context.load` files and extract signatures/schemas from `ods.resources` and `ods.schema`.
-   - **Tier 4 (5% Budget - Discovery Index)**: Scan `ods.related` links and append a 1-line **"Related Context Index"** with titles and summaries so the agent knows what exists on demand.
+   - **Tier 4 (5% Budget - Discovery Index)**: Scan `ods.related` links and append a 1-line **"Related Context Index"** carrying each target's title and `description` — never its body. This is the whole of `related`'s participation in a payload.
 5. **Code Binding Inclusion**:
-   - When `--with-code` is active, parse `ods.code` bindings and use Tree-sitter to slice the exact function, struct, or class symbol declared in `symbol` without line numbers.
-6. **Final Assembly**:
+   - When the caller requests code, parse `ods.code` bindings and slice the exact function, struct, or class named in `symbol` using a language-aware parser. Line numbers are never used. Whole-file inclusion is a fallback only when no `symbol` is declared.
+6. **Final Assembly & Topological Formatting**:
+   - Format the aggregated payload in topological order (deepest prerequisites first, entrypoint last) within the caller's token budget.
    - Emit deterministic, ordered, token-bounded context payload with provenance footnotes and trust tier headers.
-   - When code bindings are enabled, resolve all paths declared in `ods.code`.
-6. **Topological Formatting**:
-   - Format the aggregated payload in topological order (deepest prerequisites first, entrypoint last) within `--max-tokens`.
 
 ---
 
@@ -247,7 +243,7 @@ ods:
     - ../../auth/sessions.md
     - ../../crypto/tokens.md
 
-  # Soft reference (Skipped in context resolution)
+  # Soft reference (title + description only; body not loaded)
   related:
     - ../../policy/refund-sla.md
 
@@ -273,7 +269,7 @@ ods:
 # Refund Processing Guide
 ```
 
-### Resulting Context Output (`ods context features/billing/refunds.md --max-tokens 4000`):
+### Resulting Context Output (entrypoint `features/billing/refunds.md`, budget 4,000 tokens):
 1. `crypto/tokens.md` (Transitive prerequisite at Depth 2)
 2. `auth/sessions.md` (Direct prerequisite at Depth 1)
 3. `schemas/refund-request.json` (Auxiliary schema via `context.load`)

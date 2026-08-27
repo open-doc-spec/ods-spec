@@ -32,7 +32,7 @@ This document defines the normative format model, compliance requirements, lifec
 
 ## 1. Conformance Language
 
-The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14 ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.txt), [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174.txt)) when, and only when, they appear in all capitals.
+The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14, exactly as stated in [README.md §1](README.md#1-conformance-language). That is the canonical statement; do not maintain a second copy here.
 
 ---
 
@@ -87,11 +87,47 @@ An ODS Document is a Markdown file (`.md`) containing optional YAML frontmatter.
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
+### 3.0 Minimal Conformant Document
+
+ODS adoption is **additive**. Conformance is defined by what a document does not get wrong, not by what it declares.
+
+| Level | Requirement | Status |
+| :--- | :--- | :--- |
+| **Absolute minimum** | A UTF-8 Markdown file inside the workspace. Frontmatter MAY be absent entirely. | **Conformant** |
+| **Recommended floor** | `description` (top level) + `ods.profile` + `ods.status`. | **Conformant + useful** |
+| **Everything else** | `depends`, `related`, `code`, `resources`, `context`, `entity`, `memory`, attestations. | **Progressive enhancement** |
+
+- A document with no frontmatter MUST NOT be reported as an error. Tools MAY report an informational hint suggesting `description` and `ods.profile`.
+- A document that omits `ods.profile` is treated as `profile: note`, whose section contract is empty; it therefore cannot fail `PROF-002`.
+- A document that omits `ods.status` is treated as `status: draft`.
+- No key is required for conformance. Errors arise only from keys that are **present and wrong** (bad placement, invalid enum, dangling path, cyclic `depends`).
+
+```markdown
+---
+description: "How JWT session tokens are signed, verified, and revoked."
+ods:
+  profile: guide
+  status: stable
+---
+
+# User Authentication Guide
+
+## Overview
+...
+```
+
+This document is complete. Authors SHOULD NOT add keys speculatively; each additional key exists to solve a problem stated in its own chapter.
+
+Adoption stages, and the guide that teaches each, are laid out in [Learn ODS](../guides/README.md).
+
+---
+
 ### 3.1 Frontmatter
 - Frontmatter MUST be a single YAML document delimited by `---` on the first line of the file and closed by `---` on its own line.
 - Frontmatter is **optional**. All fields within frontmatter are **optional**.
 - Frontmatter contains machine-readable metadata intended for developer tooling, search indexers, and AI agent runtimes.
-- In pure ODS authoring, frontmatter SHOULD NOT contain a `title:` key (the document title is defined by the first `# H1` heading). However, for Google OKF v0.2 compatibility, parsers MUST accept top-level `title:` and `type:` without error.
+- In pure ODS authoring, frontmatter SHOULD NOT contain a `title:` key (the document title is defined by the first `# H1` heading). Parsers MUST accept top-level `title:` and `type:` without error — the OKF superset depends on them.
+- A `title:` key in a document carrying **no** OKF signal (no `type`, `okf_version`, or `sources`) is reported as a `SYNTAX-002` **warning** advising the author to move the title to the `# H1`. It is never an error, and tools MUST NOT strip or rewrite it. See [validation.md](validation.md#4-normative-lint-rules-matrix).
 - Parsers and tools MUST preserve unknown frontmatter keys to guarantee zero-friction interoperability with Static Site Generators (SSGs) and external tools.
 
 ### 3.2 Native Google OKF v0.2 Superset Interoperability
@@ -105,12 +141,14 @@ ODS 1.1 operates as a strict superset of Google's Open Knowledge Format (OKF v0.
 - In standard ODS documents, the document's primary title MUST be defined as the first `# H1` heading in the body.
 
 ### 3.4 Machine-Readable JSON Schemas
-The normative data structures of ODS are formally defined using **JSON Schema Draft 2020-12**:
+The normative data structures of ODS are formally defined using **JSON Schema Draft 2020-12**. Three schemas are normative:
 - **Frontmatter Schema (v1.1.0)**: [`schemas/1.1.0/document.schema.json`](../schemas/1.1.0/document.schema.json) (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/document.schema.json`)
 - **Workspace Config Schema (v1.1.0)**: [`schemas/1.1.0/config.schema.json`](../schemas/1.1.0/config.schema.json) (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/config.schema.json`)
 - **Custom Profile Schema (v1.1.0)**: [`schemas/1.1.0/profile.schema.json`](../schemas/1.1.0/profile.schema.json) (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/profile.schema.json`)
 
-Tooling, linters, and language servers SHOULD use these schemas for Stage 1 structural validation, key lifecycle verification (`x-ods-lifecycle`), and editor autocompletion.
+Three further schemas — [`ontology.schema.json`](../schemas/1.1.0/ontology.schema.json), [`memory.schema.json`](../schemas/1.1.0/memory.schema.json), and [`attestation.schema.json`](../schemas/1.1.0/attestation.schema.json) — are published as **experimental**. They describe richer modelling shapes under review for a future revision and are NOT part of the ODS 1.1 conformance contract. Tools MUST NOT reject a document for failing them. See [`schemas/README.md`](../schemas/README.md).
+
+Tooling, linters, and language servers SHOULD use the normative schemas for Stage 1 structural validation, key lifecycle verification (`x-ods-lifecycle`), and editor autocompletion.
 
 ---
 
@@ -186,7 +224,7 @@ graph LR
 - Automatically rewrites all inbound references across the workspace, including:
   - `ods.depends` and `ods.related` in other documents.
   - `ods.context.load` references.
-  - Inline Markdown links (`[text](relative/path.md)`).
+  - Inline Markdown links written in standard `[text](target)` form, where `target` is a workspace-relative path to the moved document.
   - Code bindings and relative resource paths.
 
 ### 3. Archive (`ods archive <path>`)
@@ -202,7 +240,7 @@ graph LR
 
 ## 7. Smart Profile Inference Heuristics
 
-When adopting untyped Markdown documents into an ODS workspace (`ods adopt`), tools SHOULD scan existing `##` and `###` headings to infer the most appropriate `ods.profile`:
+When adopting untyped Markdown documents into an ODS workspace, tools SHOULD scan existing `##` and `###` headings to infer the most appropriate `ods.profile`. The heading sets below are *inference hints*; the normative section contract for each profile lives in [profiles.md §3](profiles.md#3-standard-profiles-catalog).
 
 | Heading Keywords Found in Document | Inferred Profile | Rationale |
 | :--- | :--- | :--- |
@@ -226,8 +264,10 @@ When adopting untyped Markdown documents into an ODS workspace (`ods adopt`), to
 ### Why separate Frontmatter and Body Prose?
 Frontmatter is optimized for deterministic machine indexing, CI validation, and graph traversal. Body prose is optimized for human reading and rich explanations. Mixing machine metadata (such as graph edges and code bindings) inside prose leads to fragile regular expressions and parse errors.
 
-### Why prohibit `title:` in Frontmatter?
-When title exists in both frontmatter (`title: Foo`) and body prose (`# Bar`), they inevitably drift out of sync during edits. Defining title solely as the first `# H1` adheres strictly to the Single Source of Truth (SSOT) principle.
+### Why discourage `title:` in Frontmatter — but not forbid it?
+When title exists in both frontmatter (`title: Foo`) and body prose (`# Bar`), they inevitably drift out of sync during edits. Defining title solely as the first `# H1` adheres strictly to the Single Source of Truth (SSOT) principle, so pure ODS authoring omits `title:`.
+
+Rejecting it outright, however, would break the OKF v0.2 superset guarantee — OKF concepts carry `title:` natively, and a spec cannot claim to accept "any valid OKF bundle" while erroring on one of its core keys. ODS therefore accepts `title:` universally and reports it as a `SYNTAX-002` warning only where no OKF signal is present.
 
 ### Why binary compliance instead of compliance levels?
 Compliance levels (e.g. Level 0 through 3) created confusion for developers regarding whether a doc was "good enough" for CI. Binary compliance provides an unambiguous contract: `ods lint` either passes (exit 0) or fails (exit 1).

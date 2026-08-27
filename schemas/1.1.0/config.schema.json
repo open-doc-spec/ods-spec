@@ -52,7 +52,16 @@
           "required": [
             "version"
           ],
-          "additionalProperties": false
+          "additionalProperties": false,
+          "description": " DEPRECATED (DEPR-003): use the flat form.",
+          "x-ods-lifecycle": {
+            "introduced": "1.0.0",
+            "spec_version": "1.1",
+            "status": "deprecated",
+            "deprecated_in": "1.1.0",
+            "removed_in": "2.0",
+            "spec": "specs/indexes.md#39-deprecated-nested-forms"
+          }
         }
       ]
     },
@@ -74,7 +83,7 @@
         "type": "string"
       },
       "additionalProperties": false,
-      "description": "Paths or configuration table for ignored directories."
+      "description": "Directory prefixes excluded from scanning. The array form is canonical; the { paths = [...] } table form is DEPRECATED (DEPR-003)."
     },
     "schemas": {
       "type": "array",
@@ -145,7 +154,8 @@
             "sqlite",
             "duckdb"
           ],
-          "default": "markdown"
+          "default": "markdown",
+          "description": " Deprecated spelling of backend."
         },
         "backend": {
           "type": "string",
@@ -160,7 +170,7 @@
           "type": "number",
           "minimum": 0,
           "default": 0.05,
-          "description": "Daily exponential decay rate for unpinned episodic memories."
+          "description": "Daily exponential decay rate for unpinned episodic memories. Deprecated spelling of decay_days."
         },
         "decay_days": {
           "type": "integer",
@@ -192,38 +202,144 @@
       },
       "additionalProperties": false
     },
-    "custom_profiles": {
+    "attestation": {
       "type": "object",
       "properties": {
-        "paths": {
+        "allowed_runtimes": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "File paths to registered custom profile markdown definitions."
+          "description": "List of sanctioned computation execution runtimes (e.g., bigquery, postgres, dbt, python)."
+        },
+        "enforce_receipts": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to enforce mandatory receipt emission and verification before attestation pass."
         }
       },
       "additionalProperties": false
     },
-    "packs": {
-      "type": "object",
-      "properties": {
-        "load": {
+    "custom_profiles": {
+      "oneOf": [
+        {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Registered pack identifiers or bundle paths to load into the workspace."
+          "description": "Array of file paths to registered custom profile markdown definitions."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "paths": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "File paths to registered custom profile markdown definitions."
+            }
+          },
+          "required": [
+            "paths"
+          ],
+          "additionalProperties": false,
+          "description": " DEPRECATED (DEPR-003): use the flat form.",
+          "x-ods-lifecycle": {
+            "introduced": "1.0.0",
+            "spec_version": "1.1",
+            "status": "deprecated",
+            "deprecated_in": "1.1.0",
+            "removed_in": "2.0",
+            "spec": "specs/indexes.md#39-deprecated-nested-forms"
+          }
         }
-      },
-      "additionalProperties": false
+      ]
+    },
+    "packs": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of registered pack identifiers or bundle paths to load into the workspace."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "load": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Registered pack identifiers or bundle paths to load into the workspace."
+            }
+          },
+          "required": [
+            "load"
+          ],
+          "additionalProperties": false,
+          "description": " DEPRECATED (DEPR-003): use the flat form.",
+          "x-ods-lifecycle": {
+            "introduced": "1.0.0",
+            "spec_version": "1.1",
+            "status": "deprecated",
+            "deprecated_in": "1.1.0",
+            "removed_in": "2.0",
+            "spec": "specs/indexes.md#39-deprecated-nested-forms"
+          }
+        }
+      ]
     },
     "aliases": {
       "type": "object",
-      "additionalProperties": {
-        "type": "string"
+      "description": "Workspace aliases. Use [aliases.sections] for heading synonyms and [aliases.paths] for named document shortcuts. A flat table is accepted as a legacy spelling of [aliases.sections].",
+      "properties": {
+        "sections": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "description": "Canonical section name -> accepted heading synonyms, extending specs/profiles.md#6."
+        },
+        "paths": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Handle -> workspace-relative document path."
+        }
       },
-      "description": "Workspace-wide path or symbol aliases for dependency and related resolution."
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "x-ods-lifecycle": {
+        "introduced": "1.0.0",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/indexes.md#33-aliases"
+      }
     },
     "service": {
       "type": "object",
@@ -247,7 +363,7 @@
           "type": "integer",
           "minimum": 1,
           "default": 5,
-          "description": "Polling interval in seconds when service.mode is 'poll'."
+          "description": "Polling interval in seconds when service.mode is 'poll'. Deprecated spelling of poll_secs."
         },
         "max_rss_mb": {
           "type": "integer",
@@ -257,6 +373,23 @@
         }
       },
       "additionalProperties": false
+    },
+    "dialect": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "strict",
+        "agentic",
+        "okf-superset"
+      ],
+      "default": "standard",
+      "description": "Workspace interpretation mode. See specs/indexes.md#32-dialects.",
+      "x-ods-lifecycle": {
+        "introduced": "1.1.0",
+        "spec_version": "1.1",
+        "status": "stable",
+        "spec": "specs/indexes.md#32-dialects"
+      }
     }
   },
   "required": [

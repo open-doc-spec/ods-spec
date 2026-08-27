@@ -1,5 +1,5 @@
 ---
-description: "The six ODS authoring mistakes that cause most lint failures, with a wrong example and the fix for each."
+description: "The seven ODS authoring mistakes that cause most lint failures, with a wrong example and the fix for each."
 tags:
   - learn
   - ods
@@ -22,7 +22,7 @@ ods:
 
 ## Overview
 
-Most first-month lint failures are the same six mistakes. Each block below is the broken form, then the fix.
+Most first-month lint failures are the same seven mistakes. Each block below is the broken form, then the fix.
 
 ## Prerequisites
 

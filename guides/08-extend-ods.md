@@ -11,6 +11,7 @@ ods:
   status: stable
   depends:
     - 06-run-the-workspace.md
+    - 07-ontologies-and-memory.md
   related:
     - ../specs/profiles.md
     - ../specs/keys.md
@@ -129,19 +130,20 @@ Authors who finished [Your first document](01-first-document.md) should not read
 
 ### 5. Ignore sibling dialects until you have that problem
 
-The `ods` engine also speaks:
+A workspace declares a **dialect** in `ods.toml`. `standard` is the default and is what this guide has taught throughout. The other three:
 
-- **`--okf`** — Google OKF knowledge bundles (provenance, trust, freshness)
-- **`--skills`** — reusable `SKILL.md` packages
+- **`okf-superset`** — Google OKF knowledge bundles (provenance, trust, freshness)
+- **`agentic`** — agent and skill packaging (`agent.md`, `SKILL.md`, memory tiers)
+- **`strict`** — as `standard`, with warnings promoted to errors
 
-Bare `ods lint` is ODS. You do not need those flags to use this specification.
+Omitting `dialect` gives you `standard`. You do not need any of the others to use this specification, and a dialect never changes what is *valid* — only what the engine emphasizes and how strictly it treats warnings. See [`specs/indexes.md` §3.2](../specs/indexes.md#32-dialects).
 
 ## Troubleshooting
 
 - **"Profile not found."** ODS checks the exact paths in `custom_profiles`. Create the definition at the configured path, correct the path in `ods.toml`, or make `ods.profile` match the loaded definition name.
 - **"Invalid custom profile placement."** `ods.custom_profile` is only valid in a file selected by `custom_profiles` or a registered pack. Move it to that file and use `ods.profile` in the ordinary document.
 - **"Two packs define `rfc`."** First match wins; you should get a warning. Rename one.
-- **"I want `implements` / `replaces` edges."** Out of scope on purpose. Use `depends` or `related`, and explain the nuance in prose. See [`specs/scope.md`](../specs/scope.md).
+- **"I want `implements` / `replaces` edges."** `implements` is already a standard predicate under `ods.related`. `replaces` is not — and you cannot invent it as a bare verb, because an unknown key is indistinguishable from a typo. Declare it explicitly instead: `{ predicate: custom, custom_predicate: replaces, target: "@old-spec.md" }`. It is stored and traversed like any other edge; only the inverse is not inferred. Full vocabulary: [`specs/graph.md` §4.1](../specs/graph.md#41-the-complete-predicate-vocabulary).
 - **"I want to put `role:` in frontmatter for agents."** Do not. Use `##` headings. Re-read [Pick a shape](02-pick-a-shape.md) §5.
 
 You are at the end of the learning track. Carry [Decision cards](decision-cards.md) and [Common mistakes](mistakes.md). Use the spec as a dictionary.

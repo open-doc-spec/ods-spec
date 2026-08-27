@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/profile.schema.json",
   "title": "ODS Custom Profile Definition Schema (v1.1.0)",
-  "description": "Machine-readable JSON Schema for custom profile declarations in ODS (ods.custom_profile) in v1.1.0.",
+  "description": "Machine-readable JSON Schema for custom profile declarations in ODS (ods.custom_profile) in v1.1.0. name is optional; when absent the profile-definition file stem is used. Section contracts may be declared either via required_sections/optional_sections or as ## headings in the definition file body; see specs/profiles.md#711-profile-definition-metadata.",
   "type": "object",
   "properties": {
     "name": {
@@ -35,6 +35,13 @@
       },
       "description": "List of frontmatter keys required for this profile."
     },
+    "optional_keys": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Top-level document keys documented for the profile but not required."
+    },
     "forbidden_keys": {
       "type": "array",
       "items": {
@@ -43,9 +50,5 @@
       "description": "List of frontmatter keys that are forbidden for this profile."
     }
   },
-  "required": [
-    "name",
-    "required_sections"
-  ],
   "additionalProperties": false
 }

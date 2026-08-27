@@ -19,7 +19,7 @@ This document specifies how **Assets**—comprising non-Markdown **resources** a
 
 ## At a glance
 
-- **What this chapter defines:** `ods.resources` vs `ods.code` vs `ods.context.load`, the 8 code roles, and the ban on line numbers.
+- **What this chapter defines:** `ods.resources` vs `ods.code` vs `ods.context.load`, the 10 code roles, and the ban on line numbers.
 - **Why it exists:** Attachments that look similar (a PNG, a `.ts` file, a JSON schema) must not be treated the same in a prompt.
 - **When you need it:** You are binding implementation or cataloging files on disk.
 - **When you can skip it:** Documents that do not point at files or source.
@@ -30,7 +30,7 @@ This document specifies how **Assets**—comprising non-Markdown **resources** a
 
 ## 1. Conformance Language
 
-The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14 ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.txt), [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174.txt)) when, and only when, they appear in all capitals.
+The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14, exactly as stated in [README.md §1](README.md#1-conformance-language). That is the canonical statement; do not maintain a second copy here.
 
 ---
 
@@ -67,11 +67,11 @@ Assets are attachments that connect human-readable prose in Markdown to concrete
 | **Architecture diagram / image** | `ods.resources` | Verified by `ods lint`; **NOT** loaded into prompt | Binary image; loading it would waste LLM prompt tokens. |
 | **Full PDF specification / report**| `ods.resources` | Verified by `ods lint`; **NOT** loaded into prompt | Large binary file; human reference only. |
 | **Small JSON schema / mock CSV** | `ods.context.load` | Verified by `ods lint`; **INJECTED** into prompt | Structured text data the AI agent needs to inspect. |
-| **API route / HTTP handler** | `ods.code` (`role: entrypoint`) | Verified by `ods lint`; Included when `--with-code` | Marks where execution starts. |
-| **Core business logic** | `ods.code` (`role: implementation`) | Verified by `ods lint`; Included when `--with-code` | Marks domain functions. |
-| **Unit or integration test** | `ods.code` (`role: test`) | Verified by `ods lint`; Included when `--with-code` | Test suite verifying document requirements. |
-| **Database migration script** | `ods.code` (`role: migration`) | Verified by `ods lint`; Included when `--with-code` | Persistent state transition script. |
-| **Terraform / Cloud manifest** | `ods.code` (`role: infrastructure`) | Verified by `ods lint`; Included when `--with-code` | Cloud resource definitions. |
+| **API route / HTTP handler** | `ods.code` (`role: entrypoint`) | Verified by lint; included in context only when code is requested | Marks where execution starts. |
+| **Core business logic** | `ods.code` (`role: implementation`) | Verified by lint; included in context only when code is requested | Marks domain functions. |
+| **Unit or integration test** | `ods.code` (`role: test`) | Verified by lint; included in context only when code is requested | Test suite verifying document requirements. |
+| **Database migration script** | `ods.code` (`role: migration`) | Verified by lint; included in context only when code is requested | Persistent state transition script. |
+| **Terraform / Cloud manifest** | `ods.code` (`role: infrastructure`) | Verified by lint; included in context only when code is requested | Cloud resource definitions. |
 
 ---
 
@@ -104,16 +104,33 @@ The `ods.resources` list captures non-Markdown attachments without transforming 
 ```yaml
 ods:
   resources:
-    - path: ../diagrams/network-topology.svg   # Vector diagram for human readers
-    - path: ../reports/q3-audit.pdf           # Audit report attachment
-    - path: ../contracts/billing.openapi.yaml # OpenAPI specification on disk
+    - ../diagrams/network-topology.svg        # Bare string shorthand (local path)
+    - https://figma.com/file/auth-flow-v2     # Bare string shorthand (external URL)
+    - path: ../reports/q3-audit.pdf           # Mapping with a local path
+    - path: ../contracts/billing.openapi.yaml
+      title: "Billing OpenAPI Spec"
+      description: "API contract verified by CI."
+    - url: https://miro.com/board/session-flow # Mapping with an external URL
+      title: "Session flow whiteboard"
 ```
 
-### Normative Rules:
-1. Every entry MUST be a mapping containing a `path` string.
+### 5.1 Entry Shapes (Normative)
+
+An entry in `ods.resources` MUST take one of three shapes:
+
+| Shape | Example | Interpretation |
+| :--- | :--- | :--- |
+| **Bare string — local path** | `- ../diagrams/flow.png` | Equivalent to `{ path: ../diagrams/flow.png }`. |
+| **Bare string — URL** | `- https://figma.com/file/x` | Equivalent to `{ url: https://figma.com/file/x }`. A string is treated as a URL when it carries an `http:` or `https:` scheme. |
+| **Mapping** | `{ path?, url?, title?, description? }` | MUST contain exactly one of `path` or `url`. `title` and `description` are optional. |
+
+### 5.2 Normative Rules
+
+1. Each entry MUST resolve to exactly one of `path` (local) or `url` (external). A mapping with both, or with neither, is an error.
 2. `path` MUST be a relative path resolved from the document's directory location.
-3. The referenced resource MUST exist on disk. A non-existent resource path is dangling and MUST trigger a validation error.
-4. Source code files MUST NOT be declared under `resources`; they MUST be declared under `ods.code`.
+3. A `path` entry MUST exist on disk. A non-existent resource path is dangling and MUST trigger `ASSET-001`.
+4. A `url` entry MUST be a syntactically valid absolute URL. Tools MUST NOT perform network liveness checks — external availability is not a conformance property, and a lint run MUST succeed offline.
+5. Source code files MUST NOT be declared under `resources`; they MUST be declared under `ods.code`.
 
 ---
 
@@ -170,17 +187,28 @@ ods:
     # 8. Pipeline: CI/CD automation & release workflows
     - path: .github/workflows/deploy-billing.yml
       role: pipeline
+
+    # 9. Interface: contract surface without implementation
+    - path: apps/api/src/ports/payment-provider.ts
+      role: interface
+      symbol: PaymentProvider
+
+    # 10. Fixture: inert test data consumed by tests
+    - path: apps/api/tests/fixtures/refund_success.json
+      role: fixture
 ```
 
 ---
 
-## 7. The 8 Standard Code Roles Reference
+## 7. The 10 Standard Code Roles Reference
 
 | Role | Semantic Meaning | Common File Types | Typical Symbols Linked |
 | :--- | :--- | :--- | :--- |
 | **`entrypoint`** | Where execution begins: HTTP route handler, CLI command, event consumer, or UI view. | `.tsx`, `.ts`, `.rs`, `.go`, `.py` | `RefundRoute`, `main`, `handleCheckout` |
-| **`implementation`** | Core business logic, algorithm, or domain service. | `.ts`, `.rs`, `.py`, `.go`, `.java` | `calculateTotal`, `processPayment` |
-| **`test`** | Automated tests, mock suites, and test fixtures. | `.test.ts`, `_test.go`, `test_*.py` | `TestRefundFlow`, `test_tax_calculation` |
+| **`implementation`** | Core business logic, algorithm, or domain service. **Default** when a `code` entry is a bare string. | `.ts`, `.rs`, `.py`, `.go`, `.java` | `calculateTotal`, `processPayment` |
+| **`interface`** | A contract without an implementation: trait, interface, abstract class, protocol, or public type surface. | `.ts`, `.rs`, `.go`, `.py`, `.d.ts` | `PaymentProvider`, `RefundGateway` |
+| **`test`** | Automated tests and mock suites. | `.test.ts`, `_test.go`, `test_*.py` | `TestRefundFlow`, `test_tax_calculation` |
+| **`fixture`** | Static test data consumed by tests: golden files, seeded records, recorded HTTP cassettes. | `.json`, `.csv`, `.yaml`, `.sql` | `refund_success.json` |
 | **`schema`** | Data models, type definitions, protobufs, OpenAPI schemas, Zod schemas. | `.prisma`, `.proto`, `.sql`, `.d.ts` | `UserSchema`, `PaymentIntentModel` |
 | **`migration`** | State transitions: database migration scripts, data backfills. | `.sql`, `.ts` (Prisma/Flyway/Diesel) | `V003_add_refund_status.sql` |
 | **`config`** | Runtime settings, feature flag definitions, build configs. | `.toml`, `.json`, `.yaml`, `.env.example`| `FeatureFlags`, `redisConfig` |
@@ -304,8 +332,10 @@ sequenceDiagram
 
 ## 10. Design Decisions
 
-### Why a closed enum of 8 code roles instead of custom user-defined roles?
-A closed taxonomy of 8 standard code roles ensures that external AI coding agents, linters, and analysis tools can reliably classify code without needing custom project-specific parser rules. Every software artifact naturally falls into one of the 8 universal roles.
+### Why a closed enum of 10 code roles instead of custom user-defined roles?
+A closed taxonomy of 10 standard code roles ensures that external AI coding agents, linters, and analysis tools can reliably classify code without needing custom project-specific parser rules. Every software artifact naturally falls into one of the 10 universal roles.
+
+`interface` is distinguished from `implementation` because an agent reading a contract needs the shape, not the algorithm. `fixture` is distinguished from `test` because fixture data is inert input, not executable verification — an agent slicing `role: test` for a symbol should not be handed a 4,000-row CSV.
 
 ### Why separate attested computations from standard guides?
 Attested computations provide mathematical and cryptographic guarantees of reproducibility. Keeping computation parameters, execution runner instructions, and deterministic attester assertions in explicit machine-verifiable frontmatter eliminates hallucinated queries and unauthorized database mutations.

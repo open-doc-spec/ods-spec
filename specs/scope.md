@@ -11,7 +11,7 @@ ods:
     - assets.md
     - core.md
     - ../guides/faq.md
-    - ../guides/07-extend-ods.md
+    - ../guides/08-extend-ods.md
 ---
 
 # ODS · Scope & Architectural Non-Goals
@@ -24,14 +24,14 @@ This document defines the **Architectural Boundaries** of Open Document Spec (OD
 - **Why it exists:** A spec that grows every requested key stops being learnable.
 - **When you need it:** You are proposing a new key, edge type, or file extension.
 - **When you can skip it:** You are adopting the current standard, not extending it.
-- **Learn this first:** [FAQ](../guides/faq.md) · [Extend ODS](../guides/07-extend-ods.md)
+- **Learn this first:** [FAQ](../guides/faq.md) · [Extend ODS](../guides/08-extend-ods.md)
 - **Prerequisite chapters:** [README.md](README.md)
 
 ---
 
 ## 1. Conformance Language
 
-The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14 ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.txt), [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174.txt)) when, and only when, they appear in all capitals.
+The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14, exactly as stated in [README.md §1](README.md#1-conformance-language). That is the canonical statement; do not maintain a second copy here.
 
 ---
 
@@ -40,7 +40,7 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 | Excluded Feature | Architectural Rationale |
 | :--- | :--- |
 | **No New File Extension (`.ods`)** | Files MUST remain standard `.md` so they can be viewed, edited, and rendered natively across GitHub, GitLab, VS Code, Obsidian, and all web platforms without custom plugins. |
-| **No Frontmatter `title:`** | The document title exists strictly as the first `# H1` heading in the Markdown body. Supporting a `title:` frontmatter key violates the Single Source of Truth (SSOT) principle and causes title drift. |
+| **No Frontmatter `title:` in pure ODS** | The document title exists as the first `# H1` heading in the Markdown body. Declaring it in frontmatter too violates the Single Source of Truth (SSOT) principle and causes title drift, so ODS reports it as a `SYNTAX-002` warning. It is accepted without error, because the OKF v0.2 superset guarantee depends on it. |
 | **No Parallel `type:` Taxonomy** | ODS avoids multiple classification taxonomies (e.g. `type`, `kind`, `category`). `ods.profile` is the single canonical structural classification. |
 | **No Per-Document Spec Versions** | Spec versions belong strictly on the repository root `ods.toml`. Per-file version tags cause upgrade fatigue and merge friction across large repositories. |
 | **No Mandatory Hand-Maintained Timestamps** | Git commit history is authoritative for document updates. Frontmatter `updated` timestamps are optional for non-git export environments. |
@@ -62,7 +62,7 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 
 | Excluded Feature | Architectural Rationale |
 | :--- | :--- |
-| **No Heavyweight Academic Description Logic / OWL Provers** | While ODS 1.1 supports pragmatic neuro-symbolic domain ontologies (`ods.entity`, `ods.relations`, `ods.invariants`), ODS intentionally avoids complex semantic web ontology overhead (e.g. OWL DL reasoning, RDF triplestores). ODS is optimized for fast, deterministically verifiable developer documentation and LLM context assembly. |
+| **No Heavyweight Academic Description Logic / OWL Provers** | While ODS 1.1 supports pragmatic neuro-symbolic domain ontologies (`ods.entity`, `ods.related`, `ods.invariants`), ODS intentionally avoids complex semantic web ontology overhead (e.g. OWL DL reasoning, RDF triplestores). ODS is optimized for fast, deterministically verifiable developer documentation and LLM context assembly. |
 | **No Blurring of Graph Prerequisites vs Prompt Fixtures** | Non-document fixtures (JSON schemas, mock CSVs) MUST NOT be placed in `depends`. They do not participate in DAG topological sorting. Prompt fixtures belong strictly in `context.load`. |
 | **No Auto-Loading of Arbitrary Resources** | `ods.resources` contains 50MB PDFs and binary PNG diagrams. Automatically dumping all resources into the AI prompt window causes immediate token budget exhaustion. Authors surgically declare prompt payloads via `context.load`. |
 | **No Universal Frontmatter `url:`** | External URLs belong in the Markdown body prose where context and anchor text explain their relevance. |
@@ -76,7 +76,7 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 | :--- | :--- |
 | **No Frontmatter Inside Source Code** | Source code belongs to compilers, interpreters, and linters. Annotating source files with ODS frontmatter pollutes codebase syntax. All bindings live in Markdown docs. |
 | **No Line Numbers as Code Identity** | Line numbers (e.g. `:L45-L60`) change on almost every commit, immediately breaking documentation. ODS mandates paths and language `symbol` references. |
-| **No Custom Code Roles** | The 8 standard code roles (`entrypoint`, `implementation`, `test`, `schema`, `migration`, `config`, `infrastructure`, `pipeline`) provide a universal taxonomy so external AI agents can navigate any repository without custom configuration. |
+| **No Custom Code Roles** | The 10 standard code roles (`entrypoint`, `implementation`, `interface`, `test`, `fixture`, `schema`, `migration`, `config`, `infrastructure`, `pipeline`) provide a universal taxonomy so external AI agents can navigate any repository without custom configuration. Canonical list: [assets.md §7](assets.md#7-the-10-standard-code-roles-reference). |
 
 ---
 
@@ -90,7 +90,38 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 
 ---
 
-## 7. Transport Non-Goals
+## 7. Deprecations & Versioning Policy
+
+### 7.1 Version Semantics
+
+ODS spec versions are `MAJOR.MINOR` (a `MAJOR.MINOR.PATCH` form is also accepted; see [indexes.md §3](indexes.md#3-workspace-configuration-key-reference)).
+
+| Change | Allowed in | Rationale |
+| :--- | :--- | :--- |
+| Add a new optional key or enum member | **MINOR** | Old documents stay valid; old tools preserve the key as unknown. |
+| Mark a key deprecated | **MINOR** | The key keeps working; tools emit a `DEPR-*` warning. |
+| Remove a deprecated key, tighten an enum, or turn a warning into an error | **MAJOR** | Existing conformant documents could stop validating. |
+| Change the meaning of an existing key | **MAJOR** | Silent semantic drift is worse than a break. |
+
+A key MUST be deprecated in at least one MINOR release before a MAJOR release removes it. Deprecation is recorded in the JSON Schemas as `x-ods-lifecycle.status: "deprecated"` with `deprecated_in` and `removed_in`, so tooling can surface the timeline without parsing prose.
+
+### 7.2 Deprecated in 1.1 · Scheduled for removal in 2.0
+
+Each entry below has a canonical replacement. Both forms parse in 1.1; the deprecated form emits a warning.
+
+| Deprecated | Canonical replacement | Rule | Precedence when both are present |
+| :--- | :--- | :---: | :--- |
+| `ods.relations` | `ods.related` | `DEPR-001` | Entries from `ods.relations` are appended to `ods.related`; duplicates are de-duplicated by `(predicate, target)`. |
+| `ods.memory:` and the flat `ods.tier` / `ods.valid_from` / `ods.valid_to` / `ods.asserted_at` / `ods.mutations` / `ods.pin` keys | the top-level `memory:` block | `DEPR-002` | `memory:` wins over `ods.memory:`, which wins over the flat `ods.*` keys. Conflicting values for the same field are a `MEM-004` error. |
+| Nested `ods.toml` tables (`spec = { version, dialect }`, `ignore = { paths }`, `custom_profiles = { paths }`, `packs = { load }`) | the flat forms (`spec`, `dialect`, `ignore`, `custom_profiles`, `packs`) | `DEPR-003` | The flat form wins. Declaring both forms of the same setting is an error. |
+
+Why deprecate rather than remove now: every one of these has valid documents in the wild written against ODS 1.1 schemas that accept both. Breaking them inside a MINOR release would contradict §7.1.
+
+Why deprecate rather than keep both: two spellings of one fact is exactly the drift `core.md §2` principle 3 (DRY / SSOT) exists to prevent. Authors have to learn both, tools have to implement both, and the two copies inevitably acquire different rules.
+
+---
+
+## 8. Transport Non-Goals
 
 | Excluded Feature | Architectural Rationale |
 | :--- | :--- |

@@ -136,3 +136,269 @@ pub fn find_markdown_files(relative_dir: &str) -> Result<Vec<PathBuf>> {
     files.sort();
     Ok(files)
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Spec integrity: link resolution and prose ↔ schema agreement.
+//
+// These guards exist because the specification drifted: prose and schema
+// disagreed on code roles, memory tiers, enum members and traversal bounds,
+// and every cross-chapter anchor in the glossary had rotted. Neither class of
+// defect is detectable by JSON Schema validation alone.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Every prose Markdown file in the specification surface (chapters, guides,
+/// and the root documents), excluding build artifacts and test fixtures.
+pub fn find_prose_files() -> Result<Vec<PathBuf>> {
+    let root = find_workspace_root()?;
+    let mut files = Vec::new();
+
+    for entry in WalkDir::new(&root).into_iter().filter_entry(|e| {
+        let name = e.file_name().to_string_lossy();
+        !(name.starts_with('.') || name == "target" || name == "tests" || name == "node_modules")
+    }) {
+        let entry = match entry {
+            Ok(e) => e,
+            Err(_) => continue,
+        };
+        if entry.file_type().is_file() && entry.path().extension().is_some_and(|e| e == "md") {
+            files.push(entry.into_path());
+        }
+    }
+
+    files.sort();
+    Ok(files)
+}
+
+/// Converts a Markdown heading into the anchor slug GitHub would generate:
+/// lowercase, punctuation dropped, each remaining space turned into a hyphen.
+///
+/// Note that spaces are *not* collapsed — `## A & B` yields `a--b`, with two
+/// hyphens, because the ampersand is removed but both spaces survive.
+pub fn heading_slug(heading: &str) -> String {
+    heading
+        .trim()
+        .to_lowercase()
+        .chars()
+        .filter(|c| c.is_alphanumeric() || *c == ' ' || *c == '-' || *c == '_')
+        .map(|c| if c == ' ' { '-' } else { c })
+        .collect()
+}
+
+/// Strips fenced code blocks and inline code spans, so that Markdown link
+/// syntax shown as an *example* is not mistaken for a real link.
+fn strip_code(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut rest = text;
+
+    // Fenced blocks.
+    while let Some(start) = rest.find("```") {
+        out.push_str(&rest[..start]);
+        rest = match rest[start + 3..].find("```") {
+            Some(end) => &rest[start + 3 + end + 3..],
+            None => "",
+        };
+    }
+    out.push_str(rest);
+
+    // Inline spans.
+    let mut result = String::with_capacity(out.len());
+    let mut in_span = false;
+    for ch in out.chars() {
+        match ch {
+            '`' => in_span = !in_span,
+            '\n' => {
+                in_span = false;
+                result.push(ch);
+            }
+            _ if !in_span => result.push(ch),
+            _ => {}
+        }
+    }
+    result
+}
+
+/// A relative Markdown link that failed to resolve.
+#[derive(Debug)]
+pub struct BrokenLink {
+    pub source: PathBuf,
+    pub target: String,
+    pub reason: &'static str,
+}
+
+impl std::fmt::Display for BrokenLink {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}: {} -> {}", self.source.display(), self.reason, self.target)
+    }
+}
+
+/// Resolves every relative Markdown link and `#anchor` across the prose surface.
+pub fn find_broken_links() -> Result<Vec<BrokenLink>> {
+    use std::collections::{HashMap, HashSet};
+
+    let files = find_prose_files()?;
+
+    let mut anchors: HashMap<PathBuf, HashSet<String>> = HashMap::new();
+    for path in &files {
+        let content = std::fs::read_to_string(path)?;
+        let set = content
+            .lines()
+            .filter_map(|line| {
+                let trimmed = line.trim_start_matches('#');
+                if trimmed.len() < line.len() && trimmed.starts_with(' ') {
+                    Some(heading_slug(trimmed))
+                } else {
+                    None
+                }
+            })
+            .collect();
+        anchors.insert(path.clone(), set);
+    }
+
+    let mut broken = Vec::new();
+    for path in &files {
+        let content = strip_code(&std::fs::read_to_string(path)?);
+        let dir = path.parent().unwrap_or(path);
+
+        for (target, anchor) in extract_relative_links(&content) {
+            let resolved = normalize_path(&dir.join(&target));
+
+            if !resolved.exists() {
+                broken.push(BrokenLink {
+                    source: path.clone(),
+                    target: target.clone(),
+                    reason: "missing file",
+                });
+                continue;
+            }
+
+            if let Some(anchor) = anchor {
+                if resolved.extension().is_some_and(|e| e == "md") {
+                    let known = anchors.get(&resolved);
+                    if known.is_none_or(|set| !set.contains(&anchor)) {
+                        broken.push(BrokenLink {
+                            source: path.clone(),
+                            target: format!("{}#{}", target, anchor),
+                            reason: "missing anchor",
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(broken)
+}
+
+/// Pulls `](target#anchor)` pairs out of Markdown, skipping absolute URLs and
+/// same-page `#anchor` links.
+fn extract_relative_links(content: &str) -> Vec<(String, Option<String>)> {
+    let mut links = Vec::new();
+    let bytes: Vec<char> = content.chars().collect();
+    let mut i = 0;
+
+    while i + 1 < bytes.len() {
+        if bytes[i] == ']' && bytes[i + 1] == '(' {
+            let start = i + 2;
+            let mut end = start;
+            let mut depth = 1;
+            while end < bytes.len() {
+                match bytes[end] {
+                    '(' => depth += 1,
+                    ')' => {
+                        depth -= 1;
+                        if depth == 0 {
+                            break;
+                        }
+                    }
+                    '\n' => break,
+                    _ => {}
+                }
+                end += 1;
+            }
+
+            if end < bytes.len() && bytes[end] == ')' {
+                let raw: String = bytes[start..end].iter().collect();
+                let raw = raw.trim();
+                let is_external = raw.starts_with("http://")
+                    || raw.starts_with("https://")
+                    || raw.starts_with('#')
+                    || raw.starts_with("mailto:")
+                    || raw.contains(char::is_whitespace);
+
+                if !is_external && !raw.is_empty() {
+                    match raw.split_once('#') {
+                        Some((path, anchor)) => {
+                            links.push((path.to_string(), Some(anchor.to_string())))
+                        }
+                        None => links.push((raw.to_string(), None)),
+                    }
+                }
+            }
+            i = end.max(i + 2);
+        } else {
+            i += 1;
+        }
+    }
+
+    links
+}
+
+/// Resolves `.` and `..` segments without touching the filesystem.
+fn normalize_path(path: &std::path::Path) -> PathBuf {
+    let mut out = PathBuf::new();
+    for component in path.components() {
+        match component {
+            std::path::Component::ParentDir => {
+                out.pop();
+            }
+            std::path::Component::CurDir => {}
+            other => out.push(other),
+        }
+    }
+    out
+}
+
+/// Reads an enum out of a compiled schema by JSON pointer, as a sorted set.
+pub fn schema_enum(schema_json: &Value, pointer: &str) -> Result<Vec<String>> {
+    let node = schema_json
+        .pointer(pointer)
+        .ok_or_else(|| anyhow!("No schema node at pointer {}", pointer))?;
+
+    let values = node
+        .as_array()
+        .ok_or_else(|| anyhow!("Schema node at {} is not an enum array", pointer))?;
+
+    let mut out: Vec<String> = values
+        .iter()
+        .filter_map(|v| v.as_str().map(str::to_string))
+        .collect();
+    out.sort();
+    Ok(out)
+}
+
+/// Collects every distinct `` `token` `` appearing in a named prose file, so a
+/// documented vocabulary can be compared against the schema that enforces it.
+pub fn prose_code_tokens(relative_path: &str) -> Result<Vec<String>> {
+    let root = find_workspace_root()?;
+    let content = std::fs::read_to_string(root.join(relative_path))
+        .with_context(|| format!("Failed to read {}", relative_path))?;
+
+    let mut tokens = Vec::new();
+    let mut current: Option<String> = None;
+    for ch in content.chars() {
+        match (ch, &mut current) {
+            ('`', None) => current = Some(String::new()),
+            ('`', Some(buf)) => {
+                tokens.push(std::mem::take(buf));
+                current = None;
+            }
+            ('\n', Some(_)) => current = None,
+            (c, Some(buf)) => buf.push(c),
+            _ => {}
+        }
+    }
+
+    tokens.sort();
+    tokens.dedup();
+    Ok(tokens)
+}

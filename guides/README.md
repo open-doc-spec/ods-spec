@@ -16,7 +16,8 @@ ods:
     - 04-bind-code-and-files.md
     - 05-ai-reading-list.md
     - 06-run-the-workspace.md
-    - 07-extend-ods.md
+    - 07-ontologies-and-memory.md
+    - 08-extend-ods.md
     - decision-cards.md
     - faq.md
     - mistakes.md
@@ -42,14 +43,16 @@ The normative rules live in [`specs/`](../specs/README.md). Come back to them wh
 | 4 | [Bind files and code](04-bind-code-and-files.md) | The doc must point at a diagram, schema, or function. |
 | 5 | [Give AI a reading list](05-ai-reading-list.md) | Agents should read a few files, not the whole repo. |
 | 6 | [Run the workspace](06-run-the-workspace.md) | A team will lint, rename, and discover docs in CI. |
-| 7 | [Ontologies & Agent Memory](07-ontologies-and-memory.md) | You are building neuro-symbolic entity models and cognitive memory for AI. |
-| 8 | [Extend ODS](07-extend-ods.md) | You need custom profiles, packs, or the engine contract. |
+| 7 | [Ontologies & Agent Memory](07-ontologies-and-memory.md) | You are building neuro-symbolic entity models, cognitive memory, or verifiable computations. |
+| 8 | [Extend ODS](08-extend-ods.md) | You need custom profiles, packs, or the engine contract. |
 
 Pocket references (any time):
 
 - [Decision cards](decision-cards.md) — which profile, which key, YAML vs headings
-- [Common mistakes](mistakes.md) — the six errors that cause most lint failures
+- [Common mistakes](mistakes.md) — the seven errors that cause most lint failures
 - [FAQ](faq.md) — short answers to the questions the spec buries in design notes
+
+Already know ODS and want to change it? [Contributing](../CONTRIBUTING.md) · [Changelog](../CHANGELOG.md)
 
 ---
 

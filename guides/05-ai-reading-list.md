@@ -118,10 +118,46 @@ Private documents are skipped when assembling public or unprivileged context. Us
 
 `org` means internal-ok. `public` (the default) means safe to export.
 
+### 6. Refuse to act on documentation nobody checked
+
+Reading a stale runbook is one thing. *Acting* on one is another. When an agent is about to change something, you can require that its context be reviewed:
+
+```yaml
+ods:
+  context:
+    trust-min: human-reviewed
+```
+
+A document's trust level is not something you declare — it is derived from who verified it:
+
+| Tier | You get it when | Means |
+| :--- | :--- | :--- |
+| `unverified` | No `verified` entries. *(the default)* | Nobody has checked this. |
+| `machine-confirmed` | Every `verified` entry names a process or agent. | A deterministic check passed. |
+| `human-reviewed` | At least one `verified` entry starts with `human:`. | A person signed off. |
+
+You record a review at the top level of the reviewed document:
+
+```yaml
+verified:
+  - by: "human:alice"
+    at: "2026-08-20T00:00:00Z"
+```
+
+Setting `trust-min` drops everything below the bar — and **tells you what it dropped**. A shrinking bundle you cannot explain is worse than a large one.
+
+Two neighbours worth knowing:
+
+- `stale_after:` — a date past which a document is flagged as out of date, regardless of who verified it.
+- `share: private` — see below. Trust is "has this been checked"; share is "who may see it". They are independent.
+
+Start without `trust-min`. Reach for it the first time an agent confidently does the wrong thing because a draft looked authoritative.
+
 ## Troubleshooting
 
 - **"The bundle missed a file I care about."** It is probably `related`, behind `max-depth`, in `ignore`, or `share: private`. Promote it to `depends` or `load` if it is truly required.
 - **"The bundle is huge."** A `depends` chain is wider than you think, or someone listed large files in `load`. Check `ignore` and stop loading PDFs.
+- **"`trust-min` emptied my bundle."** Everything upstream is unverified. That is the honest answer, not a bug — either get the prerequisites reviewed or lower the bar deliberately.
 - **"Why not embeddings / RAG?"** Similarity search is useful for exploration. It is not a substitute for "these three docs are required." ODS makes the required set explicit. Details: [`specs/context.md`](../specs/context.md).
 
 **You can stop here** if agents can already start from one doc and receive a tight bundle.

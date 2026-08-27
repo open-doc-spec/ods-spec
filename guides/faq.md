@@ -31,9 +31,9 @@ Two titles drift. The heading is what humans see, so it is the only title.
 
 "Level 2 of 3" made teams argue about whether CI should pass. `ods lint` either exits 0 or 1.
 
-## Why only `depends` and `related`? Where is `implements`?
+## How do `depends` and `related` work with domain ontologies?
 
-Automation only needs "required" vs "optional." Richer ontologies add authoring cost without changing the context walk. Explain nuance in prose.
+`ods.depends` is strictly for hard conceptual prerequisites that form an acyclic DAG. `ods.related` handles soft discovery links as well as typed semantic domain predicates (`is_a`, `part_of`, `owns`, `governed_by`, `maps_to`, `implements`).
 
 ## Why doesn't `resources` go into the AI prompt?
 
@@ -77,7 +77,9 @@ ODS 1.1 is a strict superset of Google Open Knowledge Format (OKF v0.2). Any val
 
 ## Why are ontology and memory keys flat under `ods:` instead of nested?
 
-To eliminate YAML indentation fatigue. Adding `ontology:` and `memory:` wrappers adds nesting without adding meaning. Direct Pareto keys (`ods.entity`, `ods.tier`, `ods.invariants`) provide maximum signal with minimum indentation.
+To eliminate YAML indentation fatigue. Adding an `ods.ontology:` wrapper adds nesting without adding meaning, so ontology keys sit directly under `ods:` — `ods.entity`, `ods.domain`, `ods.schema`, `ods.invariants`.
+
+Memory is the exception, and deliberately so. Its fields (`tier`, `valid_from`, `valid_to`, `asserted_at`, `mutations`, `pin`) are one coherent record describing a single remembered fact, and they are read by memory tooling that has no interest in the rest of the document. Keeping them in a top-level `memory:` block means that record can be lifted out whole. The flat `ods.tier` / `ods.valid_from` / … spellings still parse but are deprecated — see [`specs/graph.md` §5.1](../specs/graph.md#51-canonical-placement).
 
 ## What is memory dreaming?
 

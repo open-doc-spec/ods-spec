@@ -4,15 +4,57 @@ This directory contains the official, versioned machine-readable **JSON Schemas 
 
 ---
 
-## Published Schemas
+## Schema Status
 
-### Version 1.1.0 (Latest — Flat Pareto, Ontologies, Memory & OKF Superset)
+Schemas carry a status. Only **normative** schemas are part of the ODS 1.1 conformance contract; a tool MUST NOT fail a document for violating an experimental schema.
 
-| Schema | File | Canonical `$id` / `$schema` URL | Description |
+### Normative — Version 1.1.0
+
+| Schema | File | Canonical `$id` URL | Validates |
 | :--- | :--- | :--- | :--- |
-| **Document Frontmatter** | [`1.1.0/document.schema.json`](1.1.0/document.schema.json) | `https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/document.schema.json` | Validates Markdown YAML frontmatter, flat Pareto ontology & memory keys, and Google OKF v0.2 top-level keys. Includes `x-ods-spec` traceability annotations. |
-| **Workspace Configuration** | [`1.1.0/config.schema.json`](1.1.0/config.schema.json) | `https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/config.schema.json` | Validates repository root `ods.toml` workspace manifest with ontology & memory backend options. |
-| **Custom Profile Definition** | [`1.1.0/profile.schema.json`](1.1.0/profile.schema.json) | `https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/profile.schema.json` | Validates custom profile declarations (`ods.custom_profile`). |
+| **Document Frontmatter** | [`1.1.0/document.schema.json`](1.1.0/document.schema.json) | `…/schemas/1.1.0/document.schema.json` | Markdown YAML frontmatter: the 3-layer key placement, engine keys under `ods:`, and Google OKF v0.2 top-level keys. |
+| **Workspace Configuration** | [`1.1.0/config.schema.json`](1.1.0/config.schema.json) | `…/schemas/1.1.0/config.schema.json` | Repository root `ods.toml`. Key reference: [`specs/indexes.md` §3](../specs/indexes.md#3-workspace-configuration-key-reference). |
+| **Custom Profile Definition** | [`1.1.0/profile.schema.json`](1.1.0/profile.schema.json) | `…/schemas/1.1.0/profile.schema.json` | `ods.custom_profile` blocks in registered profile-definition files. |
+
+### Experimental — published for review, not required for conformance
+
+These describe richer modelling shapes under consideration for a future revision. They compete with, rather than extend, the flat Pareto keys that ODS 1.1 standardized, so they are deliberately held outside the conformance contract until that overlap is resolved. Their keys are **not** defined in any normative chapter.
+
+| Schema | File | Covers |
+| :--- | :--- | :--- |
+| **Domain Ontology** | [`1.1.0/ontology.schema.json`](1.1.0/ontology.schema.json) | Structured entity property lists, `entity.extends`, and `guardrails.mutation_gates` (`pre_conditions` / `post_conditions`). The normative equivalents are `ods.entity`, `ods.domain`, `ods.schema`, `ods.invariants`, and `ods.related`. |
+| **Agent Memory** | [`1.1.0/memory.schema.json`](1.1.0/memory.schema.json) | `actor`, `session_id`, `temporal.superseded_by`, and the `decision{problem, cause, alternatives, optimal_choice, post_eval, failure_mode}` record. The normative equivalent is the top-level `memory:` block ([`specs/graph.md` §5](../specs/graph.md#5-cognitive-memory--bi-temporal-traversal)). |
+| **Attestation** | [`1.1.0/attestation.schema.json`](1.1.0/attestation.schema.json) | A standalone view of `runtime` / `parameters` / `computation` / `executor` / `attester`. Those keys are already normative on `document.schema.json`; this file exists for tools that validate computations in isolation. |
+
+### Superseded — Version 1.0.0
+
+[`1.0.0/`](1.0.0/) holds the ODS 1.0 baseline schemas (`document`, `config`, `profile`). They remain published so existing pins keep resolving. **New workspaces MUST target 1.1.**
+
+**What changed in 1.1** (reconstructed from `x-ods-lifecycle.introduced`):
+
+| Added in 1.1 | Where |
+| :--- | :--- |
+| `author`, `created_at`, `updated_at` | Top level |
+| OKF v0.2 superset: `type`, `title`, `resource`, `sources`, `usage_window`, `generated`, `verified`, `stale_after`, `okf_version` | Top level |
+| Attested computations: `runtime`, `parameters`, `computation`, `executor`, `attester` | Top level |
+| Cognitive memory: the `memory:` block (`tier`, `valid_from`, `valid_to`, `asserted_at`, `mutations`, `pin`) | Top level |
+| Domain ontology: `entity`, `domain`, `schema`, `invariants` | Under `ods:` |
+| Typed predicates and attributed objects in `related`; `@` symbolic handles | Under `ods:` |
+| `context.trust-min` | Under `ods:` |
+| `interface` and `fixture` code roles | `ods.code[].role` |
+| `dialect`, `[ontology]`, `[memory]`, `[attestation]`, `[okf]`, `[aliases.sections]`, `[aliases.paths]`, `schemas` | `ods.toml` |
+
+Nothing was removed in 1.1. A valid 1.0 document is a valid 1.1 document; the only migration step is bumping `spec` in `ods.toml`. Legacy flat engine keys (`profile:` / `status:` at top level) predate 1.0's `ods:` namespace and are still accepted on read — see [`specs/core.md` §5.2](../specs/core.md#52-legacy-frontmatter-migration-ods-fmt---migrate).
+
+### Deprecated in 1.1 · removal targeted at 2.0
+
+Carrying `x-ods-lifecycle.status: "deprecated"` with `deprecated_in` and `removed_in`:
+
+- `ods.relations` → use `ods.related` (`DEPR-001`)
+- `ods.memory:` and flat `ods.tier` / `valid_from` / `valid_to` / `asserted_at` / `mutations` / `pin` → use the top-level `memory:` block (`DEPR-002`)
+- Nested `ods.toml` table forms of `spec`, `ignore`, `custom_profiles`, `packs` → use the flat forms (`DEPR-003`)
+
+Full rationale and schedule: [`specs/scope.md` §7](../specs/scope.md#7-deprecations--versioning-policy).
 
 ---
 
@@ -44,7 +86,10 @@ To ensure seamless maintenance, every key in `document.schema.json` carries an `
 | `ods.related` | Layer 2 (`ods:`) | [`specs/graph.md`](../specs/graph.md) | `#discovery-graph-and-semantic-relations` |
 | `ods.resources` | Layer 2 (`ods:`) | [`specs/assets.md`](../specs/assets.md) | `#asset-catalog` |
 | `ods.code` | Layer 2 (`ods:`) | [`specs/assets.md`](../specs/assets.md) | `#source-code-bindings` |
-| `ods.context` | Layer 2 (`ods:`) | [`specs/context.md`](../specs/context.md) | `#prompt-budget-configuration` |
+| `ods.context` (`max-depth`, `trust-min`, `load`, `ignore`) | Layer 2 (`ods:`) | [`specs/keys.md`](../specs/keys.md), [`specs/context.md`](../specs/context.md) | `#79-odscontext` |
+| `ods.relations` *(deprecated)* | Layer 2 (`ods:`) | [`specs/keys.md`](../specs/keys.md) | `#713-odsrelations-deprecated` |
+| `ods.tier`, `ods.pin`, `ods.valid_from`, `ods.valid_to`, `ods.asserted_at`, `ods.mutations` *(deprecated)* | Layer 2 (`ods:`) | [`specs/graph.md`](../specs/graph.md) | `#51-canonical-placement` |
+| `ods.custom_profile` | Layer 2 (`ods:`) | [`specs/profiles.md`](../specs/profiles.md) | `#711-profile-definition-metadata` |
 
 ---
 

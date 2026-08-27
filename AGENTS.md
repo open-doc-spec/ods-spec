@@ -33,13 +33,14 @@ When reading, updating, or generating documentation in an ODS workspace, agents 
 
 1. **Never Invent `title:` in Frontmatter**:
    - In pure ODS authoring, the document title exists **only** as the first `# H1` line in the Markdown body prose.
-   - For Google OKF v0.2 compatibility, top-level `title:` and `type:` are preserved and accepted without error.
+   - For Google OKF v0.2 compatibility, top-level `title:` and `type:` are preserved and accepted. In a document that carries no OKF signal (`type`, `okf_version`, `sources`), a `title:` key is reported as a `SYNTAX-002` **warning**, not an error.
 
 2. **Strict 3-Layer Key Placement & Universal Metadata**:
-   - **Layer 1: Universal & OKF native keys** (`description`, `tags`, `owner`, `author`, `created`, `created_at`, `updated`, `updated_at`, `type`, `title`, `resource`, `sources`, `usage_window`, `generated`, `verified`, `status`, `stale_after`, `runtime`, `parameters`, `computation`, `executor`, `attester`, `memory`) MUST be placed at the **top level** of frontmatter.
-   - **Layer 2: Scoped ODS engine keys** (`profile`, `status`, `id`, `share`, `entity`, `domain`, `schema`, `invariants`, `tier`, `valid_from`, `valid_to`, `asserted_at`, `mutations`, `pin`, `depends`, `related`, `resources`, `code`, `context`, `memory`) MUST be placed directly under the **`ods:`** block.
-   - **Layer 3: Workspace boundary keys** (`spec`, `ignore`, `custom_profiles`, `packs`, `aliases`, `ontology`, `memory`, `service`) belong ONLY in root `ods.toml`.
-   - Never nest universal keys (`tags`, `description`, `owner`, `author`, `created_at`) under `ods:`.
+   - **Layer 1: Universal & OKF native keys** MUST be placed at the **top level** of frontmatter.
+   - **Layer 2: Scoped ODS engine keys** MUST be placed directly under the **`ods:`** block.
+   - **Layer 3: Workspace boundary keys** belong ONLY in root `ods.toml`.
+   - Never nest universal keys (`tags`, `description`, `owner`, `author`, `created`, `created_at`, `updated`, `updated_at`) under `ods:` — the document schema rejects them there outright (`PLACE-001`).
+   - Canonical, normative membership of each layer: [`specs/keys.md` §3](./specs/keys.md#3-the-3-layer-key-placement-architecture) and, for Layer 3, [`specs/indexes.md` §3](./specs/indexes.md#3-workspace-configuration-key-reference). Do not maintain a second copy here.
 
 3. **Maintain Knowledge Graph Purity**:
    - `ods.depends` is strictly for conceptual dependencies to other **Markdown documents**.
@@ -52,7 +53,8 @@ When reading, updating, or generating documentation in an ODS workspace, agents 
 
 5. **Unified Related & Pareto Directed Relations**:
    - Use `ods.related` for both simple lateral reading links (`- @faq.md`) and Pareto directed semantic relation edges (`- is_a: Account`, `- owns: [@Subscription, @Invoice]`, `- governed_by: @RefundPolicy`).
-   - Use Universal `@` handles (`@Subscription`, `@tokens.md`) instead of brittle relative file paths (`../../path/to/file.md`). Legacy `{ predicate: owns, target: ... }` objects are accepted for backward compatibility.
+   - Use Universal `@` handles (`@Subscription`, `@tokens.md`) instead of brittle relative file paths (`../../path/to/file.md`). The attributed `{ predicate: owns, target: ... }` object form is also valid and is required when an edge needs `role`, `confidence`, `since`/`until`, or `cardinality`.
+   - Predicates are a **closed set**. Do not invent bare `snake_case` verbs — an unrecognized key is rejected by the schema. For a domain-specific verb use `{ predicate: custom, custom_predicate: <verb>, target: ... }`. See [`specs/graph.md` §4.1](./specs/graph.md#41-the-complete-predicate-vocabulary).
 
 6. **Preserve Third-Party and Unknown Frontmatter**:
    - If a document contains metadata for SSGs (e.g. Hugo `layout`, Astro `hero_image`, Jekyll `permalink`), agents MUST preserve those keys verbatim when editing the file.
@@ -76,7 +78,7 @@ When reading, updating, or generating documentation in an ODS workspace, agents 
 When answering questions, planning code modifications, or debugging issues, agents SHOULD follow this bounded context expansion routine instead of scanning the entire workspace:
 
 1. **Identify Entrypoint Document**: Identify the primary ODS document relevant to the user request (e.g. via `ods find` or `ods overview`).
-2. **Auto-Expand Hard Dependencies**: Read the documents listed under `ods.depends` recursively up to `ods.context.max-depth` (default: 2 hops).
+2. **Auto-Expand Hard Dependencies**: Read the documents listed under `ods.depends` recursively up to `ods.context.max-depth` (default: 2 hops; permitted range 0–10).
 3. **Evaluate Trust & Staleness**: Check `verified` (infer trust tier) and skip documents where `now >= stale_after` or `now >= valid_to`.
 4. **Load Auxiliary Resources**: Read any files listed under `ods.context.load` and inspect schema shapes in `ods.schema` and `ods.resources`.
 5. **Inspect Code Bindings**: Use `ods.code` to jump directly to declared entrypoints, logic implementations, and test fixtures using AST symbol extraction.
@@ -86,23 +88,11 @@ When answering questions, planning code modifications, or debugging issues, agen
 
 ## 3. Standard Document Profile Shapes
 
-When authoring new documents, pick the profile matching the document's intent and scaffold the expected H2 or H3 sections (`##` or `###`):
+When authoring new documents, pick the profile matching the document's intent and scaffold the expected H2 or H3 sections (`##` or `###`).
 
-| Profile | Primary Intent | Expected Sections |
-| :--- | :--- | :--- |
-| `note` | Free-form knowledge, entities, memory, and scratchpads (default) | *(none required)* |
-| `guide` | Step-by-step how-to tutorial | Overview, Prerequisites, Steps, Troubleshooting |
-| `feature` | Product capability / PRD specification | Goal, Scope, Requirements, Acceptance Criteria, Risks |
-| `decision` | Architecture Decision Record (ADR) | Context, Decision, Alternatives, Consequences |
-| `sop` | Standard operating procedure / runbook | Purpose, Prerequisites, Steps, Validation, Rollback |
-| `api` | Endpoint / RPC contract | Overview, Request, Response, Errors, Examples |
-| `architecture`| System design and data flow | Overview, Components, Data Flow, Trade-offs |
-| `policy` | Governance / team rules | Purpose, Scope, Rules, Exceptions |
-| `meeting` | Meeting minutes and team sync notes | Attendees, Agenda, Decisions, Action Items |
-| `faq` | Frequently Asked Questions | *(Question/Answer pairs; no fixed H2 list)* |
-| `checklist` | Verifiable deployment or release gates | Overview, Items, Verification, Notes |
-| `agent` | Autonomous agent instructions / prompt execution contracts (`agent.md`) | Goal, Task, Scope, Non-Scope, Context, Inputs, Constraints, Priority, Steps, Output, Success Criteria, Failure Modes, Dependencies, Assumptions, Examples |
-| `skill` | Reusable skill packages and tool contracts (`SKILL.md`) | Purpose, Capability, Activation, Scope, Non-Scope, Inputs, Outputs, Workflow, Rules, Priority, Validation, Eval, Resources, Tools, Lifecycle, Traceability |
+ODS ships 13 standard profiles: `note` (default), `guide`, `feature`, `decision`, `sop`, `api`, `architecture`, `policy`, `meeting`, `faq`, `checklist`, `agent`, and `skill`.
+
+Canonical catalog with the exact expected sections for each profile: [`specs/profiles.md` §3](./specs/profiles.md#3-standard-profiles-catalog). Recognized heading synonyms: [`specs/profiles.md` §6](./specs/profiles.md#6-section-heading-alias-matching). Do not maintain a second copy here.
 
 ---
 

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/1.1.0/document.schema.json",
-  "title": "ODS Document Frontmatter Schema (v1.1.0 — Flat Pareto with Key Lifecycle)",
+  "title": "ODS Document Frontmatter Schema (v1.1.0 \u2014 Flat Pareto with Key Lifecycle)",
   "description": "Machine-readable JSON Schema for Open Document Spec (ODS v1.1.0) Markdown YAML frontmatter. Enforces the flat Pareto key model with direct ontology and memory keys under ods:, native Google OKF v0.2 top-level keys, and 'x-ods-lifecycle' metadata tracking key introduction, status, spec chapter, and versioning.",
   "x-ods-supported-specs": {
     "ods": {
@@ -326,12 +326,14 @@
       "properties": {
         "memory": {
           "$ref": "#/$defs/memoryBlock",
-          "description": "Optional encapsulated cognitive memory block under ods:.",
+          "description": "DEPRECATED (DEPR-002): use the top-level memory: block. Optional encapsulated cognitive memory block under ods:.",
           "x-ods-lifecycle": {
             "introduced": "1.1.0",
             "spec_version": "1.1",
-            "status": "stable",
-            "spec": "specs/graph.md#cognitive-memory"
+            "status": "deprecated",
+            "spec": "specs/graph.md#51-canonical-placement",
+            "deprecated_in": "1.1.0",
+            "removed_in": "2.0"
           }
         },
         "profile": {
@@ -428,12 +430,14 @@
           "items": {
             "$ref": "#/$defs/semanticRelation"
           },
-          "description": "Direct Pareto Ontology: Typed semantic graph edges (is_a, part_of, owns, governed_by, maps_to, derives_from).",
+          "description": "DEPRECATED (DEPR-001): use ods.related, which accepts the same attributed-object entries. Direct Pareto Ontology: Typed semantic graph edges (is_a, part_of, owns, governed_by, maps_to, derives_from).",
           "x-ods-lifecycle": {
             "introduced": "1.1.0",
             "spec_version": "1.1",
-            "status": "stable",
-            "spec": "specs/graph.md#typed-semantic-relations"
+            "status": "deprecated",
+            "spec": "specs/keys.md#713-odsrelations-deprecated",
+            "deprecated_in": "1.1.0",
+            "removed_in": "2.0"
           }
         },
         "invariants": {
@@ -459,23 +463,27 @@
             "profile"
           ],
           "default": "episodic",
-          "description": "Direct Pareto Memory: Cognitive memory tier classification (episodic, semantic, procedural, state).",
+          "description": "DEPRECATED (DEPR-002): move into the top-level memory: block. Direct Pareto Memory: Cognitive memory tier classification (episodic, semantic, procedural, state).",
           "x-ods-lifecycle": {
             "introduced": "1.1.0",
             "spec_version": "1.1",
-            "status": "stable",
-            "spec": "specs/context.md#cognitive-memory-tiers"
+            "status": "deprecated",
+            "spec": "specs/graph.md#51-canonical-placement",
+            "deprecated_in": "1.1.0",
+            "removed_in": "2.0"
           }
         },
         "valid_from": {
           "type": "string",
           "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
-          "description": "Direct Pareto Memory: Timestamp when fact became true in reality.",
+          "description": "DEPRECATED (DEPR-002): move into the top-level memory: block. Direct Pareto Memory: Timestamp when fact became true in reality.",
           "x-ods-lifecycle": {
             "introduced": "1.1.0",
             "spec_version": "1.1",
-            "status": "stable",
-            "spec": "specs/graph.md#bi-temporal-valid-windows"
+            "status": "deprecated",
+            "spec": "specs/graph.md#51-canonical-placement",
+            "deprecated_in": "1.1.0",
+            "removed_in": "2.0"
           }
         },
         "valid_to": {
@@ -484,23 +492,27 @@
             "null"
           ],
           "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
-          "description": "Direct Pareto Memory: Timestamp when fact expired in reality (null if currently active).",
+          "description": "DEPRECATED (DEPR-002): move into the top-level memory: block. Direct Pareto Memory: Timestamp when fact expired in reality (null if currently active).",
           "x-ods-lifecycle": {
             "introduced": "1.1.0",
             "spec_version": "1.1",
-            "status": "stable",
-            "spec": "specs/graph.md#bi-temporal-valid-windows"
+            "status": "deprecated",
+            "spec": "specs/graph.md#51-canonical-placement",
+            "deprecated_in": "1.1.0",
+            "removed_in": "2.0"
           }
         },
         "asserted_at": {
           "type": "string",
           "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$",
-          "description": "Direct Pareto Memory: Timestamp when the agent observed/asserted this fact.",
+          "description": "DEPRECATED (DEPR-002): move into the top-level memory: block. Direct Pareto Memory: Timestamp when the agent observed/asserted this fact.",
           "x-ods-lifecycle": {
             "introduced": "1.1.0",
             "spec_version": "1.1",
-            "status": "stable",
-            "spec": "specs/graph.md#bi-temporal-assertion-times"
+            "status": "deprecated",
+            "spec": "specs/graph.md#51-canonical-placement",
+            "deprecated_in": "1.1.0",
+            "removed_in": "2.0"
           }
         },
         "mutations": {
@@ -508,23 +520,27 @@
           "items": {
             "$ref": "#/$defs/memoryMutation"
           },
-          "description": "Direct Pareto Memory: Graphiti-style structured attribute changes.",
+          "description": "DEPRECATED (DEPR-002): move into the top-level memory: block. Direct Pareto Memory: Graphiti-style structured attribute changes.",
           "x-ods-lifecycle": {
             "introduced": "1.1.0",
             "spec_version": "1.1",
-            "status": "stable",
-            "spec": "specs/context.md#entity-state-mutations"
+            "status": "deprecated",
+            "spec": "specs/graph.md#51-canonical-placement",
+            "deprecated_in": "1.1.0",
+            "removed_in": "2.0"
           }
         },
         "pin": {
           "type": "boolean",
           "default": false,
-          "description": "Direct Pareto Memory: Protects memory node from automated background decay pruning.",
+          "description": "DEPRECATED (DEPR-002): move into the top-level memory: block. Direct Pareto Memory: Protects memory node from automated background decay pruning.",
           "x-ods-lifecycle": {
             "introduced": "1.1.0",
             "spec_version": "1.1",
-            "status": "stable",
-            "spec": "specs/context.md#memory-decay-pinning"
+            "status": "deprecated",
+            "spec": "specs/graph.md#51-canonical-placement",
+            "deprecated_in": "1.1.0",
+            "removed_in": "2.0"
           }
         },
         "depends": {
@@ -654,22 +670,49 @@
           "properties": {
             "requires": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ],
               "description": "Hard conceptual prerequisite document that must be loaded/read first."
             },
             "extends": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ],
               "description": "Base foundational specification extended by this document."
             },
             "imports": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ],
               "description": "Shared contract, ontology types, or schema dependency."
             }
@@ -724,110 +767,264 @@
           "properties": {
             "is_a": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "extends": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "part_of": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "owns": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "contains": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "governed_by": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "policy": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "rule": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "maps_to": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "table": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "implements": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "depends_on": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "derives_from": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "exercises": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "see_also": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "see": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             },
             "custom": {
               "oneOf": [
-                { "type": "string", "minLength": 1 },
-                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
               ]
             }
           },
           "minProperties": 1,
           "maxProperties": 1,
-          "additionalProperties": false
+          "additionalProperties": false,
+          "description": "Pareto shorthand: a single predicate key mapped to one target or a list of targets. The vocabulary is closed (ENUM-006); see specs/graph.md#41-the-complete-predicate-vocabulary. Aliases extends->is_a, contains->owns, policy/rule->governed_by, table->maps_to, see->see_also."
         },
         {
           "type": "object",
@@ -842,13 +1039,15 @@
                 "maps_to",
                 "depends_on",
                 "derives_from",
+                "implements",
                 "exercises",
                 "see_also",
                 "custom"
               ]
             },
             "custom_predicate": {
-              "type": "string"
+              "type": "string",
+              "description": "Domain-specific verb, used only when predicate is \"custom\". No inverse edge is inferred for custom predicates."
             },
             "target": {
               "type": "string",
@@ -878,14 +1077,16 @@
               "type": "string"
             },
             "binding": {
-              "type": "object"
+              "type": "object",
+              "description": "Physical binding for maps_to edges: the column, endpoint, or field the edge resolves to."
             }
           },
           "required": [
             "predicate",
             "target"
           ],
-          "additionalProperties": false
+          "additionalProperties": false,
+          "description": "Attributed relation object. Required when an edge carries role, confidence, temporal bounds, cardinality, or a custom predicate."
         }
       ]
     },
@@ -1162,7 +1363,7 @@
           "minimum": 0,
           "maximum": 10,
           "default": 2,
-          "description": "Maximum recursive hops for dependency graph traversal in prompt resolution."
+          "description": "Maximum recursive hops along ods.depends during context resolution. Range 0-10 (ENUM-005)."
         },
         "trust-min": {
           "type": "string",
@@ -1172,7 +1373,7 @@
             "human-reviewed"
           ],
           "default": "unverified",
-          "description": "Minimum required trust tier for inclusion in bounded context."
+          "description": "Minimum trust tier a document must reach to enter the bounded payload. Derived from the verified[] entries; see specs/keys.md#79-odscontext."
         },
         "load": {
           "type": "array",
@@ -1241,10 +1442,8 @@
           "description": "Frontmatter keys that MUST NOT appear with this profile."
         }
       },
-      "required": [
-        "name"
-      ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Custom profile definition metadata. Valid only in a profile-definition file registered via custom_profiles or a pack (PROF-006). name is optional; the file stem is used when it is absent."
     },
     "memoryBlock": {
       "type": "object",
