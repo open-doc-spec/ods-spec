@@ -4,14 +4,11 @@ tags:
   - agent
   - db
 owner: team:data
-ods:
-  profile: agent
-  status: stable
-  share: org
-  code:
-    - path: src/migrator.ts
-      role: entrypoint
-      symbol: syncSchema
+profile: agent
+status: stable
+share: org
+code:
+  - src/migrator.ts
 ---
 
 # Database Sync Agent

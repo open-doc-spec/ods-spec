@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/2.0.0/config.schema.json",
+  "title": "ODS Workspace Configuration Schema (v2.0.0)",
+  "description": "Machine-readable JSON Schema for ods.toml workspace configuration in ODS v2.0.",
+  "x-ods-supported-specs": {
+    "ods": {
+      "version": "2.0.0",
+      "status": "active",
+      "url": "https://github.com/open-doc-spec/ods-spec"
+    }
+  },
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional URI of the ODS workspace configuration schema."
+    },
+    "spec": {
+      "type": "string",
+      "enum": ["2.0", "2.0.0"],
+      "description": "Target ODS specification version. Only 2.0 is valid."
+    },
+    "ignore": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Directory prefixes excluded from document scanning."
+    },
+    "custom_profiles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Paths to custom profile definition markdown files."
+    },
+    "packs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Registered pack identifiers or bundle paths."
+    },
+    "dialect": {
+      "type": "string",
+      "enum": ["standard", "strict"],
+      "default": "standard",
+      "description": "Workspace lint enforcement mode."
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "default_max_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 2,
+          "description": "Default recursion depth for depends traversal during context assembly."
+        },
+        "auto_load_resources": {
+          "type": "boolean",
+          "default": false,
+          "description": "When true, text/JSON resources are auto-injected into AI prompts."
+        },
+        "ignore": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Path prefixes excluded during context traversal."
+        }
+      },
+      "additionalProperties": false
+    },
+    "aliases": {
+      "type": "object",
+      "properties": {
+        "sections": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array", "items": { "type": "string" } }
+            ]
+          }
+        },
+        "paths": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "okf": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable OKF v0.2 superset key parsing."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["spec"],
+  "additionalProperties": false
+}

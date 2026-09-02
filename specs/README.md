@@ -1,20 +1,20 @@
 ---
-description: "What Open Document Spec (ODS) is, why it exists, core concepts, glossary, and reading pathways for authors and implementers."
-ods:
-  profile: "note"
-  status: "stable"
-  related:
-    - core.md
-    - keys.md
-    - profiles.md
-    - graph.md
-    - context.md
-    - indexes.md
-    - assets.md
-    - validation.md
-    - scope.md
-    - glossary.md
-    - ../guides/README.md
+description: What Open Document Spec (ODS) is, why it exists, core concepts, glossary,
+  and reading pathways for authors and implementers.
+profile: note
+status: stable
+related:
+- core.md
+- keys.md
+- profiles.md
+- graph.md
+- context.md
+- indexes.md
+- assets.md
+- validation.md
+- scope.md
+- glossary.md
+- ../guides/README.md
 ---
 
 # ODS · Specification Map (Reference)
@@ -51,7 +51,7 @@ Taught in full in [Why ODS exists](../guides/00-why-ods.md). Short form for impl
 
 | Question | Answer |
 | :--- | :--- |
-| **WHAT** | A convention for plain `.md` files: optional YAML frontmatter (universal keys + an `ods:` engine namespace) and a root `ods.toml` workspace marker. |
+| **WHAT** | A convention for plain `.md` files: optional flat YAML frontmatter and a root `ods.toml` workspace marker. |
 | **WHY** | Unstructured Markdown drifts, links rot, and AI tools waste tokens or hallucinate context. ODS makes identity, relationships, bindings, and reading lists lintable. |
 | **WHEN** | Architecture docs, runbooks, ADRs, PRDs, onboarding guides, or agent knowledge in Git. |
 | **WHERE** | Inside the repository, alongside code. Coexists with Hugo, Astro, Docusaurus, Next.js, and Obsidian. |
@@ -79,24 +79,24 @@ The specification is structured into 10 focused modules and a terminology refere
 
 ```
 schemas/             # Machine-readable JSON Schemas (Draft 2020-12)
-├── 1.1.0/           # Latest ODS 1.1 Schemas (Flat Pareto, Ontologies, Memory & OKF Superset)
-│   ├── document.schema.json  # Frontmatter schema with x-ods-lifecycle metadata
+├── 2.0.0/           # ODS 2.0 Schemas (flat frontmatter, clean break from 1.x)
+│   ├── document.schema.json  # Flat frontmatter schema
 │   ├── config.schema.json    # ods.toml workspace schema
 │   └── profile.schema.json   # Custom profile schema
-├── 1.0.0/           # Superseded ODS 1.0 Baseline Schemas
 guides/              # Human learning track (start at guides/README.md)
 specs/
-├── README.md        # Chapter 01 · Specification map (you are here) — not the tutorial
-├── core.md          # Chapter 02 · Format Model, Binary Compliance & OKF Superset
-├── keys.md          # Chapter 03 · Frontmatter Key Dictionary & Flat Pareto Rules
-├── profiles.md      # Chapter 04 · Structural Profiles (13 Universal Shapes) & Packs
-├── graph.md         # Chapter 05 · Dual-Graph (Domain & Lexical) & Bi-Temporal Memory
-├── context.md       # Chapter 06 · Bounded AI Context, Trust Tiers & Token Optimization
-├── assets.md        # Chapter 07 · Non-Markdown Resources, Code Bindings & Attestations
-├── indexes.md       # Chapter 08 · Workspace Config (ods.toml) & Progressive Discovery
-├── validation.md    # Chapter 09 · Conformance Profiles & Lint Rules (ONT-*, MEM-*, DEPR-*, ATT-*)
-├── scope.md         # Chapter 10 · Boundaries, Non-Goals & Architectural Trade-offs
-└── glossary.md      # Reference · Exhaustive Normative Terminology Dictionary & Disambiguation
+├── README.md        # Chapter 01 · Specification map (you are here)
+├── core.md          # Chapter 02 · Format Model & Binary Compliance
+├── keys.md          # Chapter 03 · Flat Frontmatter Key Dictionary
+├── profiles.md      # Chapter 04 · Structural Profiles (13 Shapes)
+├── graph.md         # Chapter 05 · Document Graph (depends & related)
+├── context.md       # Chapter 06 · Bounded AI Context & load
+├── assets.md        # Chapter 07 · Resources, Code Bindings & load
+├── indexes.md       # Chapter 08 · Workspace Config (ods.toml)
+├── validation.md    # Chapter 09 · Conformance Profiles & Lint Rules
+├── scope.md         # Chapter 10 · Boundaries & Versioning Policy
+├── engine.md        # Engine implementation contract (reference CLI)
+└── glossary.md      # Terminology reference
 ```
 
 ---
@@ -109,14 +109,15 @@ Implementer and reviewer order (not the human learning path):
 | :---: | :--- | :--- |
 | **01** | [**`README.md`**](README.md) *(Current)* | **Overview & Terminology**: 5W1H principles and specification map. |
 | **02** | [**`core.md`**](core.md) | **Format Model**: The minimal conformant document, frontmatter vs body prose, SSOT, 4 lifecycle operations. |
-| **03** | [**`keys.md`**](keys.md) | **Key Dictionary**: Top-level vs `ods:` block keys, data types, and copy-paste examples. |
-| **04** | [**`profiles.md`**](profiles.md) | **Profiles & Shapes**: 13 standard profiles (`guide`, `decision`, `feature`, etc.), heading contracts, custom profiles. |
-| **05** | [**`graph.md`**](graph.md) | **Graph & Identity**: Path-derived document IDs, `depends` (DAG) vs `related`, cycle prevention. |
-| **06** | [**`context.md`**](context.md) | **AI Context Scope**: Bounded context loading algorithm, `load`/`ignore`/`max-depth`, token cost reduction. |
-| **07** | [**`assets.md`**](assets.md) | **Assets & Code**: Attached `resources` and 8 source `code` roles (`entrypoint`, `implementation`, `test`, etc.). |
-| **08** | [**`indexes.md`**](indexes.md) | **Workspace & Discovery**: Root `ods.toml` key reference, dialects, elimination of folder indexes, progressive discovery. |
-| **09** | [**`validation.md`**](validation.md) | **Validation Contract**: Binary compliance, the four implementer conformance profiles, lint severity matrix, required capabilities. |
-| **10** | [**`scope.md`**](scope.md) | **Scope & Non-Goals**: Architectural boundaries, out-of-scope features, versioning policy, and the 2.0 deprecation schedule. |
+| **03** | [**`keys.md`**](keys.md) | **Key Dictionary**: Flat top-level keys, two-layer model, copy-paste examples. |
+| **04** | [**`profiles.md`**](profiles.md) | **Profiles & Shapes**: 13 standard profiles; section headings are advisory. |
+| **05** | [**`graph.md`**](graph.md) | **Graph & Identity**: Path-derived IDs, `depends` (DAG) vs `related` string paths. |
+| **06** | [**`context.md`**](context.md) | **AI Context Scope**: `load`, workspace `default_max_depth`, token optimization. |
+| **07** | [**`assets.md`**](assets.md) | **Assets & Code**: `resources`, string `code` paths, `load` distinction. |
+| **08** | [**`indexes.md`**](indexes.md) | **Workspace & Discovery**: `ods.toml` key reference, `[context]` defaults. |
+| **09** | [**`validation.md`**](validation.md) | **Validation Contract**: Binary compliance, lint rule matrix, engine capabilities. |
+| **10** | [**`scope.md`**](scope.md) | **Scope & Non-Goals**: Architectural boundaries and 2.0 versioning policy. |
+| **11** | [**`engine.md`**](engine.md) | **Engine Contract**: Reference CLI requirements for `open-doc-spec/ods`. |
 | **REF**| [**`glossary.md`**](glossary.md) | **Normative Glossary**: Comprehensive definitions across 7 domains and concept disambiguation. |
 
 ---
@@ -158,9 +159,7 @@ A workspace declares a **dialect** in `ods.toml`. The dialect does not change wh
 | Dialect | Emphasis |
 | :--- | :--- |
 | `standard` *(default)* | Engineering docs, graph relationships, code bindings, bounded AI context. |
-| `strict` | As `standard`, with warnings promoted to errors. For repositories wanting a zero-warning gate. |
-| `agentic` | Agent and skill packaging: `agent` / `skill` profiles, memory tiers, execution contracts. |
-| `okf-superset` | Google OKF v0.2 knowledge bundles: provenance, verification dates, trust tiers, attested computations. Auto-selected on OKF bundle detection. |
+| `strict` | As `standard`, with warnings promoted to errors. |
 
 Normative definitions: [indexes.md §3.2](indexes.md#32-dialects).
 

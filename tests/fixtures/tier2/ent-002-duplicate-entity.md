@@ -1,11 +1,9 @@
 ---
-description: "An entity class name declared twice in the workspace."
+description: First document declaring entity Customer.
 x-ods-expect: ENT-002
-ods:
-  profile: note
-  status: draft
-  entity: DuplicatedCustomer
-  domain: Billing
+entity: Customer
+profile: note
+status: draft
 ---
 
-# Duplicate Entity A
+# Customer A

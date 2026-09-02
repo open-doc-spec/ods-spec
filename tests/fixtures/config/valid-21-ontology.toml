@@ -1,0 +1,5 @@
+spec = "2.1"
+
+[ontology]
+default_domain = "Core"
+strict_schema = true

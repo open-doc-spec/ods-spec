@@ -1,2 +1,2 @@
-# spec must match MAJOR.MINOR or MAJOR.MINOR.PATCH.
-spec = "eleven"
+# spec must be "2.0" only.
+spec = "1.1"

@@ -1,20 +1,20 @@
 ---
-description: "Choose an ODS profile from the job the document does, fill the expected headings, and keep execution contracts out of YAML."
+description: Choose an ODS profile from the job the document does, fill the expected
+  headings, and keep execution contracts out of YAML.
 tags:
-  - learn
-  - ods
-  - profiles
-  - authoring
+- learn
+- ods
+- profiles
+- authoring
 owner: team:ods
-ods:
-  profile: guide
-  status: stable
-  depends:
-    - 01-first-document.md
-  related:
-    - 03-link-documents.md
-    - decision-cards.md
-    - ../specs/profiles.md
+profile: guide
+status: stable
+depends:
+- 01-first-document.md
+related:
+- 03-link-documents.md
+- decision-cards.md
+- ../specs/profiles.md
 ---
 
 # Pick a Shape
@@ -79,9 +79,8 @@ description: Why the billing service uses Stripe as the card processor.
 tags:
   - billing
   - architecture
-ods:
-  profile: decision
-  status: stable
+profile: decision
+status: stable
 ---
 
 # ADR 004: Stripe for Card Payments
@@ -134,9 +133,8 @@ ods:
 ```markdown
 ---
 description: Implement the refunds endpoint from the API contract.
-ods:
-  profile: agent
-  status: draft
+profile: agent
+status: draft
 ---
 
 # Refunds Endpoint Agent

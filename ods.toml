@@ -1,11 +1,7 @@
-# ═════════════════════════════════════════════════════════════════
 # ods.toml — Repository root configuration (Workspace Boundary)
-# ═════════════════════════════════════════════════════════════════
 
-# Targeted ODS specification version
-spec = "1.1"
+spec = "2.0"
 
-# Directory path prefixes excluded from document scanning and linting
 ignore = [
   "target",
   ".artifacts",
@@ -14,24 +10,3 @@ ignore = [
   "tests",
   ".ods"
 ]
-
-# Neuro-symbolic ontology subsystem
-[ontology]
-default_domain = "Core"
-strict_invariants = true
-
-# Temporal cognitive memory settings
-[memory]
-backend = "markdown"
-decay_days = 30
-auto_dream = true
-
-# Google OKF native superset interoperability
-[okf]
-enabled = true
-
-# Background watcher & memory budget settings
-[service]
-mode = "poll"
-poll_secs = 2
-max_rss_mb = 10

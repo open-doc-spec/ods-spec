@@ -1,35 +1,6 @@
-# Canonical flat form, as documented in specs/indexes.md §3.
-spec = "1.1"
-dialect = "standard"
-ignore = ["target", "node_modules", "dist"]
-custom_profiles = ["tests/fixtures/valid/valid-custom-profile.md"]
-packs = ["vendor/engineering-pack"]
-schemas = ["schemas/1.1.0/document.schema.json"]
+spec = "2.0"
 
-[aliases.sections]
-Goal = ["Objective", "Purpose"]
+ignore = ["target", "node_modules"]
 
-[aliases.paths]
-auth-spec = "guides/auth.md"
-
-[ontology]
-default_domain = "Core"
-strict_invariants = true
-export_format = "cypher"
-
-[memory]
-backend = "markdown"
-decay_days = 30
-auto_dream = true
-
-[attestation]
-allowed_runtimes = ["bigquery", "postgres"]
-enforce_receipts = true
-
-[okf]
-enabled = true
-
-[service]
-mode = "poll"
-poll_secs = 2
-max_rss_mb = 10
+[context]
+default_max_depth = 2

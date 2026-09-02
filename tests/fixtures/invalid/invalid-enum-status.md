@@ -1,11 +1,10 @@
 ---
 description: This document contains an illegal status enum value.
 tags:
-  - test
+- test
 owner: team:docs
-ods:
-  profile: note
-  status: in-progress
+profile: note
+status: in-progress
 ---
 
 # Invalid Status

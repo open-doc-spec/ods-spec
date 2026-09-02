@@ -1,12 +1,10 @@
 ---
-description: "An ods.schema path that does not resolve on disk."
+description: Entity with a schema path that does not exist on disk.
 x-ods-expect: ONT-001
-ods:
-  profile: note
-  status: draft
-  entity: Customer
-  domain: Billing
-  schema: ./schemas/not-on-disk.schema.json
+entity: DanglingSchemaEntity
+profile: note
+status: draft
+schema: tests/fixtures/2.1.0/schemas/does-not-exist.schema.json
 ---
 
-# Dangling Schema Contract
+# Dangling Schema Entity

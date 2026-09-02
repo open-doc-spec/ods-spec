@@ -1,18 +1,18 @@
 ---
-description: "How to propose a change to the Open Document Spec: the key-proposal path, the fixture requirement, and what the conformance suite enforces."
+description: 'How to propose a change to the Open Document Spec: the key-proposal
+  path, the fixture requirement, and what the conformance suite enforces.'
 tags:
-  - contributing
-  - governance
-  - ods
+- contributing
+- governance
+- ods
 owner: team:ods
-ods:
-  profile: guide
-  status: stable
-  share: public
-  related:
-    - specs/scope.md
-    - specs/validation.md
-    - schemas/README.md
+profile: guide
+status: stable
+share: public
+related:
+- specs/scope.md
+- specs/validation.md
+- schemas/README.md
 ---
 
 # Contributing to the Open Document Spec
@@ -36,20 +36,20 @@ A key proposal is four things, in this order. A proposal missing any of them can
 
 1. **The problem.** What can an author not express today, and what do they do instead? "Teams work around this by X" is the strongest possible opening. A key that solves a hypothetical is a key everyone must learn and nobody needs.
 2. **Why an existing key will not do.** ODS already has 3 layers and 5 subsystems. Show that the fact does not belong in `related`, `context.load`, a body heading, or an unknown top-level key that tooling already preserves untouched.
-3. **The schema delta.** The exact addition to `schemas/1.1.0/document.schema.json` (or `config.schema.json`), including an `x-ods-lifecycle` block naming the chapter that will define it. Additive-only: see the version semantics in [`specs/scope.md` §7.1](specs/scope.md#71-version-semantics).
+3. **The schema delta.** The exact addition to `schemas/2.0.0/document.schema.json` (or `config.schema.json`). Additive-only: see the version semantics in [`specs/scope.md` §7.1](specs/scope.md#71-version-semantics).
 4. **A fixture.** At least one under `tests/fixtures/` — positive if the key is valid, under `tests/fixtures/invalid/` if you are adding a Tier 1 constraint, under `tests/fixtures/tier2/` with an `x-ods-expect` marker if you are adding a workspace-semantic rule.
 
 Then the prose: the key's normative definition in its governing chapter, its row in the [`keys.md`](specs/keys.md) subsystem matrix, and, if it changes what an author writes on a normal day, a mention in the relevant guide.
 
 ### Proposing a new lint rule
 
-Add the row to the matrix in [`specs/validation.md` §4](specs/validation.md#4-normative-lint-rules-matrix) with a rule id, a validation tier, a severity, and a remediation. If the tier is 2, add a fixture under `tests/fixtures/tier2/` declaring `x-ods-expect: <RULE-ID>` — `test_every_tier2_rule_has_a_fixture` fails otherwise, by design.
+Add the row to the matrix in [`specs/validation.md` §4](specs/validation.md#4-normative-lint-rules-matrix-ods-20--21) with a rule id, a validation tier, a severity, and a remediation. If the tier is 2, add a fixture under `tests/fixtures/tier2/` declaring `x-ods-expect: <RULE-ID>` — `test_every_tier2_rule_has_a_fixture` fails otherwise, by design.
 
 Severity is not a style choice. **Error** means a conformant workspace cannot contain this. **Warning** means the author should know but CI should not block. If you cannot state the failure a user suffers when the condition holds, it is a warning at most.
 
 ### Removing or changing a key
 
-You cannot, inside a MINOR release. Deprecate it: set `x-ods-lifecycle.status` to `deprecated` with `deprecated_in` and `removed_in`, add a `DEPR-*` warning rule, record it in [`specs/scope.md` §7.2](specs/scope.md#72-deprecated-in-11--scheduled-for-removal-in-20), and state the precedence rule for documents that use both spellings. Removal happens in the next MAJOR.
+ODS 2.0 uses a clean-break versioning model. Removals happen in MAJOR releases only. Record the change in `CHANGELOG.md` and [`specs/scope.md` §7](specs/scope.md#7-versioning-policy).
 
 ### Editing prose
 
@@ -76,6 +76,6 @@ If a change to a heading breaks `test_no_broken_internal_links`, fix the inbound
 
 ## Troubleshooting
 
-- **"My valid fixture fails schema validation."** Check the layer: universal keys (`tags`, `description`, `owner`, `author`, dates) at the top level, engine keys under `ods:`, workspace keys in `ods.toml`. The document schema rejects universal key names under `ods:` by name.
+- **"My valid fixture fails schema validation."** Check that engine keys (`profile`, `depends`, `code`, etc.) are flat at the top level — not under `ods:`. Workspace keys belong in `ods.toml` only.
 - **"`test_every_tier2_rule_has_a_fixture` fails after I added a rule."** That is the intended behavior. Add the fixture.
 - **"`test_prose_matches_schema_enums` fails and I only edited prose."** You changed a count or dropped an enum member from its canonical chapter. The schema and the prose must state the same thing.

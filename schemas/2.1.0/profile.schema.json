@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/2.1.0/profile.schema.json",
+  "title": "ODS Custom Profile Definition Schema (v2.1.0)",
+  "description": "JSON Schema for custom profile declarations registered via custom_profiles in ods.toml.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "description": { "type": "string" },
+    "required_sections": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "optional_sections": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "required_keys": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "optional_keys": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "forbidden_keys": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

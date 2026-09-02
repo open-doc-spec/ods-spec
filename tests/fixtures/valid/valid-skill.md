@@ -1,13 +1,12 @@
 ---
 description: Reusable agent skill for ODS document validation.
 tags:
-  - skill
-  - ods
+- skill
+- ods
 owner: team:docs
-ods:
-  profile: skill
-  status: stable
-  share: public
+profile: skill
+status: stable
+share: public
 ---
 
 # ODS Linter Skill

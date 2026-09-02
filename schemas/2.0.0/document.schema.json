@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/2.0.0/document.schema.json",
+  "title": "ODS Document Frontmatter Schema (v2.0.0)",
+  "description": "Machine-readable JSON Schema for Open Document Spec (ODS v2.0) Markdown YAML frontmatter. Flat top-level keys only; no ods: wrapper.",
+  "x-ods-supported-specs": {
+    "ods": {
+      "version": "2.0.0",
+      "status": "active",
+      "url": "https://github.com/open-doc-spec/ods-spec"
+    },
+    "okf": {
+      "version": "0.2.0",
+      "dialect": "okf-superset",
+      "status": "fully-supported",
+      "source_spec": "google/knowledge-catalog"
+    }
+  },
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional URI of the ODS document frontmatter schema for editor validation."
+    },
+    "title": {
+      "type": "string",
+      "description": "Document title. If present, MUST match the first # H1 heading (TITLE-001)."
+    },
+    "name": {
+      "type": "string",
+      "description": "Alias for title. If present, MUST match the first # H1 heading (TITLE-001)."
+    },
+    "description": {
+      "type": "string",
+      "description": "High-level summary of the document purpose."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "owner": { "type": "string" },
+    "author": { "type": "string" },
+    "created": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+    },
+    "created_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+    },
+    "updated": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+    },
+    "updated_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+    },
+    "profile": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$",
+      "default": "note",
+      "description": "Structural profile contract (guide, decision, feature, etc.)."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "stable", "deprecated", "archived"],
+      "default": "stable"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_/-]+$"
+    },
+    "share": {
+      "type": "string",
+      "enum": ["public", "org", "private"],
+      "default": "public"
+    },
+    "depends": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Hard Markdown prerequisites traversed during context resolution."
+    },
+    "related": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Soft lateral document links (not traversed)."
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "type": "string", "minLength": 1 },
+          { "$ref": "#/$defs/resourceEntry" }
+        ]
+      }
+    },
+    "code": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^(?!.*:[Ll]?\\d+).*$"
+      },
+      "description": "Source file paths bound to this document (no line numbers)."
+    },
+    "load": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Auxiliary non-Markdown files injected into AI prompt context."
+    },
+    "type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "OKF v0.2: concept type identifier."
+    },
+    "resource": {
+      "type": "string",
+      "description": "OKF v0.2: canonical URI of the underlying asset."
+    },
+    "sources": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/okfSourceEntry" }
+    },
+    "usage_window": { "$ref": "#/$defs/timeWindow" },
+    "generated": { "$ref": "#/$defs/actorEvent" },
+    "verified": {
+      "oneOf": [
+        { "$ref": "#/$defs/actorEvent" },
+        { "type": "array", "items": { "$ref": "#/$defs/actorEvent" } }
+      ]
+    },
+    "stale_after": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+    },
+    "runtime": { "type": "string" },
+    "parameters": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/computationParameter" }
+    },
+    "computation": { "type": "string" },
+    "executor": { "$ref": "#/$defs/computationExecutor" },
+    "attester": { "$ref": "#/$defs/computationAttester" },
+    "okf_version": { "type": "string" },
+    "x-ods-expect": {
+      "type": "string",
+      "description": "Test fixture only: expected Tier 2 lint rule ID."
+    }
+  },
+  "not": {
+    "required": ["ods"]
+  },
+  "propertyNames": {
+    "not": { "enum": ["ods"] }
+  },
+  "$defs": {
+    "resourceEntry": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri" },
+        "title": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "anyOf": [{ "required": ["path"] }, { "required": ["url"] }],
+      "additionalProperties": false
+    },
+    "actorEvent": {
+      "type": "object",
+      "properties": {
+        "by": { "type": "string", "minLength": 1 },
+        "at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+        }
+      },
+      "required": ["by"],
+      "additionalProperties": false
+    },
+    "timeWindow": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+        }
+      },
+      "required": ["from", "to"],
+      "additionalProperties": false
+    },
+    "okfSourceEntry": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "resource": { "type": "string", "minLength": 1 },
+        "title": { "type": "string" },
+        "author": { "type": "string" },
+        "usage_count": { "type": "number", "minimum": 0 },
+        "last_modified": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+        },
+        "usage_window": { "$ref": "#/$defs/timeWindow" }
+      },
+      "required": ["resource"],
+      "additionalProperties": false
+    },
+    "computationParameter": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "type": {
+          "type": "string",
+          "enum": ["string", "integer", "number", "boolean", "date", "timestamp", "array", "object"]
+        },
+        "required": { "type": "boolean", "default": true },
+        "description": { "type": "string" },
+        "default": {}
+      },
+      "required": ["name", "type"],
+      "additionalProperties": false
+    },
+    "computationExecutor": {
+      "type": "object",
+      "properties": {
+        "resource": { "type": "string", "minLength": 1 },
+        "receipt": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["resource"],
+      "additionalProperties": false
+    },
+    "computationAttester": {
+      "type": "object",
+      "properties": {
+        "resource": { "type": "string", "minLength": 1 }
+      },
+      "required": ["resource"],
+      "additionalProperties": false
+    }
+  }
+}

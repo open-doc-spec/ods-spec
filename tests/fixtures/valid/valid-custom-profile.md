@@ -1,26 +1,17 @@
 ---
-description: Profile definition for architecture decision records.
-tags:
-  - profile
-  - adr
+description: Architecture decision using a custom profile registered in ods.toml.
+profile: custom-decision
+status: stable
 owner: team:arch
-ods:
-  custom_profile:
-    name: custom-decision
-    description: Custom Architecture Decision Record profile contract
-    required_sections:
-      - Context
-      - Decision
-      - Consequences
-    optional_sections:
-      - Alternatives
-      - Compliance
-    required_keys:
-      - owner
-    forbidden_keys:
-      - title
 ---
 
-# Custom Decision Profile
+# Custom Decision Example
 
-This file declares the custom-decision profile contract.
+## Context
+We need a custom ADR shape.
+
+## Decision
+Use the custom-decision profile.
+
+## Consequences
+Documents follow the registered section contract.

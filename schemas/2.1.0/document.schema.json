@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/2.1.0/document.schema.json",
+  "title": "ODS Document Frontmatter Schema (v2.1.0)",
+  "description": "Machine-readable JSON Schema for Open Document Spec (ODS v2.1) Markdown YAML frontmatter. Extends 2.0 with optional Pareto ontology keys (entity, domain, schema) and typed related predicates.",
+  "x-ods-supported-specs": {
+    "ods": {
+      "version": "2.1.0",
+      "status": "active",
+      "url": "https://github.com/open-doc-spec/ods-spec"
+    },
+    "okf": {
+      "version": "0.2.0",
+      "dialect": "okf-superset",
+      "status": "fully-supported",
+      "source_spec": "google/knowledge-catalog"
+    }
+  },
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional URI of the ODS document frontmatter schema for editor validation."
+    },
+    "title": {
+      "type": "string",
+      "description": "Document title. If present, MUST match the first # H1 heading (TITLE-001)."
+    },
+    "name": {
+      "type": "string",
+      "description": "Alias for title. If present, MUST match the first # H1 heading (TITLE-001)."
+    },
+    "description": { "type": "string" },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "owner": { "type": "string" },
+    "author": { "type": "string" },
+    "created": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+    },
+    "created_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+    },
+    "updated": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+    },
+    "updated_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+    },
+    "entity": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Pareto ontology: canonical concept or class name (e.g. Customer)."
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Pareto ontology: business domain partition (e.g. Billing)."
+    },
+    "schema": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Pareto ontology: workspace-relative path to JSON Schema on disk (ONT-001)."
+    },
+    "profile": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$",
+      "default": "note"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "stable", "deprecated", "archived"],
+      "default": "stable"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_/-]+$"
+    },
+    "share": {
+      "type": "string",
+      "enum": ["public", "org", "private"],
+      "default": "public"
+    },
+    "depends": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "related": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "type": "string", "minLength": 1 },
+          { "$ref": "#/$defs/paretoPredicateShorthand" },
+          { "$ref": "#/$defs/customPredicate" }
+        ]
+      },
+      "description": "Soft lateral links: plain paths or Pareto predicate shorthand."
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "type": "string", "minLength": 1 },
+          { "$ref": "#/$defs/resourceEntry" }
+        ]
+      }
+    },
+    "code": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^(?!.*:[Ll]?\\d+).*$"
+      }
+    },
+    "load": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "type": { "type": "string", "minLength": 1 },
+    "resource": { "type": "string" },
+    "sources": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/okfSourceEntry" }
+    },
+    "usage_window": { "$ref": "#/$defs/timeWindow" },
+    "generated": { "$ref": "#/$defs/actorEvent" },
+    "verified": {
+      "oneOf": [
+        { "$ref": "#/$defs/actorEvent" },
+        { "type": "array", "items": { "$ref": "#/$defs/actorEvent" } }
+      ]
+    },
+    "stale_after": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+    },
+    "runtime": { "type": "string" },
+    "parameters": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/computationParameter" }
+    },
+    "computation": { "type": "string" },
+    "executor": { "$ref": "#/$defs/computationExecutor" },
+    "attester": { "$ref": "#/$defs/computationAttester" },
+    "okf_version": { "type": "string" },
+    "x-ods-expect": { "type": "string" }
+  },
+  "not": { "required": ["ods"] },
+  "propertyNames": { "not": { "enum": ["ods"] } },
+  "$defs": {
+    "paretoPredicateShorthand": {
+      "type": "object",
+      "properties": {
+        "is_a": { "type": "string", "minLength": 1 },
+        "part_of": { "type": "string", "minLength": 1 },
+        "owns": { "type": "string", "minLength": 1 },
+        "governed_by": { "type": "string", "minLength": 1 },
+        "maps_to": { "type": "string", "minLength": 1 }
+      },
+      "minProperties": 1,
+      "maxProperties": 1,
+      "additionalProperties": false,
+      "description": "Pareto predicate shorthand: exactly one of is_a, part_of, owns, governed_by, maps_to."
+    },
+    "customPredicate": {
+      "type": "object",
+      "properties": {
+        "predicate": { "const": "custom" },
+        "verb": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "minLength": 1 }
+      },
+      "required": ["predicate", "verb", "target"],
+      "additionalProperties": false
+    },
+    "resourceEntry": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri" },
+        "title": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "anyOf": [{ "required": ["path"] }, { "required": ["url"] }],
+      "additionalProperties": false
+    },
+    "actorEvent": {
+      "type": "object",
+      "properties": {
+        "by": { "type": "string", "minLength": 1 },
+        "at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+        }
+      },
+      "required": ["by"],
+      "additionalProperties": false
+    },
+    "timeWindow": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+        }
+      },
+      "required": ["from", "to"],
+      "additionalProperties": false
+    },
+    "okfSourceEntry": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "resource": { "type": "string", "minLength": 1 },
+        "title": { "type": "string" },
+        "author": { "type": "string" },
+        "usage_count": { "type": "number", "minimum": 0 },
+        "last_modified": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?)?$"
+        },
+        "usage_window": { "$ref": "#/$defs/timeWindow" }
+      },
+      "required": ["resource"],
+      "additionalProperties": false
+    },
+    "computationParameter": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "type": {
+          "type": "string",
+          "enum": ["string", "integer", "number", "boolean", "date", "timestamp", "array", "object"]
+        },
+        "required": { "type": "boolean", "default": true },
+        "description": { "type": "string" },
+        "default": {}
+      },
+      "required": ["name", "type"],
+      "additionalProperties": false
+    },
+    "computationExecutor": {
+      "type": "object",
+      "properties": {
+        "resource": { "type": "string", "minLength": 1 },
+        "receipt": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["resource"],
+      "additionalProperties": false
+    },
+    "computationAttester": {
+      "type": "object",
+      "properties": {
+        "resource": { "type": "string", "minLength": 1 }
+      },
+      "required": ["resource"],
+      "additionalProperties": false
+    }
+  }
+}

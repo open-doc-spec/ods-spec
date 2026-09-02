@@ -1,20 +1,19 @@
 ---
-description: "Short answers to the questions ODS specs usually bury in design-decision sections."
+description: Short answers to common ODS 2.0 and 2.1 questions.
 tags:
   - learn
   - ods
   - questions
 owner: team:ods
-ods:
-  profile: faq
-  status: stable
-  related:
-    - 00-why-ods.md
-    - decision-cards.md
-    - mistakes.md
-    - ../specs/core.md
-    - ../specs/scope.md
-    - ../specs/context.md
+profile: faq
+status: stable
+related:
+  - 00-why-ods.md
+  - decision-cards.md
+  - mistakes.md
+  - ../specs/core.md
+  - ../specs/scope.md
+  - ../specs/context.md
 ---
 
 # FAQ
@@ -23,68 +22,50 @@ ods:
 
 Files must open on GitHub, in VS Code, in Obsidian, and in every Static Site Generator without a plugin. `.md` is the whole point.
 
-## Why is the title not a frontmatter key?
+## Can I use `title:` in frontmatter?
 
-Two titles drift. The heading is what humans see, so it is the only title.
+Yes, in ODS 2.0. If you declare `title:` or `name:`, it must match the first `# H1` heading (`TITLE-001`). If you omit it, the H1 is the title.
 
-## Why are there no compliance levels?
+## Why is there no `ods:` wrapper?
 
-"Level 2 of 3" made teams argue about whether CI should pass. `ods lint` either exits 0 or 1.
+Flat keys are easier to author and lint. The `ods:` namespace was the #1 placement mistake in 1.x.
 
-## How do `depends` and `related` work with domain ontologies?
+## How do `depends` and `related` differ?
 
-`ods.depends` is strictly for hard conceptual prerequisites that form an acyclic DAG. `ods.related` handles soft discovery links as well as typed semantic domain predicates (`is_a`, `part_of`, `owns`, `governed_by`, `maps_to`, `implements`).
+`depends` lists hard Markdown prerequisites that context resolution walks. `related` lists soft links that are not traversed. In ODS 2.0, both are flat string paths. ODS 2.1 optionally adds typed predicates on `related` — see [Domain ontology](09-domain-ontology.md).
+
+## What is ODS 2.1?
+
+A **minor additive extension** on top of 2.0. It adds optional `entity`, `domain`, `schema`, and five Pareto predicates on `related`. Documents without those keys remain fully valid. Set `spec = "2.1"` in `ods.toml` to enable ontology lint rules.
+
+## When should I use typed `related` predicates?
+
+When you need machine-checkable domain semantics (`governed_by:`, `maps_to:`) between concept docs. For ordinary "see also" links, plain string paths are enough.
 
 ## Why doesn't `resources` go into the AI prompt?
 
-Because it often holds multi-megabyte PDFs and images. `context.load` is the explicit, small, text-only injection list.
+It often holds multi-megabyte PDFs and images. Use `load:` for small text fixtures, or set `auto_load_resources = true` in `ods.toml`.
 
-## Why default `max-depth` to 2?
+## Where is `max-depth` configured?
 
-Two hops along real prerequisites usually covers the architecture you need. Deeper walks grow exponentially and drown the prompt.
+In `ods.toml` → `[context].default_max_depth` (default `2`). It is not a frontmatter key in 2.0.
 
-## Why not hand-written backlinks?
+## Why forbid line numbers in `code`?
 
-They rot on the first rename. Declare the edge on the dependent document. Let tools compute inbound links.
+`:L45` dies when someone adds an import. Bind whole file paths and keep files under ~300 LOC.
 
-## Why forbid line numbers in `ods.code`?
+## Are profile section headings required?
 
-`:L45` dies when someone adds an import. A symbol name does not.
-
-## Why can't I invent a ninth code role?
-
-A closed set is how an external agent classifies unknown repos. If it does not fit, pick the nearest role and describe the rest in prose.
-
-## Why are profile headings warnings, not errors?
-
-Adoption must not punish a draft. Structure is encouraged; a missing `## Risks` should not break the build.
-
-## Why TOML for the workspace file and YAML for documents?
-
-Workspace config is typed tables. Document metadata is the YAML authors already write for Hugo and Astro. Mixing both in YAML made the two layers harder to tell apart.
+No. Missing `## Steps` on a `guide` profile is fine. Structure is encouraged; it does not fail CI.
 
 ## Do I have to use the `ods` CLI?
 
-No. The spec is the files on disk. The CLI is the reference engine that lints and builds context. Another tool may implement the same contract.
+No. The spec is the files on disk. The CLI is the reference engine. Another tool may implement the same contract.
 
-## Is ODS a competitor to Docusaurus / Hugo / Obsidian?
+## Does ODS 2.0 read 1.x documents?
 
-No. Those render or navigate. ODS labels and links the Markdown they already consume. Unknown keys are preserved.
+No. ODS 2.0 is a clean break. Stay on the `v1.1.final` tag or manually flatten your frontmatter.
 
-## How does ODS 1.1 integrate with Google OKF?
+## How does OKF work in 2.0?
 
-ODS 1.1 is a strict superset of Google Open Knowledge Format (OKF v0.2). Any valid OKF bundle from Google's Knowledge Catalog is automatically 100% compliant ODS without file conversions or extra plugins.
-
-## Why are ontology and memory keys flat under `ods:` instead of nested?
-
-To eliminate YAML indentation fatigue. Adding an `ods.ontology:` wrapper adds nesting without adding meaning, so ontology keys sit directly under `ods:` — `ods.entity`, `ods.domain`, `ods.schema`, `ods.invariants`.
-
-Memory is the exception, and deliberately so. Its fields (`tier`, `valid_from`, `valid_to`, `asserted_at`, `mutations`, `pin`) are one coherent record describing a single remembered fact, and they are read by memory tooling that has no interest in the rest of the document. Keeping them in a top-level `memory:` block means that record can be lifted out whole. The flat `ods.tier` / `ods.valid_from` / … spellings still parse but are deprecated — see [`specs/graph.md` §5.1](../specs/graph.md#51-canonical-placement).
-
-## What is memory dreaming?
-
-Dreaming is an asynchronous background process that consolidates episodic agent interaction traces into clean, living entity profiles, resolves contradictory facts, and prunes decayed historical memories.
-
-## Should I start in `specs/` or `guides/`?
-
-Humans: [`guides/README.md`](README.md). Implementers: [`specs/README.md`](../specs/README.md).
+OKF v0.2 keys (`type`, `title`, `sources`, etc.) remain at the top level. Documents with `type:` or `okf_version:` skip `TITLE-001`.

@@ -1,17 +1,18 @@
 ---
-description: "Standard document profiles, expected section heading contracts, complete copy-paste templates, custom profile catalogs, and reusable packs."
-ods:
-  profile: "note"
-  status: "stable"
-  depends:
-    - README.md
-    - keys.md
-  related:
-    - core.md
-    - validation.md
-    - indexes.md
-    - ../guides/02-pick-a-shape.md
-    - ../guides/08-extend-ods.md
+description: Standard document profiles, expected section heading contracts, complete
+  copy-paste templates, custom profile catalogs, and reusable packs.
+profile: note
+status: stable
+depends:
+- README.md
+- keys.md
+related:
+- core.md
+- validation.md
+- indexes.md
+- ../guides/02-pick-a-shape.md
+- ../guides/08-extend-ods.md
+- ../guides/09-domain-ontology.md
 ---
 
 # ODS · Document Profiles & Shapes
@@ -70,33 +71,52 @@ ODS standardizes **13 Universal Profiles** covering human prose structures, engi
 
 ---
 
-### 3.1 Orthogonal Machine Capabilities vs Document Profiles
+### 3.1 Orthogonal Keys vs Document Profiles
 
-In ODS, **Profiles** define **Prose Shapes** (`## Overview`, `## Steps`, `## Decision`), while **Pareto Keys** define **Machine Capabilities**:
+**Profiles** define prose shapes (`## Overview`, `## Steps`, `## Decision`). Other ODS keys are **orthogonal** — they can appear on any profile:
 
-1. **Ontology Primitives (`ods.entity`, `ods.domain`, `ods.invariants`)**: Can be declared on *any* profile (`note`, `architecture`, `feature`, `api`). An entity does not need a proprietary profile.
-2. **Cognitive Memory Primitives (`ods.tier`, `ods.mutations`, `ods.valid_from`)**: Can be attached to a `note` or `sop`. The `ods.tier` field directly declares the cognitive memory level (`episodic` / `profile`).
-3. **Attested Computations (`type: Attested Computation`, `runtime: bigquery`)**: Defined natively via top-level Google OKF keys over a standard `note` or `feature` document.
+1. **Graph keys** (`depends`, `related`, `resources`, `code`, `load`) — see [keys.md §7](keys.md#7-ods-engine-keys-flat-top-level) and [graph.md](graph.md).
+2. **Pareto ontology (ODS 2.1)** — flat `entity`, `domain`, and `schema` on concept or feature docs; typed predicates on `related`. See [guides/09-domain-ontology.md](../guides/09-domain-ontology.md).
+3. **OKF superset** — top-level keys such as `type`, `sources`, and `verified` on standard profiles. See [core.md §3.1](core.md#31-frontmatter).
+
+Memory tiers, `invariants`, and the `ods:` wrapper are **not** part of ODS 2.0+.
+
+Profile section headings are **advisory** in ODS 2.0+. Tools MAY report missing sections as hints; there is no `PROF-002` lint error.
 
 ---
 
 ## 4. Complete Profile Templates (Copy-Paste Ready)
 
-### 4.1 `guide` Template (How-To Tutorial)
+All templates use **flat frontmatter** (no `ods:` wrapper). Engine keys sit at the top level beside universal metadata.
+
+### 4.1 `note` Template (Default)
+
+```markdown
+---
+description: Scratchpad for billing domain concepts.
+profile: note
+status: draft
+tags: [billing]
+---
+
+# Billing Notes
+
+Free-form content. No required sections.
+```
+
+### 4.2 `guide` Template (How-To Tutorial)
+
 ```markdown
 ---
 description: Step-by-step tutorial for configuring user authentication sessions.
 tags: [auth, setup]
 owner: team:platform
-ods:
-  profile: guide
-  status: stable
-  depends:
-    - ../prerequisites/cli-setup.md
-  code:
-    - path: src/auth.ts
-      role: implementation
-      symbol: initAuth
+profile: guide
+status: stable
+depends:
+  - ../prerequisites/cli-setup.md
+code:
+  - src/auth.ts
 ---
 
 # User Session Setup Guide
@@ -114,123 +134,118 @@ This guide walks through configuring session tokens for client web applications.
 3. Validate session connectivity with the Redis cache.
 
 ## Troubleshooting
-- **Error: Redis Connection Timeout**: Verify that your Redis instance is running and reachable on port 6379.
+- **Error: Redis Connection Timeout**: Verify that your Redis instance is running on port 6379.
 ```
 
-### 4.2 `feature` Template (PRD / Capability Spec)
+### 4.3 `feature` Template (PRD / Capability Spec)
+
 ```markdown
 ---
 description: Product capability specification for automated customer refund processing.
 tags: [billing, payments]
 owner: team:billing
-ods:
-  profile: feature
-  status: stable
-  depends:
-    - ../auth/sessions.md
-  context:
-    load:
-      - ../schemas/refund-payload.json
+profile: feature
+status: stable
+depends:
+  - ../auth/sessions.md
+load:
+  - ../schemas/refund-payload.json
 ---
 
 # Customer Refund Processing
 
 ## Goal
-Enable customer support agents to issue partial or full credit card refunds directly from the dashboard.
+Enable customer support agents to issue partial or full credit card refunds from the dashboard.
 
 ## Scope
 - In Scope: Visa, Mastercard, and Stripe payment methods.
-- Out of Scope: Direct wire transfer refunds and international currencies (v2).
+- Out of Scope: Wire transfer refunds (v2).
 
 ## Requirements
-1. Support agents can select one or more order line items to refund.
-2. System must record the agent ID and reason code for auditing.
-3. Total refund amount cannot exceed the original transaction value.
+1. Support agents can select order line items to refund.
+2. System records agent ID and reason code for auditing.
 
 ## Acceptance Criteria
-- Refund requests are processed synchronously with the payment gateway.
-- Successful refunds generate a confirmation email to the customer within 60 seconds.
+- Refund requests process synchronously with the payment gateway.
+- Confirmation email sent within 60 seconds.
 
 ## Risks
-- Gateway API timeouts could lead to duplicate refund requests if idempotency keys are not enforced.
+- Gateway timeouts could cause duplicate refunds without idempotency keys.
 ```
 
-### 4.3 `decision` Template (ADR)
+### 4.4 `decision` Template (ADR)
+
 ```markdown
 ---
-description: Architectural decision record evaluating Redis vs Memcached for session storage.
+description: ADR evaluating Redis vs Memcached for session storage.
 tags: [architecture, cache]
 owner: team:core
-ods:
-  profile: decision
-  status: stable
+profile: decision
+status: stable
 ---
 
 # ADR 004: Redis for Session Storage
 
 ## Context
-Our web tier requires a distributed, low-latency in-memory store for user authentication sessions.
+Our web tier requires a distributed, low-latency in-memory store for sessions.
 
 ## Decision
-We choose Redis 7 as our primary session store, deployed via AWS ElastiCache.
+We choose Redis 7 via AWS ElastiCache.
 
 ## Alternatives
-- **Memcached**: Extremely fast and simple, but lacks persistence, pub/sub for token invalidation, and rich data structures.
-- **PostgreSQL**: Strong ACID guarantees, but disk I/O introduces unacceptable latency under high read volume.
+- **Memcached**: Fast but lacks persistence and pub/sub.
+- **PostgreSQL**: Strong ACID but higher read latency.
 
 ## Consequences
-- We gain sub-millisecond session lookup latency and built-in TTL expiration.
-- We must monitor ElastiCache cluster memory usage and manage cluster failover replication.
+- Sub-millisecond session lookups and built-in TTL.
+- Must monitor cluster memory and failover.
 ```
 
-### 4.4 `sop` Template (Standard Operating Procedure / Runbook)
+### 4.5 `sop` Template (Runbook)
+
 ```markdown
 ---
-description: Runbook for performing scheduled PostgreSQL database maintenance and vacuuming.
+description: Runbook for PostgreSQL vacuum maintenance.
 tags: [database, ops]
 owner: team:sre
-ods:
-  profile: sop
-  status: stable
-  code:
-    - path: scripts/db-vacuum.sh
-      role: pipeline
+profile: sop
+status: stable
+code:
+  - scripts/db-vacuum.sh
 ---
 
 # SOP: PostgreSQL Database Vacuuming
 
 ## Purpose
-Execute periodic vacuuming on high-churn transaction tables to prevent transaction ID wraparound and reclaim disk space.
+Prevent transaction ID wraparound on high-churn tables.
 
 ## Prerequisites
-- Superuser database credentials in AWS Secrets Manager.
-- Maintenance window approval from the release coordinator.
+- Superuser credentials in Secrets Manager.
+- Maintenance window approval.
 
 ## Steps
-1. Notify on-call team in `#ops-alerts`.
-2. Connect to the read-write primary instance.
+1. Notify on-call in `#ops-alerts`.
+2. Connect to the primary instance.
 3. Run `VACUUM (VERBOSE, ANALYZE) billing_transactions;`.
 
 ## Validation
-Query `pg_stat_user_tables` to confirm that `last_vacuum` timestamp reflects the current execution time.
+Confirm `last_vacuum` updated in `pg_stat_user_tables`.
 
 ## Rollback
-If database CPU exceeds 85% for more than 2 minutes, terminate the vacuum backend query using `SELECT pg_cancel_backend(pid);`.
+If CPU exceeds 85% for 2+ minutes, cancel the backend with `pg_cancel_backend`.
 ```
 
-### 4.5 `api` Template (Endpoint / Interface Contract)
+### 4.6 `api` Template (Endpoint Contract)
+
 ```markdown
 ---
-description: API endpoint contract for processing transaction refunds.
+description: API contract for processing transaction refunds.
 tags: [api, billing]
 owner: team:billing
-ods:
-  profile: api
-  status: stable
-  code:
-    - path: apps/api/src/routes/refunds.ts
-      role: entrypoint
-      symbol: HandleRefundPost
+profile: api
+status: stable
+code:
+  - apps/api/src/routes/refunds.ts
 ---
 
 # POST /api/v1/refunds
@@ -240,29 +255,15 @@ Issues a refund against a completed charge.
 
 ## Request
 - **Headers**: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- **Body**:
-  ```json
-  {
-    "charge_id": "ch_12345",
-    "amount_cents": 2500,
-    "reason": "customer_return"
-  }
-  ```
+- **Body**: `{ "charge_id": "ch_12345", "amount_cents": 2500, "reason": "customer_return" }`
 
 ## Response
-- **Status Code**: `200 OK`
-  ```json
-  {
-    "refund_id": "ref_98765",
-    "status": "succeeded",
-    "created_at": 1705315200
-  }
-  ```
+- **200 OK**: `{ "refund_id": "ref_98765", "status": "succeeded" }`
 
 ## Errors
-- `400 Bad Request`: Invalid amount or missing charge ID.
-- `404 Not Found`: Charge ID does not exist.
-- `409 Conflict`: Charge has already been fully refunded.
+- `400`: Invalid amount or missing charge ID.
+- `404`: Charge not found.
+- `409`: Charge already fully refunded.
 
 ## Examples
 ```bash
@@ -270,208 +271,252 @@ curl -X POST https://api.example.com/v1/refunds \
   -H "Authorization: Bearer sec_key" \
   -d '{"charge_id":"ch_12345","amount_cents":2500}'
 ```
-### 4.6 `checklist` Template (Verifiable Release & Quality Gate)
+```
+
+### 4.7 `architecture` Template
+
 ```markdown
 ---
-description: Release readiness checklist for staging-to-production deployment.
-tags: [release, deployment, quality-gate]
+description: Checkout service architecture overview.
+profile: architecture
+status: stable
+depends:
+  - ../decisions/004-redis-sessions.md
+---
+
+# Checkout Service Architecture
+
+## Overview
+Event-driven checkout flow with payment gateway integration.
+
+## Components
+- API gateway, order service, payment adapter, notification worker.
+
+## Data Flow
+Client → API → order queue → payment → webhook → email.
+
+## Trade-offs
+Async processing improves resilience; adds observability requirements.
+```
+
+### 4.8 `policy` Template
+
+```markdown
+---
+description: Refund eligibility policy.
+profile: policy
+status: stable
+related:
+  - ../features/refunds.md
+---
+
+# Refund Eligibility Policy
+
+## Purpose
+Define when refunds may be issued.
+
+## Scope
+All customer-facing payment channels.
+
+## Rules
+1. Refunds within 30 days of purchase.
+2. Manager approval required above $500.
+
+## Exceptions
+Fraud disputes follow the security incident SOP.
+```
+
+### 4.9 `meeting` Template
+
+```markdown
+---
+description: Sprint planning notes.
+profile: meeting
+status: draft
+---
+
+# Sprint 42 Planning
+
+## Attendees
+Alice, Bob, Carol
+
+## Agenda
+1. Review carry-over items
+2. Capacity planning
+
+## Decisions
+Defer international refunds to next sprint.
+
+## Action Items
+- [ ] Alice: draft refund API spec
+```
+
+### 4.10 `checklist` Template
+
+```markdown
+---
+description: Production release quality gate.
+tags: [release, deployment]
 owner: team:platform
-ods:
-  profile: checklist
-  status: stable
-  depends:
-    - ../specs/release-v1.1.md
+profile: checklist
+status: stable
+depends:
+  - ../specs/release-v1.1.md
 ---
 
 # Production Release Quality Gate
 
 ## Overview
-Mandatory verification checklist that must be satisfied before promoting staging builds to production.
+Mandatory checks before promoting staging to production.
 
 ## Items
-- [ ] Database schema migrations tested on staging replica.
-- [ ] End-to-end synthetic API smoke tests pass (100%).
-- [ ] Zero critical or high severity security vulnerabilities in container scan.
-- [ ] Datadog APM latency monitors configured for new endpoints.
-- [ ] Rollback runbook verified by the on-call engineer.
+- [ ] Migrations tested on staging replica.
+- [ ] E2E smoke tests pass.
+- [ ] Container scan shows no critical CVEs.
 
 ## Verification
-1. Run CI release suite: `pnpm run test:e2e:staging`.
-2. Inspect Trivy container scan report in GitHub Actions.
-3. Confirm sign-off in `#release-approvals` Slack channel.
+Run `pnpm run test:e2e:staging` and confirm sign-off in `#release-approvals`.
 
 ## Notes
-- Deployment freeze takes effect Fridays after 14:00 UTC.
+Deployment freeze Fridays after 14:00 UTC.
 ```
 
-### 4.7 `agent` Template (Autonomous Agent & Prompt Instruction Contract / `agent.md`)
+### 4.11 `agent` Template (`agent.md`)
+
 ```markdown
 ---
-description: Autonomous coding agent prompt contract for implementing API endpoints.
+description: Agent contract for implementing API endpoints.
 tags: [agent, code-gen]
 owner: team:ai-platform
-ods:
-  profile: agent
-  status: stable
-  depends:
-    - ../specs/api-contract.md
-  code:
-    - path: src/server.ts
-      role: entrypoint
-      symbol: createServer
-  context:
-    max-depth: 2
-    load:
-      - ../schemas/api-schema.json
+profile: agent
+status: stable
+depends:
+  - ../specs/api-contract.md
+code:
+  - src/server.ts
+load:
+  - ../schemas/api-schema.json
 ---
 
 # Feature Implementation Agent
 
 ## Goal
-Implement a secure, type-safe REST endpoint matching the specified OpenAPI schema.
+Implement a secure REST endpoint matching the OpenAPI schema.
 
 ## Task
-Read the target schema, generate the endpoint handler in TypeScript, and register route validation middleware.
+Generate the handler in TypeScript and register validation middleware.
 
 ## Scope
-- In Scope: Request parsing, parameter validation, business logic invocation, and error response formatting.
+Request parsing, validation, business logic, error formatting.
 
 ## Non-Scope
-- Database schema migrations or changes to external payment webhooks.
+Database migrations or payment webhooks.
 
 ## Context
-Our API service uses Express with Zod validation. All errors must map to standard RFC 7807 problem details.
+Express with Zod validation; errors use RFC 7807 problem details.
 
 ## Inputs
-- Route path: `/api/v1/refunds`
-- Method: `POST`
-- Schema path: `schemas/refund-payload.json`
+- Route: `POST /api/v1/refunds`
+- Schema: `schemas/refund-payload.json`
 
 ## Constraints
-- Must not use `any` types in TypeScript code.
-- Must sanitize all user-supplied query parameters before executing SQL queries.
-- Must execute within a 15-minute agent timeout budget.
+- No `any` types.
+- Sanitize all user input before SQL.
 
 ## Priority
-1. Security and input validation.
-2. Compliance with existing test suites.
-3. Code cleanliness and lint compliance.
+1. Security. 2. Test compliance. 3. Lint cleanliness.
 
 ## Steps
-1. Inspect the OpenAPI schema in `schemas/refund-payload.json`.
-2. Generate route handler in `src/routes/refunds.ts`.
-3. Add unit test assertions in `tests/refunds.test.ts`.
-4. Run `pnpm test` to verify zero regressions.
+1. Inspect the schema.
+2. Generate `src/routes/refunds.ts`.
+3. Add tests and run `pnpm test`.
 
 ## Output
-- Completed route handler file.
-- Passing unit test suite covering success (200) and failure (400, 404, 500) cases.
+Route handler and passing unit tests.
 
 ## Success Criteria
-- `pnpm lint` and `pnpm test` exit with status code 0.
-- All acceptance criteria in `specs/api-contract.md` are satisfied.
+`pnpm lint` and `pnpm test` exit 0.
 
 ## Failure Modes
-- Schema validation failure: Return `400 Bad Request` with structured error array.
-- Database connection failure: Return `503 Service Unavailable` with retry-after header.
+Schema failure → 400; DB unavailable → 503 with retry-after.
 
 ## Dependencies
 - `specs/api-contract.md`
-- `schemas/api-schema.json`
 
 ## Assumptions
-- Node.js 20+ runtime is pre-configured in the CI environment.
+Node.js 20+ in CI.
 
 ## Examples
 ```json
-// Example valid request payload
-{
-  "charge_id": "ch_987654",
-  "amount_cents": 1500
-}
+{ "charge_id": "ch_987654", "amount_cents": 1500 }
 ```
 ```
 
-### 4.8 `skill` Template (Reusable Agent Capability Package / `SKILL.md`)
+### 4.12 `skill` Template (`SKILL.md`)
+
 ```markdown
 ---
-description: Reusable skill package for analyzing and optimizing PostgreSQL query plans.
-tags: [skill, database, postgres]
+description: Skill for PostgreSQL query plan optimization.
+tags: [skill, database]
 owner: team:database
-ods:
-  profile: skill
-  status: stable
-  code:
-    - path: scripts/explain-analyze.sql
-      role: pipeline
+profile: skill
+status: stable
+code:
+  - scripts/explain-analyze.sql
 ---
 
 # PostgreSQL Query Optimization Skill
 
 ## Purpose
-Enables autonomous agents and developers to systematically analyze slow query plans and apply index optimizations.
+Analyze slow query plans and recommend indexes.
 
 ## Capability
-- EXPLAIN (ANALYZE, BUFFERS) query plan parsing.
-- Missing index identification.
-- Sequential scan bottleneck remediation.
+EXPLAIN parsing, missing index detection, sequential scan remediation.
 
 ## Activation
-- Trigger when query execution time exceeds 250ms.
-- Trigger when user requests database query performance tuning.
+Trigger when query time exceeds 250ms or user requests tuning.
 
 ## Scope
-- In Scope: Single-query plan optimization, B-Tree and GIN index recommendations.
+Single-query optimization and index recommendations.
 
 ## Non-Scope
-- Sharding, connection pool tuning, or hardware resizing.
+Sharding, pool tuning, hardware resizing.
 
 ## Inputs
-- Target SQL query string.
-- Table schema DDL.
-- Current table row count.
+SQL query, table DDL, row counts.
 
 ## Outputs
-- Formatted `EXPLAIN` execution analysis.
-- Recommended `CREATE INDEX` DDL statements.
-- Estimated execution time reduction percentage.
+EXPLAIN analysis, `CREATE INDEX` DDL, estimated improvement.
 
 ## Workflow
-1. Execute `EXPLAIN (ANALYZE, BUFFERS)` on the target query in staging.
-2. Identify sequential scans and high-cost nested loop joins.
-3. Propose index creation with minimal lock contention (`CONCURRENTLY`).
-4. Re-run query plan to measure latency improvements.
+1. Run `EXPLAIN (ANALYZE, BUFFERS)` in staging.
+2. Identify sequential scans.
+3. Propose `CREATE INDEX CONCURRENTLY`.
+4. Re-measure latency.
 
 ## Rules
-- Never run un-indexed queries against production tables without `LIMIT`.
-- Always generate index names adhering to `idx_<table_name>_<column_name>`.
+Never run unbounded queries on production without `LIMIT`.
 
 ## Priority
-1. Prevent database CPU spikes.
-2. Minimize index write overhead on high-throughput tables.
+Prevent CPU spikes over index write overhead.
 
 ## Validation
-- Verify query plan uses index scan instead of sequential scan.
-- Verify buffer read hits improve by at least 50%.
+Query plan uses index scan; buffer hits improve ≥50%.
 
 ## Eval
-- Test against standard benchmark suite: `benchmarks/sql-opt-cases.json`.
-- Must achieve >90% accuracy on standard optimizer evaluation scenarios.
+Benchmark suite `benchmarks/sql-opt-cases.json` — >90% accuracy.
 
 ## Resources
-- PostgreSQL 16 Official Indexing Documentation: `docs/reference/postgres-indexes.md`.
+`docs/reference/postgres-indexes.md`
 
 ## Tools
-- `psql` CLI / Postgres MCP Server.
-- `pg_stat_statements` integration.
+`psql`, Postgres MCP server.
 
 ## Lifecycle
-- Pre-execution: Verify read-only replica connection.
-- Execution: Plan inspection and test execution.
-- Post-execution: Revert temporary test indexes.
+Pre: verify read replica. Post: revert test indexes.
 
 ## Traceability
-- Log all optimization runs to `logs/sql-opt-audit.jsonl` with execution timestamp, agent ID, and latency deltas.
+Log runs to `logs/sql-opt-audit.jsonl`.
 ```
 
 ---
@@ -585,23 +630,22 @@ Validation = ["Sanity Checks", "Smoke Tests"]
 Eval = ["Benchmark Suite", "Model Evals"]
 ```
 
-A bare `[aliases]` table is accepted as a legacy spelling of `[aliases.sections]`. See [indexes.md §3.3](indexes.md#33-aliases).
+A bare `[aliases]` table is accepted as a legacy spelling of `[aliases.sections]`. See [indexes.md §3.5](indexes.md#35-aliases).
 
 ---
 
 ## 7. Custom Profiles & Profile Definition Files
 
-Workspaces can define domain-specific custom profiles by creating profile definition Markdown files and registering their exact paths in `ods.toml`.
+Workspaces define domain-specific profiles by creating profile-definition Markdown files and registering their paths in `ods.toml`. See [keys.md §8](keys.md#8-custom-profile-definition-keys) for the key reference.
 
 ### 7.1 Custom Profile Definition File (`docs/profiles/rfc.md`)
 
 ```markdown
 ---
-ods:
-  custom_profile:
-    name: rfc
-    required_keys:
-      - github-issue
+name: rfc
+description: RFC-style design document shape.
+required_keys:
+  - github-issue
 ---
 
 # Profile: RFC
@@ -618,60 +662,52 @@ ods:
 ```
 
 - Pipe characters (`|`) in section headings define acceptable heading alternatives.
-- The profile identifier is derived from `ods.custom_profile.name` or the file stem (`rfc`).
-- Every path listed in `custom_profiles` MUST exist at the configured location and MUST resolve to a Markdown file or a profile directory. Tools MUST NOT silently skip a missing path or search another location.
-- A file containing `ods.custom_profile` MUST be one of the registered profile-definition files (or a file inside a registered profile directory). Ordinary documents MUST use `ods.profile` to select the registered profile.
+- The profile identifier comes from `name` or the file stem (`rfc`).
+- Every path in `custom_profiles` MUST exist (`PROF-005`).
+- Profile-definition metadata MUST appear only in registered definition files (`PROF-006`).
 
 ### 7.1.1 Profile-definition metadata
 
-The `ods.custom_profile` block of a registered profile-definition file MAY contain these profile-definition keys:
+Profile-definition frontmatter uses the keys in [`profile.schema.json`](../schemas/2.0.0/profile.schema.json):
 
-| Key | Placement | Meaning |
-| :--- | :--- | :--- |
-| `name` | `ods.custom_profile.name` | Optional profile identifier. When absent, the file stem is used. |
-| `description` | `ods.custom_profile.description` | Optional one-line summary shown in tooling. |
-| `required_sections` | `ods.custom_profile.required_sections` | Canonical H2/H3 sections expected in documents using the profile. Missing sections are a `PROF-002` warning. |
-| `optional_sections` | `ods.custom_profile.optional_sections` | Sections recognized for the profile but never required. |
-| `required_keys` | `ods.custom_profile.required_keys` | Keys that documents using the profile SHOULD contain. |
-| `optional_keys` | `ods.custom_profile.optional_keys` | Useful keys that are documented for the profile but are not required. |
-| `forbidden_keys` | `ods.custom_profile.forbidden_keys` | Keys that documents using the profile SHOULD NOT contain. |
+| Key | Meaning |
+| :--- | :--- |
+| `name` | Optional profile identifier. When absent, the file stem is used. |
+| `description` | Optional one-line summary shown in tooling. |
+| `required_sections` | Canonical H2/H3 sections expected in documents using the profile (advisory). |
+| `optional_sections` | Recognized but never required sections. |
+| `required_keys` | Top-level keys documents using the profile should contain. |
+| `optional_keys` | Useful top-level keys that are not required. |
+| `forbidden_keys` | Top-level keys that should not appear with the profile. |
 
-**Two ways to declare sections.** A profile may list its sections either as `required_sections` / `optional_sections` in frontmatter, or as `##` headings in the definition file's body with `|` separating acceptable alternatives (as in §7.1 above). The two forms are equivalent. A profile SHOULD use one or the other; where both are present, `required_sections` wins and tools SHOULD warn about the ambiguity.
+**Two ways to declare sections.** A profile may list sections in `required_sections` / `optional_sections`, or as `##` headings in the body with `|` alternatives (as in §7.1). Where both are present, `required_sections` wins; tools SHOULD warn about ambiguity.
 
-These keys describe the profile definition; they are not copied into documents using the profile. Each `required_keys` entry is matched against a top-level frontmatter key in the target document. Profile-specific document keys MUST NOT be nested under `ods:`. The standard engine keys (`profile`, `status`, `id`, `share`, `depends`, `related`, `resources`, `code`, and `context`) remain separate from profile-definition metadata.
+Profile-definition keys are not copied into documents using the profile. Engine keys (`profile`, `status`, `depends`, `related`, `resources`, `code`, `load`) remain flat at the top level — never nested under `ods:`.
 
-`required_keys`, `optional_keys`, and `forbidden_keys` are optional lists of top-level key names. Add one `-` entry for each key. If a list has no entries, omit that profile-definition key; `[]` is valid YAML for an explicitly empty list but is not required.
+`required_keys` is presence-only: a key satisfies the requirement when present with a non-null value. Matching is case-insensitive after normalization.
 
-`required_keys` is a presence-only contract: a conformant tool MUST NOT infer a value type, enum, or business meaning from it. A key satisfies the requirement when it is present with a non-null YAML value, including an empty list or structured value. An absent or explicit null key does not satisfy it. Key matching is case-insensitive after normalization; authors SHOULD write keys in lowercase.
-
-`optional_keys` and `forbidden_keys` do not define value types. A tool SHOULD report a `PROF-004` warning when a target document contains a `forbidden_keys` entry.
-
-If a document declares an `ods.profile` name that is not a standard profile or a profile loaded from a registered definition path, the tool MUST report a `PROF-001` error. The diagnostic MUST identify the configured `custom_profiles` paths so the author can correct the exact file location or profile name.
-
-If a path declared by `custom_profiles` does not exist, is not a Markdown file or profile directory, or contains invalid profile-definition frontmatter, the tool MUST fail with a `PROF-005` error and identify the configured path. If `ods.custom_profile` appears in a file that is not selected by `custom_profiles` or a registered pack, the tool MUST fail with a `PROF-006` error.
-
-Missing profile-required keys MUST be reported as a profile validation warning (`PROF-003`). Under the binary compliance contract, warnings do not cause a non-zero exit code unless another error is present. Tools MAY offer a stricter policy, but it is outside the ODS 1.1 core contract.
+If `profile` does not resolve to a standard or registered custom profile, the tool MUST report `PROF-001`. If `custom_profiles` points to a missing path, report `PROF-005`. If profile-definition metadata appears outside a registered file, report `PROF-006`.
 
 Example target document:
 
 ```markdown
 ---
 github-issue: 123
-ods:
-  profile: rfc
-  status: draft
+profile: rfc
+status: draft
+description: Retry policy for payment gateway calls.
 ---
 
 # RFC: Retry Policy
 ```
 
-Profile-required metadata is for domain keys such as issue IDs, service names, or owners. Agent and skill execution contracts remain Markdown body sections, not `required_keys` entries.
+Profile-required metadata is for domain keys (issue IDs, service names). Agent and skill execution contracts belong in Markdown body sections, not `required_keys`.
 
 ### 7.2 Registering Custom Profiles in `ods.toml`
 
 ```toml
 # ods.toml
-spec = "1.1"
+spec = "2.0"
 
 custom_profiles = [
   "docs/profiles/rfc.md",
@@ -694,7 +730,8 @@ packs = [
 ```
 
 ### 8.1 Profile Resolution Order
-When resolving a document's `ods.profile`, tools MUST search in this priority order:
+
+When resolving a document's `profile`, tools MUST search in this priority order:
 1. **Standard built-in profiles** (`note`, `guide`, `feature`, `agent`, `skill`, etc.)
 2. **Explicit workspace `custom_profiles`** paths declared in `ods.toml`
 3. **Imported `packs`** in the order declared in `ods.toml`
@@ -706,11 +743,12 @@ If a profile name is declared in multiple places, the first resolved definition 
 ## 9. Valid vs. Invalid Profile Usage Examples
 
 ### Valid Decision Document
+
 ```markdown
 ---
-ods:
-  profile: decision
-  status: stable
+profile: decision
+status: stable
+description: ADR for primary database selection.
 ---
 
 # ADR 009: Postgres for Primary Storage
@@ -728,19 +766,20 @@ We choose PostgreSQL 16 managed on AWS RDS.
 ## Consequences
 We gain strong consistency and JSONB support; we must manage RDS connection pooling.
 ```
-*Why it is valid*: All 4 required sections (`Context`, `Decision`, `Alternatives Considered` [alias], `Consequences`) are present as recognized H2/H3 profile headings.
+
+*Why it is valid*: All four expected sections are present (`Alternatives Considered` matches the `Alternatives` alias).
 
 ### Invalid Agent Document (Frontmatter Pollution Anti-Pattern)
+
 ```markdown
 # ERRONEOUS CODE:
 ---
 description: Code generation instructions.
-role: Autonomous TypeScript Engineer            # ERROR: Operational execution key in frontmatter
-refusal_guardrails: [Never drop production DB]  # ERROR: Operational execution key in frontmatter
-workflow: [Inspect, Code, Test]                 # ERROR: Operational execution key in frontmatter
-ods:
-  profile: agent
-  status: stable
+role: Autonomous TypeScript Engineer
+refusal_guardrails: [Never drop production DB]
+workflow: [Inspect, Code, Test]
+profile: agent
+status: stable
 ---
 
 # Code Generation Agent
@@ -748,7 +787,8 @@ ods:
 ## Goal
 Implement route handlers.
 ```
-*Why it is invalid*: Violates 3-tier metadata separation. Operational keys like `role:`, `refusal_guardrails:`, and `workflow:` belong exclusively in Markdown body headings (`## Constraints`, `## Steps`, `## Workflow`), not in YAML frontmatter.
+
+*Why it is invalid*: Operational keys like `role:`, `refusal_guardrails:`, and `workflow:` belong in Markdown body headings (`## Constraints`, `## Steps`, `## Workflow`), not in YAML frontmatter.
 
 ---
 

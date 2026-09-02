@@ -6,18 +6,15 @@ tags:
 owner: team:auth
 created: 2026-08-14
 updated: 2026-08-14
-ods:
-  profile: guide
-  status: stable
-  share: public
-  depends:
-    - valid-note.md
-  code:
-    - path: src/auth.ts
-      role: entrypoint
-      symbol: createToken
-  resources:
-    - path: diagrams/auth-flow.png
+profile: guide
+status: stable
+share: public
+depends:
+  - valid-note.md
+code:
+  - src/auth.ts
+resources:
+  - diagrams/auth-flow.png
 ---
 
 # Authentication Token Guide
