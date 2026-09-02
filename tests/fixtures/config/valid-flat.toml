@@ -1,0 +1,6 @@
+spec = "2.0"
+
+ignore = ["target", "node_modules"]
+
+[context]
+default_max_depth = 2

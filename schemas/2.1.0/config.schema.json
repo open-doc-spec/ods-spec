@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/2.1.0/config.schema.json",
+  "title": "ODS Workspace Configuration Schema (v2.1.0)",
+  "description": "Machine-readable JSON Schema for ods.toml workspace configuration in ODS v2.1.",
+  "x-ods-supported-specs": {
+    "ods": {
+      "version": "2.1.0",
+      "status": "active",
+      "url": "https://github.com/open-doc-spec/ods-spec"
+    }
+  },
+  "type": "object",
+  "properties": {
+    "$schema": { "type": "string" },
+    "spec": {
+      "type": "string",
+      "enum": ["2.0", "2.0.0", "2.1", "2.1.0"],
+      "description": "Target ODS specification version."
+    },
+    "ignore": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "custom_profiles": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "packs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "dialect": {
+      "type": "string",
+      "enum": ["standard", "strict"],
+      "default": "standard"
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "default_max_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 2
+        },
+        "auto_load_resources": {
+          "type": "boolean",
+          "default": false
+        },
+        "ignore": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ontology": {
+      "type": "object",
+      "properties": {
+        "default_domain": {
+          "type": "string",
+          "description": "Default business domain when entity docs omit domain."
+        },
+        "strict_schema": {
+          "type": "boolean",
+          "default": true,
+          "description": "When true, ONT-001 fails CI if schema path is missing."
+        }
+      },
+      "additionalProperties": false
+    },
+    "aliases": {
+      "type": "object",
+      "properties": {
+        "sections": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array", "items": { "type": "string" } }
+            ]
+          }
+        },
+        "paths": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "okf": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["spec"],
+  "additionalProperties": false
+}

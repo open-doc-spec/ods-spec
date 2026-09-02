@@ -1,0 +1,13 @@
+# Build & Test Artifacts
+.artifacts/
+target/
+
+# Node / Temp
+node_modules/
+dist/
+
+# OS & IDE
+.DS_Store
+.vscode/
+.idea/
+*.tmp

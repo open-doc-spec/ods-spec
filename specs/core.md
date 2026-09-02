@@ -1,27 +1,27 @@
 ---
-description: "ODS format model, single source of truth, binary compliance, atomic lifecycle operations, and backward compatibility guarantees."
-ods:
-  profile: "note"
-  status: "stable"
-  depends:
-    - README.md
-  related:
-    - keys.md
-    - graph.md
-    - indexes.md
-    - profiles.md
-    - validation.md
-    - ../guides/01-first-document.md
-    - ../guides/06-run-the-workspace.md
+description: ODS format model, single source of truth, binary compliance, and atomic
+  lifecycle operations.
+profile: note
+status: stable
+depends:
+- README.md
+related:
+- keys.md
+- graph.md
+- indexes.md
+- profiles.md
+- validation.md
+- ../guides/01-first-document.md
+- ../guides/06-run-the-workspace.md
 ---
 
 # ODS · Core Format Model & Conformance
 
-This document defines the normative format model, compliance requirements, lifecycle operations, and backward-compatibility architecture for Open Document Spec (**ODS**).
+This document defines the normative format model, compliance requirements, and lifecycle operations for Open Document Spec (**ODS**) version 2.0.
 
 ## At a glance
 
-- **What this chapter defines:** The document file model (optional YAML + Markdown body), binary compliance, lifecycle operations, and backward-compatible reads.
+- **What this chapter defines:** The document file model (optional YAML + Markdown body), binary compliance, lifecycle operations, and profile inference.
 - **Why it exists:** Every other chapter assumes one format, one pass/fail gate, and one home for the title.
 - **When you need it:** You are implementing a parser, writing CI, or deciding where the title lives.
 - **When you can skip it:** You only want to write a first document — use [Your first document](../guides/01-first-document.md).
@@ -32,7 +32,7 @@ This document defines the normative format model, compliance requirements, lifec
 
 ## 1. Conformance Language
 
-The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14 ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.txt), [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174.txt)) when, and only when, they appear in all capitals.
+The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14, exactly as stated in [README.md §1](README.md#1-conformance-language). That is the canonical statement; do not maintain a second copy here.
 
 ---
 
@@ -48,42 +48,106 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 
 ## 3. Format Model
 
-An ODS Document is a Markdown file (`.md`) containing optional YAML frontmatter.
+An ODS Document is a Markdown file (`.md`) containing optional YAML frontmatter. ODS 2.0 uses **flat top-level keys** — there is no `ods:` wrapper block.
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │ YAML Frontmatter (Optional)                                             │
 │ ---                                                                     │
-│ # Tier 1: Universal Keys (Visible to all YAML/SSG tools)                │
-│ description: Universal summary for previews and search                  │
+│ # Universal metadata (visible to all YAML/OKF tools)                    │
+│ description: Universal summary for previews and search                    │
 │ tags: [auth, security]                                                  │
+│ owner: team:security                                                    │
+│ author: Alice Smith                                                     │
+│ created_at: 2026-08-26                                                  │
+│ type: BigQuery Table          # OKF v0.2 concept type                   │
+│ sources: [{ id: bq-src, resource: datasets/auth.sql }]                  │
+│ verified: [{ by: "human:ahormati", at: "2026-08-20T00:00:00Z" }]        │
 │                                                                         │
-│ # Tier 2: ODS Engine Keys (Scoped to prevent keyword collisions)         │
-│ ods:                                                                    │
-│   profile: guide                                                        │
-│   status: stable                                                        │
-│   depends: [../crypto/tokens.md]                                        │
+│ # ODS engine keys (flat, top-level)                                     │
+│ profile: guide                                                          │
+│ status: stable                                                          │
+│ depends: [../crypto/tokens.md]                                          │
+│ related: [../policy/data-retention.md]                                  │
+│ code: [src/auth/server.ts, tests/tokens.test.ts]                        │
+│ resources: [../diagrams/session-flow.png]                               │
+│ load: [../schemas/session.schema.json]                                  │
 │ ---                                                                     │
 ├─────────────────────────────────────────────────────────────────────────┤
 │ Body Prose (Markdown)                                                   │
-│ # Document Title (Sole Title Definition)                                │
+│ # Document Title (Primary title definition)                             │
 │                                                                         │
 │ ## Overview                                                             │
 │ Human-readable explanation, decisions, and usage.                       │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
+### 3.0 Minimal Conformant Document
+
+ODS adoption is **additive**. Conformance is defined by what a document does not get wrong, not by what it declares.
+
+| Level | Requirement | Status |
+| :--- | :--- | :--- |
+| **Absolute minimum** | A UTF-8 Markdown file inside the workspace. Frontmatter MAY be absent entirely. | **Conformant** |
+| **Recommended floor** | `description` + `profile` + `status`. | **Conformant + useful** |
+| **Everything else** | `depends`, `related`, `code`, `resources`, `load`, OKF attestations. | **Progressive enhancement** |
+
+- A document with no frontmatter MUST NOT be reported as an error. Tools MAY report an informational hint suggesting `description` and `profile`.
+- A document that omits `profile` is treated as `profile: note`, whose section contract is empty; missing sections are advisory only.
+- A document that omits `status` is treated as `status: draft`.
+- No key is required for conformance. Errors arise only from keys that are **present and wrong** (invalid enum, dangling path, cyclic `depends`, forbidden `ods:` block).
+
+```markdown
+---
+description: "How JWT session tokens are signed, verified, and revoked."
+profile: guide
+status: stable
+---
+
+# User Authentication Guide
+
+## Overview
+...
+```
+
+This document is complete. Authors SHOULD NOT add keys speculatively; each additional key exists to solve a problem stated in its own chapter.
+
+Adoption stages, and the guide that teaches each, are laid out in [Learn ODS](../guides/README.md).
+
+---
+
 ### 3.1 Frontmatter
+
 - Frontmatter MUST be a single YAML document delimited by `---` on the first line of the file and closed by `---` on its own line.
 - Frontmatter is **optional**. All fields within frontmatter are **optional**.
 - Frontmatter contains machine-readable metadata intended for developer tooling, search indexers, and AI agent runtimes.
-- Frontmatter MUST NOT contain a `title:` key. The document title is declared exclusively by the first `# H1` heading in the body.
-- Parsers and tools MUST preserve unknown frontmatter keys to guarantee zero-friction interoperability with Static Site Generators (SSGs) like Hugo, Astro, Jekyll, Docusaurus, Next.js, and Obsidian.
+- The document's primary title MUST be defined as the first `# H1` heading in the body.
+- If `title:` or `name:` is present in frontmatter, it MUST match that `# H1` text exactly. A mismatch is reported as `TITLE-001`. OKF documents carrying `type:` are exempt.
+- The `ods:` key MUST NOT appear in ODS 2.0 frontmatter. Its presence is a schema error.
+- Parsers and tools MUST preserve unknown frontmatter keys to guarantee zero-friction interoperability with Static Site Generators (SSGs) and external tools.
 
-### 3.2 Body Prose
+### 3.2 Native Google OKF v0.2 Superset Interoperability
+
+ODS 2.0 operates as a strict superset of Google's Open Knowledge Format (OKF v0.2):
+
+- Any valid OKF bundle (`index.md`, `log.md`, `references/`, `computations/`) is automatically a compliant ODS workspace when `spec = "2.0"` is declared and documents use flat frontmatter.
+- Top-level OKF keys (`type`, `title`, `description`, `resource`, `tags`, `sources`, `usage_window`, `generated`, `verified`, `status`, `stale_after`, `runtime`, `parameters`, `computation`, `executor`, `attester`, `okf_version`) are first-class native primitives.
+
+### 3.3 Body Prose
+
 - The body contains human-readable Markdown prose (purpose, architectural rationale, workflows, diagrams, and code snippets).
 - The body MUST NOT re-declare metadata already declared in frontmatter (such as `owner`, `status`, or edge lists).
-- The document's primary title MUST be defined as the first `# H1` heading in the body.
+- In standard ODS documents, the document's primary title MUST be defined as the first `# H1` heading in the body.
+
+### 3.4 Machine-Readable JSON Schemas
+
+The normative data structures of ODS 2.0 are formally defined using **JSON Schema Draft 2020-12**. Three schemas are normative:
+
+- **Frontmatter Schema (v2.0.0)**: [`schemas/2.0.0/document.schema.json`](../schemas/2.0.0/document.schema.json) (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/2.0.0/document.schema.json`)
+- **Workspace Config Schema (v2.0.0)**: [`schemas/2.0.0/config.schema.json`](../schemas/2.0.0/config.schema.json) (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/2.0.0/config.schema.json`)
+- **Custom Profile Schema (v2.0.0)**: [`schemas/2.0.0/profile.schema.json`](../schemas/2.0.0/profile.schema.json) (`https://raw.githubusercontent.com/open-doc-spec/ods-spec/main/schemas/2.0.0/profile.schema.json)
+
+Tooling, linters, and language servers SHOULD use the normative schemas for Stage 1 structural validation and editor autocompletion.
 
 ---
 
@@ -103,49 +167,13 @@ stateDiagram-v2
 | State | Definition | Validation Criteria |
 | :--- | :--- | :--- |
 | **Plain Markdown** | Markdown files without a workspace root marker. | Valid Markdown; not managed by ODS. |
-| **ODS Workspace** | Directory tree whose root **`ods.toml`** has a non-empty `spec`. A root `index.md` (even with `ods: 0.1`) is **not** sufficient. | Tooling discovers documents and enforces ODS rules. |
+| **ODS Workspace** | Directory tree containing a root `ods.toml` marker with `spec = "2.0"`. | Tooling discovers documents and enforces ODS 2.0 rules. |
 | **Compliant** | An ODS workspace where `ods lint` passes with **zero errors** (exit code `0`). | Graph edges resolve, IDs are unique, no cycles exist, paths exist, schemas conform. |
 | **Non-Compliant** | An ODS workspace containing one or more lint **errors** (exit code `1`). | Tooling reports directive diagnostics and remediation steps. |
 
 ---
 
-## 5. Backward Compatibility & Migration Architecture
-
-To ensure zero disruption for repositories adopting newer ODS engines or migrating from legacy tools, ODS mandates strict backward compatibility contracts:
-
-### 5.1 CLI Argument Compatibility
-Older CI scripts, GitHub Actions (`action.yml`), and developer aliases may pass legacy flags such as `--level 1`, `--level 3`, `--mode standard`, or `--mode strict`.
-- The `ods` CLI and engine MUST accept these flags gracefully without crashing.
-- Tools MUST silently map legacy level flags to the unified **Full Compliance Mode**.
-
-### 5.2 Legacy Frontmatter Migration (`ods fmt --migrate`)
-During early adoption, documents may contain un-nested engine keys at the top level:
-
-```yaml
-# LEGACY FORMAT (Accepted on read during migration)
----
-description: User setup guide.
-profile: guide                  # Legacy flat engine key
-status: draft                   # Legacy flat engine key
-tags: [setup]
----
-
-# User Setup
-```
-
-- Parsers MUST accept legacy flat engine keys on read.
-- Migration and formatting tools (`ods fmt --migrate`) MUST hoist universal keys (`description`, `tags`) to the top level, nest engine keys (`profile`, `status`) under `ods:`, and preserve all unknown third-party keys.
-
-### 5.3 Legacy root index → `ods.toml`
-Early workspaces used a root `index.md` / `index.ods.md` with scalar `ods: 0.1` and policy keys (`packs`, `ignore`, `custom-profiles`) in frontmatter. That form is **not** a workspace marker.
-
-- `ods init` MUST write root `ods.toml` and MAY copy those policy keys into it.
-- After `ods.toml` exists, tools MUST load policy from `ods.toml` only. They MUST NOT write `packs:` / `custom-profiles:` back into document frontmatter.
-- A leftover root `index.md` MAY remain as optional navigation (`ods.profile: index`). It MUST NOT keep workspace policy keys (`PLACE-003`).
-
----
-
-## 6. Atomic Lifecycle Operations
+## 5. Atomic Lifecycle Operations
 
 Conformant ODS tools MUST implement or support four atomic lifecycle operations to maintain graph integrity during repository evolution:
 
@@ -157,32 +185,36 @@ graph LR
 ```
 
 ### 1. Scaffold (`ods new <path>`)
-- Creates a new Markdown document at the specified path with valid frontmatter (`ods.profile`, `ods.status: draft`, optional `description`).
+
+- Creates a new Markdown document at the specified path with valid frontmatter (`profile`, `status: draft`, optional `description`).
 - Derives the document ID automatically from `<path>`.
 - Injects standard section heading placeholders corresponding to the chosen profile.
 
 ### 2. Relocate (`ods mv <from> <to>`)
+
 - Moves or renames the file from `<from>` to `<to>`.
 - Automatically rewrites all inbound references across the workspace, including:
-  - `ods.depends` and `ods.related` in other documents.
-  - `ods.context.load` references.
-  - Inline Markdown links (`[text](relative/path.md)`).
+  - `depends` and `related` in other documents.
+  - `load` references.
+  - Inline Markdown links written in standard `[text](target)` form, where `target` is a workspace-relative path to the moved document.
   - Code bindings and relative resource paths.
 
 ### 3. Archive (`ods archive <path>`)
-- Updates `ods.status` to `archived`.
+
+- Updates `status` to `archived`.
 - Preserves all inbound and outbound graph edges so historical context remains intact.
 - Optionally moves the document to an `archive/` folder if configured by the workspace.
 
 ### 4. Delete (`ods rm <path>`)
+
 - Removes the document file from the filesystem.
-- Scans the entire workspace and automatically scrubs the deleted document's path/ID from all inbound `ods.depends`, `ods.related`, and `ods.context.load` arrays to prevent dangling references.
+- Scans the entire workspace and automatically scrubs the deleted document's path/ID from all inbound `depends`, `related`, and `load` arrays to prevent dangling references.
 
 ---
 
-## 7. Smart Profile Inference Heuristics
+## 6. Smart Profile Inference Heuristics
 
-When adopting untyped Markdown documents into an ODS workspace (`ods adopt`), tools SHOULD scan existing `##` and `###` headings to infer the most appropriate `ods.profile`:
+When adopting untyped Markdown documents into an ODS workspace, tools SHOULD scan existing `##` and `###` headings to infer the most appropriate `profile`. The heading sets below are *inference hints*; the normative section contract for each profile lives in [profiles.md §3](profiles.md#3-standard-profiles-catalog).
 
 | Heading Keywords Found in Document | Inferred Profile | Rationale |
 | :--- | :--- | :--- |
@@ -201,15 +233,22 @@ When adopting untyped Markdown documents into an ODS workspace (`ods adopt`), to
 
 ---
 
-## 8. Design Decisions
+## 7. Design Decisions
+
+### Why flat frontmatter instead of an `ods:` wrapper?
+
+ODS 2.0 removes the indirection of nesting engine keys under `ods:`. Flat keys are easier to read, simpler to schema-validate, and align with how authors already write universal metadata (`description`, `tags`). The wrapper added ceremony without enabling features that flat keys cannot express.
 
 ### Why separate Frontmatter and Body Prose?
+
 Frontmatter is optimized for deterministic machine indexing, CI validation, and graph traversal. Body prose is optimized for human reading and rich explanations. Mixing machine metadata (such as graph edges and code bindings) inside prose leads to fragile regular expressions and parse errors.
 
-### Why prohibit `title:` in Frontmatter?
-When title exists in both frontmatter (`title: Foo`) and body prose (`# Bar`), they inevitably drift out of sync during edits. Defining title solely as the first `# H1` adheres strictly to the Single Source of Truth (SSOT) principle.
+### Why require title/body consistency when `title:` is present?
+
+When `title:` exists in frontmatter but diverges from the `# H1` heading, search indexes, link previews, and agent summaries disagree about the document name. `TITLE-001` enforces a single source of truth while still allowing OKF bundles to carry native `title:` keys.
 
 ### Why binary compliance instead of compliance levels?
+
 Compliance levels (e.g. Level 0 through 3) created confusion for developers regarding whether a doc was "good enough" for CI. Binary compliance provides an unambiguous contract: `ods lint` either passes (exit 0) or fails (exit 1).
 
 ---

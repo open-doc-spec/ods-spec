@@ -1,21 +1,21 @@
 ---
-description: "Link ODS documents with depends and related, use path-derived IDs, and keep the knowledge graph acyclic and document-only."
+description: Link ODS documents with depends and related, use path-derived IDs, and
+  keep the knowledge graph acyclic and document-only.
 tags:
-  - learn
-  - ods
-  - graph
-  - authoring
+- learn
+- ods
+- graph
+- authoring
 owner: team:ods
-ods:
-  profile: guide
-  status: stable
-  depends:
-    - 02-pick-a-shape.md
-  related:
-    - 04-bind-code-and-files.md
-    - decision-cards.md
-    - mistakes.md
-    - ../specs/graph.md
+profile: guide
+status: stable
+depends:
+- 02-pick-a-shape.md
+related:
+- 04-bind-code-and-files.md
+- decision-cards.md
+- mistakes.md
+- ../specs/graph.md
 ---
 
 # Link Documents
@@ -30,8 +30,10 @@ Two edges. That is the whole graph:
 
 | Edge | Means | Cycles allowed? | Loaded for AI by default? |
 | :--- | :--- | :---: | :---: |
-| `ods.depends` | Read this first. Hard prerequisite. | No | Yes |
-| `ods.related` | See also. Soft pointer. | Yes | No |
+| `depends` | Read this first. Hard prerequisite. | No | Yes |
+| `related` | See also. Soft pointer. | Yes | No |
+
+Both are simple string paths to other Markdown documents. On ODS **2.1** workspaces, `related` may also use Pareto predicate shorthand (`governed_by:`, `maps_to:`, etc.) — see [Domain ontology](09-domain-ontology.md).
 
 ## Prerequisites
 
@@ -50,9 +52,8 @@ Create `docs/auth/sessions.md`:
 description: How dashboard sessions are created, validated, and revoked.
 tags:
   - auth
-ods:
-  profile: guide
-  status: stable
+profile: guide
+status: stable
 ---
 
 # Dashboard Sessions
@@ -82,11 +83,10 @@ description: How to issue a customer credit-card refund from the billing dashboa
 tags:
   - billing
   - customer-care
-ods:
-  profile: guide
-  status: draft
-  depends:
-    - ../auth/sessions.md
+profile: guide
+status: draft
+depends:
+  - ../auth/sessions.md
 ---
 ```
 
@@ -99,19 +99,18 @@ Paths are relative to the current file, and they must exist. A typo is a lint er
 The refunds SLA is useful background. It is not a prerequisite:
 
 ```yaml
-ods:
-  profile: guide
-  status: draft
-  depends:
-    - ../auth/sessions.md
-  related:
-    - ../policy/refund-sla.md
-    - ../decisions/004-stripe.md
+profile: guide
+status: draft
+depends:
+  - ../auth/sessions.md
+related:
+  - ../policy/refund-sla.md
+  - ../decisions/004-stripe.md
 ```
 
-`related` may point both ways. `depends` may not.
+`related` may point both ways. `depends` is strictly for hard prerequisites.
 
-**Test:** if an agent cannot do the job without that file, it is `depends`. If a human might want it later, it is `related`.
+**Test:** if an agent cannot do the job without that file, it is `depends`. If a human or agent might want it for optional context, it is `related`.
 
 ### 4. Let IDs come from paths
 
@@ -122,7 +121,7 @@ docs/guides/refunds.md     →  docs/guides/refunds
 docs/auth/sessions.md      →  docs/auth/sessions
 ```
 
-Write `ods.id` only when you rename a heavily linked file and must keep the old identity for a while. Almost nobody needs this in week one.
+Write `id` only when you rename a heavily linked file and must keep the old identity for a while. Almost nobody needs this in week one.
 
 ### 5. Never close a loop in `depends`
 
@@ -146,17 +145,15 @@ sessions.md  --related-->  refunds.md    ← allowed
 
 ```yaml
 # Right
-ods:
-  depends:
-    - ../auth/sessions.md
+depends:
+  - ../auth/sessions.md
 
 # Wrong — that JSON is not a document
-ods:
-  depends:
-    - ../schemas/refund-request.json
+depends:
+  - ../schemas/refund-request.json
 ```
 
-The JSON goes in `ods.context.load` when an agent must read it. That is the next two pages.
+The JSON goes in `load` when an agent must read it. That is the next two pages.
 
 Do not hand-write backlinks. If refunds depends on sessions, you do not also list refunds on sessions. Tools compute inbound links.
 
@@ -164,7 +161,7 @@ Do not hand-write backlinks. If refunds depends on sessions, you do not also lis
 
 - **"Lint reports a dangling reference."** The relative path is wrong, or the file was moved by hand. Use `ods mv` (see [Run the workspace](06-run-the-workspace.md)) so inbound edges update together.
 - **"Do Markdown `[links](../auth/sessions.md)` still count?"** They are for readers. The machine graph is `depends` / `related`. Prefer both: a prose link *and* a frontmatter edge when it is a real prerequisite.
-- **"How deep can depends go?"** As deep as the subject needs. AI expansion stops at `max-depth` (default 2) so a long chain does not explode a prompt. Humans can still walk the whole graph.
+- **"How deep can depends go?"** As deep as the subject needs. AI expansion stops at the workspace `[context].default_max_depth` (default 2, ceiling 10) so a long chain does not explode a prompt. Humans can still walk the whole graph.
 
 **You can stop here** if your docs only need "read this first" and "see also."
 

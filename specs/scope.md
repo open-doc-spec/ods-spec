@@ -1,17 +1,17 @@
 ---
-description: "What ODS intentionally excludes from core design: boundaries, architectural non-goals, and rationale by domain."
-ods:
-  profile: "note"
-  status: "stable"
-  depends:
-    - README.md
-  related:
-    - keys.md
-    - graph.md
-    - assets.md
-    - core.md
-    - ../guides/faq.md
-    - ../guides/07-extend-ods.md
+description: 'What ODS intentionally excludes from core design: boundaries, architectural
+  non-goals, and rationale by domain.'
+profile: note
+status: stable
+depends:
+- README.md
+related:
+- keys.md
+- graph.md
+- assets.md
+- core.md
+- ../guides/faq.md
+- ../guides/08-extend-ods.md
 ---
 
 # ODS · Scope & Architectural Non-Goals
@@ -24,14 +24,14 @@ This document defines the **Architectural Boundaries** of Open Document Spec (OD
 - **Why it exists:** A spec that grows every requested key stops being learnable.
 - **When you need it:** You are proposing a new key, edge type, or file extension.
 - **When you can skip it:** You are adopting the current standard, not extending it.
-- **Learn this first:** [FAQ](../guides/faq.md) · [Extend ODS](../guides/07-extend-ods.md)
+- **Learn this first:** [FAQ](../guides/faq.md) · [Extend ODS](../guides/08-extend-ods.md)
 - **Prerequisite chapters:** [README.md](README.md)
 
 ---
 
 ## 1. Conformance Language
 
-The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14 ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.txt), [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174.txt)) when, and only when, they appear in all capitals.
+The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **NOT RECOMMENDED**, **MAY**, and **OPTIONAL** in this document are to be interpreted as described in BCP 14, exactly as stated in [README.md §1](README.md#1-conformance-language). That is the canonical statement; do not maintain a second copy here.
 
 ---
 
@@ -40,11 +40,17 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 | Excluded Feature | Architectural Rationale |
 | :--- | :--- |
 | **No New File Extension (`.ods`)** | Files MUST remain standard `.md` so they can be viewed, edited, and rendered natively across GitHub, GitLab, VS Code, Obsidian, and all web platforms without custom plugins. |
-| **No Frontmatter `title:`** | The document title exists strictly as the first `# H1` heading in the Markdown body. Supporting a `title:` frontmatter key violates the Single Source of Truth (SSOT) principle and causes title drift. |
-| **No Parallel `type:` Taxonomy** | ODS avoids multiple classification taxonomies (e.g. `type`, `kind`, `category`). `ods.profile` is the single canonical structural classification. |
+| **No `ods:` Wrapper Block** | ODS 2.0 uses flat top-level frontmatter keys (`profile`, `status`, `depends`, etc.). Nesting engine keys under `ods:` added indirection without benefit for the simplified 2.0 model. |
+| **No Parallel `type:` Taxonomy for ODS Profiles** | ODS avoids multiple classification taxonomies (e.g. `type`, `kind`, `category`) for document shape. `profile` is the single canonical structural classification. (`type:` remains accepted for OKF v0.2 interoperability.) |
 | **No Per-Document Spec Versions** | Spec versions belong strictly on the repository root `ods.toml`. Per-file version tags cause upgrade fatigue and merge friction across large repositories. |
 | **No Mandatory Hand-Maintained Timestamps** | Git commit history is authoritative for document updates. Frontmatter `updated` timestamps are optional for non-git export environments. |
 | **No Closed Tag Registries** | Tags are free-form strings normalized to lowercase. Mandating closed tag registries restricts team flexibility. |
+
+### 2.1 Title Keys and `TITLE-001`
+
+ODS 2.0 **allows** `title:` and `name:` in frontmatter when they match the first `# H1` heading in the body. If either key is present, tools MUST verify consistency and report `TITLE-001` when they diverge. OKF v0.2 documents carrying `type:` are exempt from this rule.
+
+This replaces the 1.x policy of warning on bare `title:` without OKF signal. ODS 2.0 treats title keys as valid metadata when synchronized with the body heading.
 
 ---
 
@@ -64,10 +70,11 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 
 | Excluded Feature | Architectural Rationale |
 | :--- | :--- |
-| **No Complex Ontologies in Core** | High-order edge types (`implements`, `extends`, `replaces`, `conflicts-with`) introduce high cognitive overhead for authors without improving automated AI prompt assembly. Core standardizes only `depends` (hard prerequisite) and `related` (soft reference). |
-| **No Blurring of Graph Prerequisites vs Prompt Fixtures** | Non-document fixtures (JSON schemas, mock CSVs) MUST NOT be placed in `depends`. They do not participate in DAG topological sorting. Prompt fixtures belong strictly in `context.load`. |
-| **No Auto-Loading of Arbitrary Resources** | `ods.resources` contains 50MB PDFs and binary PNG diagrams. Automatically dumping all resources into the AI prompt window causes immediate token budget exhaustion. Authors surgically declare prompt payloads via `context.load`. |
-| **No Universal Frontmatter `url:`** | External URLs belong in the Markdown body prose where context and anchor text explain their relevance. |
+| **No Typed Graph Predicates** | ODS 2.0 removes Pareto shorthand (`is_a:`, `owns:`, etc.) and attributed relation objects from `related`. Graph edges are flat string arrays of document paths only. Domain semantics belong in prose. |
+| **No `@` Symbolic Handle Resolution** | ODS 2.0 requires explicit workspace-relative paths in `depends`, `related`, `code`, `resources`, and `load`. Handle indirection added resolver complexity and ambiguous collision cases. |
+| **No Blurring of Graph Prerequisites vs Prompt Fixtures** | Non-document fixtures (JSON schemas, mock CSVs) MUST NOT be placed in `depends` or `related`. They do not participate in DAG topological sorting. Prompt fixtures belong strictly in `load`. |
+| **No Auto-Loading of Arbitrary Resources** | `resources` may catalog 50 MB PDFs and binary PNG diagrams. Automatically dumping all resources into the AI prompt window causes immediate token budget exhaustion. Authors surgically declare prompt payloads via `load`. |
+| **No Universal Frontmatter `url:`** | External URLs belong in the Markdown body prose or in `resources` entries with explicit `url` fields. |
 | **No Hand-Written Backlinks** | Authors declare relationships only on the dependent document. Inbound backlinks MUST be computed dynamically by tooling to prevent synchronization bugs. |
 
 ---
@@ -77,8 +84,9 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 | Excluded Feature | Architectural Rationale |
 | :--- | :--- |
 | **No Frontmatter Inside Source Code** | Source code belongs to compilers, interpreters, and linters. Annotating source files with ODS frontmatter pollutes codebase syntax. All bindings live in Markdown docs. |
-| **No Line Numbers as Code Identity** | Line numbers (e.g. `:L45-L60`) change on almost every commit, immediately breaking documentation. ODS mandates paths and language `symbol` references. |
-| **No Custom Code Roles** | The 8 standard code roles (`entrypoint`, `implementation`, `test`, `schema`, `migration`, `config`, `infrastructure`, `pipeline`) provide a universal taxonomy so external AI agents can navigate any repository without custom configuration. |
+| **No Line Numbers as Code Identity** | Line numbers (e.g. `:L45-L60`) change on almost every commit, immediately breaking documentation. ODS mandates file paths only in `code`. |
+| **No Code Role Taxonomy** | ODS 2.0 removes the 10 standard code roles (`entrypoint`, `implementation`, `test`, etc.). `code` is a flat string array of file paths; semantic meaning belongs in prose or filename conventions. |
+| **No Symbol-Level Code Bindings** | ODS 2.0 removes `symbol`, `role`, and `description` fields from code bindings. File paths are sufficient for navigation; AST-level linking is a tooling concern outside the spec. |
 
 ---
 
@@ -92,7 +100,57 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **
 
 ---
 
-## 7. Transport Non-Goals
+## 7. Versioning Policy
+
+### 7.1 Version Semantics
+
+ODS spec versions are `MAJOR.MINOR` (a `MAJOR.MINOR.PATCH` form is also accepted; see [indexes.md §3](indexes.md#3-workspace-configuration-key-reference)).
+
+| Change | Allowed in | Rationale |
+| :--- | :--- | :--- |
+| Add a new optional key or enum member | **MINOR** | Old documents stay valid; old tools preserve the key as unknown. |
+| Mark a key deprecated | **MINOR** | The key keeps working; tools emit a `DEPR-*` warning. |
+| Remove a deprecated key, tighten an enum, or turn a warning into an error | **MAJOR** | Existing conformant documents could stop validating. |
+| Change the meaning of an existing key | **MAJOR** | Silent semantic drift is worse than a break. |
+
+### 7.2 ODS 2.0: Clean Break from 1.x
+
+**ODS 2.0 is a major-version clean break.** Tools targeting ODS 2.0 MUST NOT accept 1.x-only constructs:
+
+| Removed in 2.0 | Replacement |
+| :--- | :--- |
+| `ods:` wrapper block | Flat top-level keys (`profile`, `status`, `depends`, etc.) |
+| Typed predicates in `related` / `depends` | Flat string arrays of document paths *(restored in 2.1 — see §7.3)* |
+| `@` symbolic handles | Explicit workspace-relative paths |
+| `ods.relations` | `related` (string array) |
+| `ods.code` object entries (`path`, `role`, `symbol`) | `code` (string array of paths) |
+| `ods.context.load` / `ods.context.max-depth` | Top-level `load`; workspace `[context]` in `ods.toml` |
+| `ods.entity`, `ods.domain`, `ods.schema`, `ods.invariants` | Removed in 2.0 core; flat `entity` / `domain` / `schema` restored in 2.1 (§7.3) |
+| `memory:` block and cognitive memory tiers | Removed from core spec |
+| `[ontology]`, `[memory]`, `[attestation]` in `ods.toml` | Removed in 2.0; minimal `[ontology]` restored in 2.1 (§7.3). `[memory]` and `[attestation]` stay removed. |
+| Nested `ods.toml` table forms | Flat keys only |
+
+Migration from 1.x is an explicit, tool-assisted rewrite (`ods fmt --migrate-2`), not silent backward-compatible parsing. Repositories MUST set `spec = "2.0"` in `ods.toml` to opt into the new contract.
+
+A key MUST be deprecated in at least one MINOR release before a MAJOR release removes it. ODS 1.1 carried deprecation warnings for constructs removed in 2.0; 2.0 enforces the removal.
+
+### 7.3 ODS 2.1: Optional Pareto Ontology Extension
+
+**ODS 2.1 is a MINOR additive release.** Workspaces on `spec = "2.0"` remain fully valid. Opting into 2.1 adds:
+
+| Added in 2.1 | Purpose |
+| :--- | :--- |
+| `entity`, `domain`, `schema` frontmatter keys | Canonical concept identity and JSON Schema binding |
+| Typed `related` (5 predicates + `custom` verb) | Domain semantics without re-importing 1.1's large vocabulary |
+| `[ontology]` in `ods.toml` | `default_domain`, `strict_schema` only |
+
+Documents without `entity` or typed `related` are valid 2.0 and 2.1 documents. Ontology lint rules (`ONT-*`, `ENT-*`, `ENUM-006`) activate when `spec >= "2.1"` or the workspace loads `@ods/pack-pareto-ontology`.
+
+What **does not** return in 2.1: `invariants`, `memory:`, `@` handles, edge metadata, OWL/cypher export, `[memory]`, `[attestation]`.
+
+---
+
+## 8. Transport Non-Goals
 
 | Excluded Feature | Architectural Rationale |
 | :--- | :--- |

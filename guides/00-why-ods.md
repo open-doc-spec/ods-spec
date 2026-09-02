@@ -1,18 +1,18 @@
 ---
-description: "Why ODS exists, what it is (and is not), when to adopt it, and where it lives in a Git repository."
+description: Why ODS exists, what it is (and is not), when to adopt it, and where
+  it lives in a Git repository.
 tags:
-  - learn
-  - ods
-  - onboarding
+- learn
+- ods
+- onboarding
 owner: team:ods
-ods:
-  profile: guide
-  status: stable
-  related:
-    - README.md
-    - 01-first-document.md
-    - faq.md
-    - ../specs/scope.md
+profile: guide
+status: stable
+related:
+- README.md
+- 01-first-document.md
+- faq.md
+- ../specs/scope.md
 ---
 
 # Why ODS Exists

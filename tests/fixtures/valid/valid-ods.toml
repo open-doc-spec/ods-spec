@@ -1,0 +1,14 @@
+spec = "2.0"
+
+ignore = ["target", "node_modules", "dist", ".ods"]
+
+custom_profiles = ["tests/fixtures/valid/custom-decision.profile.md"]
+
+packs = ["core", "security"]
+
+[aliases.paths]
+auth-spec = "guides/auth.md"
+
+[context]
+default_max_depth = 2
+auto_load_resources = false

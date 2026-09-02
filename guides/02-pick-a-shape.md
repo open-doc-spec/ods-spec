@@ -1,20 +1,20 @@
 ---
-description: "Choose an ODS profile from the job the document does, fill the expected headings, and keep execution contracts out of YAML."
+description: Choose an ODS profile from the job the document does, fill the expected
+  headings, and keep execution contracts out of YAML.
 tags:
-  - learn
-  - ods
-  - profiles
-  - authoring
+- learn
+- ods
+- profiles
+- authoring
 owner: team:ods
-ods:
-  profile: guide
-  status: stable
-  depends:
-    - 01-first-document.md
-  related:
-    - 03-link-documents.md
-    - decision-cards.md
-    - ../specs/profiles.md
+profile: guide
+status: stable
+depends:
+- 01-first-document.md
+related:
+- 03-link-documents.md
+- decision-cards.md
+- ../specs/profiles.md
 ---
 
 # Pick a Shape
@@ -65,7 +65,7 @@ That covers most engineering repos. The other profiles (`api`, `architecture`, `
 | `sop` | Purpose, Prerequisites, Steps, Validation, Rollback | A runbook without rollback is an incident waiting. |
 | `note` | *(none)* | Scratchpads should not fail lint. |
 
-Heading names must match the exact canonical section title (e.g. `## Alternatives`, `## Non-Scope`). Write the exact expected heading.
+Heading names are matched loosely. `## Alternatives Considered` counts as `Alternatives`. `## Out of Scope` counts as `Non-Scope`. You do not need to memorize aliases; write the obvious heading.
 
 Missing expected headings are **warnings**, not errors. The file is still compliant. The warning exists so a `decision` does not ship without `## Consequences`.
 
@@ -79,9 +79,8 @@ description: Why the billing service uses Stripe as the card processor.
 tags:
   - billing
   - architecture
-ods:
-  profile: decision
-  status: stable
+profile: decision
+status: stable
 ---
 
 # ADR 004: Stripe for Card Payments
@@ -134,9 +133,8 @@ ods:
 ```markdown
 ---
 description: Implement the refunds endpoint from the API contract.
-ods:
-  profile: agent
-  status: draft
+profile: agent
+status: draft
 ---
 
 # Refunds Endpoint Agent
@@ -159,8 +157,8 @@ YAML is for facts a linter and an indexer should enforce. Prompts, guardrails, a
 
 - **"Which profile if it is a bit of everything?"** Use `note` until the job is clear. Do not invent a hybrid.
 - **"Can I add extra headings?"** Yes. Expected headings are a minimum, not a maximum.
-- **"Can I invent `profile: rfc`?"** Yes, as a custom profile — that is [level 7](07-extend-ods.md). Until then, `feature` or `decision` is enough.
-- **"Lint says unknown profile."** Typo, or a custom profile not listed in `ods.toml`. Unknown profiles warn and behave like `note`.
+- **"Can I invent `profile: rfc`?"** Yes, as a custom profile — that is [level 8](08-extend-ods.md). Until then, `feature` or `decision` is enough.
+- **"Lint says unknown profile."** Typo, or a custom profile not listed in `ods.toml`. Unrecognized profiles produce a fatal `PROF-001` error and do not fall back to `note`.
 
 **You can stop here** if you can pick `note` / `guide` / `decision` / `feature` / `sop` and fill the headings.
 
